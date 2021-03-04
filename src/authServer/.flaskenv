@@ -1,1 +1,1 @@
-authServer.py
+FLASK_APP=authServer.py

@@ -32,7 +32,7 @@ class User(db.Model):
             self.access_list = list()
 
     def __repr__(self):
-        return '<User {}>'.format(self.username)    
+        return '<User {}>\n'.format(self.username)    
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -46,6 +46,11 @@ class User(db.Model):
                 return False
         else:
             return True
+    
+    def delete(self):
+        AuthToken.query.filter_by(user_id=self.id).delete()
+        db.session.delete(self)
+        db.session.commit()
 
 
 class AuthToken(db.Model):
@@ -55,10 +60,10 @@ class AuthToken(db.Model):
     access_list = db.Column(db.PickleType)
     expiration_date = db.Column(db.DateTime, index=True, default=nowPlusLifetime)
     
-    def __init__(self, user, access_list=None, refresh_token=None, password=None):
+    def __init__(self, user, refresh_token=None, access_list=None, password=None):
         self.user_id = user.id
         if refresh_token is not None:
-            if refresh_token.isValid and refreshToken.user == user:
+            if refresh_token.isValid and refresh_token.user_id == user.id:
                 self.access_list = refresh_token.access_list
             else:
                 raise AuthenticationError("Invalid refresh token for user {}. Will not issue AuthToken.".format(user))
@@ -71,14 +76,34 @@ class AuthToken(db.Model):
             else:
                 raise AuthenticationError("Bad password.")
         else:
-            raise AuthenticationError("Invalid arguments to create AuthToken")
+            raise AuthenticationError("Invalid arguments to create AuthToken {}, {}, {}, {}".format(user,access_list,refresh_token,password))
         
+        db.session.add(self)
+        db.session.commit()
         return
+    
+    @property
+    def payload(self):
+        user = User.query.get(self.user_id)
+
+        return jwt.encode({'username': user.username, 
+                           'access_list': self.access_list,
+                           'expiration_date': str(self.expiration_date)},
+                           JWT_SECRET, JWT_ALGORITHM)
 
     def __repr__(self):
         #return '<Id: {}>, <User: {}>, <Expires: {}>\n  access_list: {}'.format(id, self.user, self.expiration_date, self.access_list)
-        return '<Id: {}>, <User id: {}>\n  access_list: {}'.format(id, self.user_id, self.access_list)
+        return '<Id: {}>, <User id: {}>\n  access_list: {}\n'.format(id, self.user_id, self.access_list)
 
+    @classmethod
+    def purge_expired(cls, date=None):
+
+        if date is None:
+            date = datetime.utcnow()
+
+        AuthToken.query.filter(AuthToken.expiration_date<date).delete()
+        db.session.commit()
+        return
 
 class RefreshToken(db.Model):
     __tablename__ = 'refreshtokens'
@@ -88,9 +113,27 @@ class RefreshToken(db.Model):
     access_list = db.Column(db.PickleType)
 
     def __repr__(self):
-        return '<Id: {}>, <User id: {}>\n  paired AuthToken: {}'.format(id, user_id, auth_token_id)
+        return '<Id: {}>, <User id: {}>\n  payload: {}\n'.format(self.id, self.user_id, self.payload)
 
-    def __init__(self, user, access_list):
+    def __init__(self, user=None, access_list=None, encoded_payload=None):
+        if encoded_payload is not None:
+            if user is not None or access_list is not None:
+                raise ValueError("Cannot specify both refresh_token and user/access_list pair")
+
+            try:
+                payload = jwt.decode(encoded_payload, JWT_SECRET, JWT_ALGORITHM)
+            except:
+                raise AuthenticationError("Invalid could not decrypt refresh_token")
+
+            user_id = payload['user_id']
+            try:
+                user = User.query.get(self.user_id)
+            except:
+                raise AuthenticationError("Could not find user of RefreshToken")
+
+            access_list = payload['access_list']
+            
+
         self.user_id = user.id
         if user.check_access_list(access_list):
             self.access_list = access_list
@@ -102,4 +145,19 @@ class RefreshToken(db.Model):
             'access_list': self.access_list
         }
         self.payload = jwt.encode(payload, JWT_SECRET, JWT_ALGORITHM)
+
+        db.session.add(self)
+        db.session.commit()
         return
+
+
+    def isValid(self):
+        user_goldstandard = User.query.get(self.user_id)
+        if not user_goldstandard.check_access_list(self.access_list):
+            return False
+        try:
+            payload = jwt.decode(self.payload, JWT_SECRET, JWT_ALGORITHM)
+        except:
+            return False
+        
+        return True

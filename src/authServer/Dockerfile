@@ -1,13 +1,16 @@
-FROM python:3.6-alpine
+FROM alpine:latest
 
 RUN adduser -D authServer
 
 WORKDIR /home/authServer
 
 COPY requirements.txt requirements.txt
-RUN python -m venv venv
-RUN venv/bin/pip install --upgrade pip
-RUN venv/bin/pip install -r requirements.txt
+RUN apk add --no-cache python3 py3-numpy 
+RUN apk add --no-cache --virtual .build-deps gcc g++ zlib-dev make python3-dev  jpeg-dev
+RUN python3 -m venv venv
+RUN venv/bin/pip install --upgrade pip setuptools wheel
+RUN venv/bin/pip install --upgrade -r requirements.txt
+RUN apk del .build-deps
 
 COPY app app
 COPY errors errors
@@ -21,4 +24,4 @@ RUN chown -R authServer:authServer ./
 USER authServer
 
 EXPOSE 5000
-ENTRYPOINT [ "./boot.sh" ]
+ENTRYPOINT ["/home/authServer/boot.sh"]

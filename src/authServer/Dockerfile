@@ -14,14 +14,16 @@ RUN apk del .build-deps
 
 COPY app app
 COPY errors errors
-COPY migrations migrations
+#COPY migrations migrations
+
 COPY authServer.py config.py boot.sh testingscript.py .flaskenv ./
 RUN chmod +x boot.sh
+
 
 ENV FLASK_APP authServer.py
 
 RUN chown -R authServer:authServer ./
-USER authServer
 
+USER authServer
 EXPOSE 5000
 ENTRYPOINT ["/home/authServer/boot.sh"]

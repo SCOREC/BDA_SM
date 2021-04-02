@@ -28,8 +28,8 @@ def perform_get_time_series(auth_json, query_json, check_auth=True):
                             startTime: "{start_time}", 
                             endTime: "{end_time}") {{
             id
-            floatvalue
             dataType
+            floatvalue
             ts
         }}        
     }}'''

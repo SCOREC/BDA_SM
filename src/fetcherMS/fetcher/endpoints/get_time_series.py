@@ -1,5 +1,5 @@
 from .PythonGraphQLRequestSample import perform_graphql_request, get_bearer_token
-from werkzeug.exceptions import abort
+from werkzeug.exceptions import abort, BadRequest
 
 '''
 Requirements:
@@ -15,7 +15,7 @@ def perform_get_time_series(auth_json, query_json, check_auth=True):
         start_time = query_json['start_time']
         end_time = query_json['end_time']
     else:
-        raise ValidationError('query_json object is None')
+        raise BadRequest('query_json object is None')
 
     print("Requesting Data from CESMII Smart Manufacturing Platform...")
     print()
@@ -40,7 +40,7 @@ def perform_get_time_series(auth_json, query_json, check_auth=True):
     if auth_json:
         current_bearer_token = get_bearer_token(auth_json)
     else:
-        raise ValidationError('auth_json object is None')
+        raise BadRequest('auth_json object is None')
 
     try:
         # Try to request data with the current bearer token

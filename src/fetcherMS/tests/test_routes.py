@@ -53,7 +53,8 @@ def test_fetcher_route():
 
     response = client.get(url, json=json_from_trainer)
     print(response.get_data())
-    assert b'ts' in response.get_data()
+    # assert b'ts' in response.get_data()
+    assert b'215' in response.get_data()
     assert response.status_code == 200
 
 def test_fetcher_no_auth():

@@ -5,4 +5,6 @@ pika==1.1.0
 Werkzeug
 pytest
 python-dotenv==0.16.0
+pytest-mock
+mock
 gunicorn

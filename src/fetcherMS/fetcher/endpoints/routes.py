@@ -16,41 +16,48 @@ from werkzeug.exceptions import BadRequest
 #    "query_json" : {"tag_ids": ["917","907","909"],
 #                 "start_time": "2021-00-23T20:51:40.071032+00:00",
 #                 "end_time": "now",
+#                 "GMT_prefix_sign":"plus",
 #                 "max_samples": 0
 #     }
 # }
-
-# <PORT>/api/gettimeseries
 @api.route('/gettimeseries', methods=['GET'])
 def gettimeseries():
-    request_data = request.get_json()
+    
+    request_data = json.loads(request.args.get('query'))
     auth_json = None
     query_json = None
-    
+    # return request_data 
     if request_data:
         if 'auth_json' in request_data and 'query_json' in request_data:
             auth_json = request_data['auth_json']
             query_json = request_data['query_json']
+
+            # set the GMT time_zone prefix sign
+            if request_data['query_json']['GMT_prefix_sign'] == 'plus':
+                GMT_prefix = '+'
+            else:
+                GMT_prefix = '-'
+
+            request_data['query_json']['start_time'] = request_data['query_json']['start_time'].replace(" ",GMT_prefix)
+            request_data['query_json']['end_time'] = request_data['query_json']['end_time'].replace(" ",GMT_prefix)
+
+            print(request_data['query_json']['start_time'])
             returned_json = perform_get_time_series(auth_json, query_json)
-            # return returned_json
         else:
             raise BadRequest('auth_json object or query_json not found in trainer JSON')
     else:
         raise BadRequest('Invalid Trainer JSON')
     matched_data = get_matching_dates(returned_json, query_json)
     return matched_data
+    return returned_json
 
-
-def get_matching_dates(nums_json, query_json, debug=False, opt = 0):
+def get_matching_dates(item_dict, query_json, debug=False, opt=0):
     '''
     This routine takes a json object returned from the SM platform,
     1) It parses from starting date incrementally for each entry and confirms that the delta are the same
-    2) It drops each row that doesnt have complete entries of matchind dates
+    2) It drops each row that doesnt have complete entries of matching dates
     3) It returns the filtered object with completely matching rows and columns
     '''
-    debug = True    #ABJ
-    nums = json.dumps(nums_json)
-    item_dict = json.loads(nums)
     dict_len = len(item_dict['data']['getRawHistoryDataWithSampling'])
     inner_dict = item_dict['data']['getRawHistoryDataWithSampling']
 
@@ -60,10 +67,10 @@ def get_matching_dates(nums_json, query_json, debug=False, opt = 0):
     for i in range(dict_len):
         # get the content
         id = inner_dict[i]['id']
-        dt = inner_dict[i]['dataType']
-        if dt == "FLOAT":
+        content_type = inner_dict[i]['dataType']
+        if content_type == "FLOAT":
             data_type = "floatvalue"
-        elif dt == "INT":
+        elif content_type == "INT":
             data_type = "intvalue"
         value = inner_dict[i][data_type]
         ts = inner_dict[i]["ts"]
@@ -111,6 +118,7 @@ def get_matching_dates(nums_json, query_json, debug=False, opt = 0):
         "data" : ts_data
     }
     
+    # TODO: complete  the numpy approach
     if opt:
         print(" write the code for this option and probably compare timing")
     # approach 2: using numpy ???
@@ -118,4 +126,6 @@ def get_matching_dates(nums_json, query_json, debug=False, opt = 0):
     # print("np shape is: ", np_2d_arr)
 
     # all time match outputs are sorted to avoid errors
+
+    # TODO: confirm a consistent delta_t across the entire data set and/or only use the handed delta_t
     return sorted_js

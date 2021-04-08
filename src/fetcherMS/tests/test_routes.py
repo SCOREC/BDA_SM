@@ -53,7 +53,8 @@ def test_fetcher_route():
 
     response = client.get(url, json=json_from_trainer)
     print(response.get_data())
-    assert b'ts' in response.get_data()
+    # assert b'ts' in response.get_data()
+    assert b'215' in response.get_data()
     assert response.status_code == 200
 
 def test_fetcher_no_auth():
@@ -64,8 +65,8 @@ def test_fetcher_no_auth():
     json_from_trainer['auth_json'] = {}
 
     response = client.get(url, json=json_from_trainer)
-    assert b'error' in response.get_data()
-    assert response.status_code == 500
+    assert b'Bad Request' in response.get_data()
+    assert response.status_code == 400
 
 def test_fetcher_no_query():
     test_app = Flask(__name__)
@@ -75,5 +76,5 @@ def test_fetcher_no_query():
     json_from_trainer['query_json'] = {}
 
     response = client.get(url, json=json_from_trainer)
-    assert b'error' in response.get_data()
-    assert response.status_code == 500
+    assert b'Bad Request' in response.get_data()
+    assert response.status_code == 400

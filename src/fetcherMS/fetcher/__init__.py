@@ -31,5 +31,3 @@ def create_app(test_config=None):
     return app
 
 app = create_app()
-# for non-commandline purposes
-# app.run(host="localhost", port=5000, debug=True)

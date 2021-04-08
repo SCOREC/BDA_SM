@@ -2,7 +2,7 @@ from fetcher.endpoints import api
 from flask import request
 from .get_time_series import perform_get_time_series
 import json
-import numpy as np
+# import numpy as np
 from werkzeug.exceptions import BadRequest
 
 # valid input json to the fetcher should contain these fields
@@ -33,13 +33,19 @@ def gettimeseries():
             query_json = request_data['query_json']
 
             # set the GMT time_zone prefix sign
-            if request_data['query_json']['GMT_prefix_sign'] == 'plus':
-                GMT_prefix = '+'
+            if query_json and 'GMT_prefix_sign' in query_json:
+                if query_json['GMT_prefix_sign'] == 'plus':
+                    GMT_prefix = '+'
+                else:
+                    GMT_prefix = '-'
             else:
-                GMT_prefix = '-'
+                raise BadRequest('GMT_prefix_sign not found')
 
-            request_data['query_json']['start_time'] = request_data['query_json']['start_time'].replace(" ",GMT_prefix)
-            request_data['query_json']['end_time'] = request_data['query_json']['end_time'].replace(" ",GMT_prefix)
+            if 'start_time' and 'end_time' in query_json:
+                query_json['start_time'] = query_json['start_time'].replace(" ",GMT_prefix)
+                query_json['end_time'] = query_json['end_time'].replace(" ",GMT_prefix)
+            else:
+                raise BadRequest('start_time and/ or end_time not found')
 
             print(request_data['query_json']['start_time'])
             returned_json = perform_get_time_series(auth_json, query_json)

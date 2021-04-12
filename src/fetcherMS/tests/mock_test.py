@@ -2,11 +2,11 @@ try:
     import pytest
     import fetcher
     # import requests
-    # import response
+    import responses
     # import requests_mock
     import unittest
     from unittest.mock import patch
-    from fetcher import create_app, configure_app
+    from fetcher import create_app, configure_app, app
 except Exception as e:
     print("\nSome modules are missing {}".format(e))
 
@@ -16,19 +16,22 @@ except ImportError:
     import mock
 
 
-@pytest.fixture
-def app(mocker):
-    mocker.patch("fetcher.configure_app.fetcher_home", return_value='This is fetcher home!')
-    app = create_app()
-    return app
+# @pytest.fixture
+# def app(mocker):
+#     mocker.patch("fetcher.configure_app.fetcher_home", return_value='This is fetcher home!')
+#     app = create_app()
+#     return app
 
-# def client(app):
-#     return app.test_client()
+@pytest.fixture(autouse=True)
+def client():
+    app.config['TESTING'] = True
+    client = app.test_client()
+    yield client
 
-# def test_home_funky(client):
-#     assert True
-    # res = client.get("/fetcherhome")
-    # assert res.json == {'res': 'This'}
+@responses.activate
+def test_fetcher_home(client):
+    result = client.get('/fetcher_home')
+    assert result.status_code == 200
 
 class BasicTests(unittest.TestCase):
     @classmethod
@@ -87,9 +90,3 @@ if __name__ =="__main__":
     print(__name__)
     unittest.main()
     '''
-
-# # Flask attempt
-# def test_fetcher(client):
-#     res = client.get("/")
-#     assert res.status_code == 200
-

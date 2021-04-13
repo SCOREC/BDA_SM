@@ -1,4 +1,4 @@
-# The fetcher test should not make any real API calls
+# These fetcher tests make real API calls
 # similar to test_fixtures.py
 try:
     import json

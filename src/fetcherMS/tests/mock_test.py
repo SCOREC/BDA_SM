@@ -1,12 +1,15 @@
 try:
     import pytest
+    import flask
+    from flask import Flask
     import fetcher
-    # import requests
     import responses
-    # import requests_mock
+    import requests
     import unittest
     from unittest.mock import patch
+    import json
     from fetcher import create_app, configure_app, app
+    from fetcher.endpoints.routes import gettimeseries
 except Exception as e:
     print("\nSome modules are missing {}".format(e))
 
@@ -15,23 +18,71 @@ try:
 except ImportError:
     import mock
 
-
-# @pytest.fixture
-# def app(mocker):
-#     mocker.patch("fetcher.configure_app.fetcher_home", return_value='This is fetcher home!')
-#     app = create_app()
-#     return app
-
-@pytest.fixture(autouse=True)
-def client():
-    app.config['TESTING'] = True
-    client = app.test_client()
-    yield client
+@pytest.fixture
+def mocked_responses():
+    with responses.RequestsMock() as rsps:
+        yield rsps
 
 @responses.activate
 def test_fetcher_home(client):
     result = client.get('/fetcher_home')
     assert result.status_code == 200
+
+# https://github.com/getsentry/responses
+@responses.activate
+def test_get_ts(mock_fetcher_param, mock_resp_data):
+    param = mock_fetcher_param
+    res_json = mock_resp_data
+
+    url = "http://localhost:8080/api/gettimeseries"
+    query_str = json.dumps(param["query"])
+    url = url + f'?query={query_str}'
+
+    responses.add(responses.GET, url, json=res_json, status=200)
+    resp = requests.get(url)
+    assert 'data' in responses.calls[0].response.text
+
+# https://medium.com/@vladbezden/how-to-mock-flask-request-object-in-python-fdbc249de504
+# def test_fetcher_home_2(mocker):
+#     given_user = "samy"
+#     req_mock = mocker.patch.object(flask, "request")
+#     req_mock.headers.get.return_value = given_user
+#     res = user_name()
+
+# https://medium.com/analytics-vidhya/pytest-mocking-cheatsheet-dcebd84876e3
+# def test_mock_home(flask_app_mock):
+#     with flask_app_mock.app_context():
+#         home = configure_app(flask_app_mock)
+#         response = home()
+#         assert response == "This is fetcher home!"
+
+
+'''
+@patch("fetcher.endpoints.routes.gettimeseries")
+def test_get_time(mock_get_ts):
+    # arrange data    
+    ts_mock = mock.Mock(flask, "request")   # unsure of this
+    mock_get_ts.return_value = '{"foo": "bar"}'
+
+    # action
+    # call the get time series - call the api route with the arguments
+    with mock_get_ts.test_request_context('/gettimeseries', data={"query": {
+    "auth_json" : {"authenticator": "abolajiDemo",
+                "password": "memphis",
+                "name": "Dami06",
+                "role": "rpi_graphql",
+                "url": "https://rpi.cesmii.net/graphql"
+                },
+   "query_json" : {"tag_ids": [ "984","997", "996"],
+                "start_time": "2020-01-23T20:51:40.071032+00:00", "GMT_prefix_sign":"plus",
+                "end_time": "now",
+                "max_samples": 0
+    }
+    }}):
+        actual_res = gettimeseries()
+
+    # first_call = mock_get_ts.call_agrs_list[0]
+    # assert_equals()
 
 class BasicTests(unittest.TestCase):
     @classmethod
@@ -61,7 +112,6 @@ class BasicTests(unittest.TestCase):
     # def test_home_funky(self):
     #     assert True
 
-'''
 # This should be a replacement to request.get
 def mocked_request_get(*args, **kwargs):
     class MockResponse:
@@ -73,10 +123,9 @@ def mocked_request_get(*args, **kwargs):
             return self.json_data
 
     if args[0] == 'http://127.0.0.1:8080/fetcher_home':
-        return MockResponse("fetcher_home", 200)
+        return MockResponse("This is fetcher home!", 200)
     
     # add more conditions here
-    
     return MockResponse(None, 400)
 
 class FetcherTestCase(unittest.TestCase):

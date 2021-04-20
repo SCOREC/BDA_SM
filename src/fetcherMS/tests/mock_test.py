@@ -1,12 +1,15 @@
 try:
     import pytest
+    import flask
+    from flask import Flask
     import fetcher
-    # import requests
-    # import response
-    # import requests_mock
+    import responses
+    import requests
     import unittest
-    from unittest.mock import patch
-    from fetcher import create_app, configure_app
+    import json
+    from fetcher import create_app, configure_app, app
+    from fetcher.endpoints.routes import gettimeseries
+    from tests.conftest import *
 except Exception as e:
     print("\nSome modules are missing {}".format(e))
 
@@ -15,81 +18,139 @@ try:
 except ImportError:
     import mock
 
-
 @pytest.fixture
-def app(mocker):
-    mocker.patch("fetcher.configure_app.fetcher_home", return_value='This is fetcher home!')
-    app = create_app()
-    return app
+def mocked_responses():
+    with responses.RequestsMock() as rsps:
+        yield rsps
 
-# def client(app):
-#     return app.test_client()
+@responses.activate
+def test_home(client):
+    result = client.get('/fetcher_home')
+    assert result.status_code == 200
 
-# def test_home_funky(client):
-#     assert True
-    # res = client.get("/fetcherhome")
-    # assert res.json == {'res': 'This'}
+@responses.activate
+def test_get_ts(mock_fetcher_param, mock_resp_data):
+    uri = "http://localhost:8080/api/gettimeseries"
+    query_str = json.dumps(mock_fetcher_param["query"])
+    url = uri + f'?query={query_str}'
 
-class BasicTests(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        print("setup class called")
-    
-    @classmethod
-    def tearDownClass(cls):
-        print("\n Tear down class called")
+    responses.add(
+        method=responses.GET,
+        url=url,
+        json=mock_resp_data,
+        status=200,
+        match_querystring=False,
+    )
+    resp = requests.get(uri, params={"query": mock_fetcher_param["query"]})
+    assert 'data' in responses.calls[0].response.text
+    assert 'gettimeseries' in responses.calls[0].request.url
 
-    def setUp(self):
-        self.auth = 0 # create an initialized class variable
-    
-    def tearDown(self):
-        print("function tear down called")
+@responses.activate
+def test_get_ts_invalid_auth(mock_resp_data):
+    uri = "http://localhost:8080/api/gettimeseries"
+    query_str = json.dumps(mock_invalid_auth["query"])
+    url = uri + f'?query={query_str}'
 
-    # @mock.patch(fetcher.configure_app.fetcher_home.requests.get)
-    # def test_request_with_decorator(self, mock_get):
-    def test_home(self):
-        "Mocking with the decorator"
-        fake_str = 'This is fetcher home!'
-        # with patch('fetcher.requests.get')
-        # mock_get.return_value.status_code = 200
-        # response = app()
+    responses.add(
+        method=responses.GET,
+        url=url,
+        body="Invalid auth_json",
+        status=404,
+        match_querystring=False,
+    )
+    resp = requests.get(uri, params={"query": mock_invalid_auth["query"]})
+    resp = requests.get(url)
+    assert 'data' not in responses.calls[0].response.text
+    assert 'gettimeseries' in responses.calls[0].request.url
 
-        # self.assertEqual(response.status_code, 200)
-    # def test_home_funky(self):
-    #     assert True
+@responses.activate
+def test_get_ts_invalid_query(mock_resp_data):
+    uri = "http://localhost:8080/api/gettimeseries"
+    query_str = json.dumps(mock_invalid_query["query"])
+    url = uri + f'?query={query_str}'
 
-'''
-# This should be a replacement to request.get
-def mocked_request_get(*args, **kwargs):
-    class MockResponse:
-        def __init__(self, json_data, status_code):
-            self.json_data = json_data
-            self.status_code = status_code
+    responses.add(
+        method=responses.GET,
+        url=url,
+        body="Invalid query_json",
+        status=404,
+        match_querystring=False,
+    )
+    resp = requests.get(uri, params={"query": mock_invalid_query["query"]})
+    assert 'data' not in responses.calls[0].response.text
+    assert 'gettimeseries' in responses.calls[0].request.url
 
-        def json(self):
-            return self.json_data
+@responses.activate
+def test_get_ts_invalid_user(mock_resp_data):
+    uri = "http://localhost:8080/api/gettimeseries"
+    query_str = json.dumps(mock_invalid_user["query"])
+    url = uri + f'?query={query_str}'
 
-    if args[0] == 'http://127.0.0.1:8080/fetcher_home':
-        return MockResponse("fetcher_home", 200)
-    
-    # add more conditions here
-    
-    return MockResponse(None, 400)
+    responses.add(
+        method=responses.GET,
+        url=url,
+        body="Invalid user",
+        status=404,
+        match_querystring=False,
+    )
+    resp = requests.get(uri, params={"query": mock_invalid_user["query"]})
+    assert 'data' not in responses.calls[0].response.text
+    assert 'gettimeseries' in responses.calls[0].request.url
 
-class FetcherTestCase(unittest.TestCase):
+@responses.activate
+def test_get_ts_invalid_pwd(mock_resp_data):
+    uri = "http://localhost:8080/api/gettimeseries"
+    query_str = json.dumps(mock_invalid_pwd["query"])
+    url = uri + f'?query={query_str}'
 
-    @mock.patch('fetcher.request.get', side_effect=mocked_request_get)
-    def test_fetcher(self, mock_get):
-        json_data = fetcher_home('http://127.0.0.1:8080/fetcher_home')
-        self.assertEqual(json_data, "fetcher_home")
+    responses.add(
+        method=responses.GET,
+        url=url,
+        body="Invalid password",
+        status=404,
+        match_querystring=False,
+    )
+    resp = requests.get(uri, params={"query": mock_invalid_pwd["query"]})
+    resp = requests.get(url)
+    assert 'data' not in responses.calls[0].response.text
+    assert 'gettimeseries' in responses.calls[0].request.url
 
-if __name__ =="__main__":
-    print(__name__)
-    unittest.main()
-    '''
+@responses.activate
+def test_get_ts_invalid_name(mock_resp_data):
+    uri = "http://localhost:8080/api/gettimeseries"
+    query_str = json.dumps(mock_invalid_name["query"])
+    url = uri + f'?query={query_str}'
 
-# # Flask attempt
-# def test_fetcher(client):
-#     res = client.get("/")
-#     assert res.status_code == 200
+    responses.add(
+        method=responses.GET,
+        url=url,
+        body="Invalid name",
+        status=404,
+        match_querystring=False,
+    )
+    resp = requests.get(uri, params={"query": mock_invalid_name["query"]})
+    assert 'data' not in responses.calls[0].response.text
+    assert 'gettimeseries' in responses.calls[0].request.url
+    assert 'query' in responses.calls[0].request.params
 
+@responses.activate
+def test_get_ts_invalid_role(mock_resp_data):
+    uri = "http://localhost:8080/api/gettimeseries"
+    query_str = json.dumps(mock_invalid_role["query"])
+    # print(query_str)
+    url = uri + f'?query={query_str}'
+
+    responses.add(
+        method=responses.GET,
+        url=url,
+        body="Invalid role",
+        status=404,
+        match_querystring=False,
+    )
+    resp = requests.get(uri, params={"query": mock_invalid_role["query"]})
+    assert 'data' not in responses.calls[0].response.text
+    assert 'gettimeseries' in responses.calls[0].request.url
+
+# https://github.com/getsentry/responses
+# https://medium.com/@vladbezden/how-to-mock-flask-request-object-in-python-fdbc249de504
+# https://medium.com/analytics-vidhya/pytest-mocking-cheatsheet-dcebd84876e3

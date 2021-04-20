@@ -12,7 +12,7 @@ def configure_app(app):
     
     from  . import auth
     app.register_blueprint(auth.bp)
-
+    return fetcher_home
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)

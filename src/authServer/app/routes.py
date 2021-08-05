@@ -15,11 +15,26 @@ def login():
 def index():
     return "Hello, World!"
 
+@app.route('/createUser', methods='POST')
+def createUser():
+    
+    try:
+        current_user = request.headers.get('authToken')
+        current_access_list = 
+    if 'createUser' is not in request.headers.get('authToken')):
+        return Response("Permission Denied", status=403)
+
+   'createUser'  request.headers.get_all()
+    new_username = request.values.get('username')
+    new_password = request.values.get('password')
+    new_password_confirm = request.values.get('password_confirm')
+
+
+
 @app.route('/getToken', methods=['POST','GET'])
 def getToken():
     username = request.values.get('username')
     password = request.values.get('password')
-    print("username: {}, password: {}".format(username,password))
 
     try:
         user = User.query.filter_by(username=username).first()
@@ -34,23 +49,17 @@ def getToken():
 
 
     response = jsonify({"token":auth_token.payload, "expiration_date":auth_token.expiration_date})
-    #response = Response(response=({'token':auth_token.payload, 'expiration_date:':auth_token.expiration_date}),  status=200)
-    print(response)
     response.set_cookie(key='refresh_token', value=refresh_token.payload, httponly=True)
     return response
     
 @app.route('/refreshToken', methods=['POST', 'GET'])
 def refreshToken():
     refresh_token_key = request.cookies.get('refresh_token')
-    print("RF from cookie: {}".format(refresh_token_key))
 
     try:
         refresh_token = RefreshToken.query.filter_by(payload=refresh_token_key).first()
-        print("RF: {}".format(refresh_token))
         user = User.query.get(refresh_token.user_id)
-        print("user: {}".format(user))
         auth_token = AuthToken(user, refresh_token=refresh_token)
-        print("AT: {}".format(auth_token))
     except:
         return Response("Unavailable", status=404)
     token =  auth_token.payload

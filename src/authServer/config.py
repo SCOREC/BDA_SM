@@ -1,7 +1,7 @@
 import os
 basedir = os.path.abspath(os.path.dirname(__file__))
 JWT_LIFETIME = int(os.environ.get('JWTLIFETIME') or  1800) # Lifetime in seconds
-JWT_SECRET = 'secret'
+JWT_SECRET = os.environ.get('JWTSECRET') 
 JWT_ALGORITHM = 'HS256'
 
 

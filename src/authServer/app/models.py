@@ -82,6 +82,20 @@ class AuthToken(db.Model):
         db.session.commit()
         return
     
+    def jwt_to_authToken(jwt):
+        try:
+            data = jwt.decode(jwt, JWT_SECRET, JWT_ALGORITHM) 
+            username = data['username']
+            access_list = data['access_list']
+            expiration_date = data['expiration_date']
+        except e:
+            raise AuthenticationError("Invalid JWT")
+
+        user = User.query.get(self.user_id)
+        
+        
+        return (username, access_list, expiration_date)
+
     @property
     def payload(self):
         user = User.query.get(self.user_id)

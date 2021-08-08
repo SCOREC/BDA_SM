@@ -1,0 +1,10 @@
+Flask==1.1.2
+Flask-Cors==3.0.9
+requests==2.25.0
+pika==1.1.0
+Werkzeug
+pytest
+python-dotenv==0.16.0
+pytest-mock
+mock
+gunicorn

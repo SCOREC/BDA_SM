@@ -1,9 +1,12 @@
-from flask import Blueprint, render_template, request, Response, make_response
+from flask import Blueprint, Response
+from flask import render_template, jsonify
+from flask import request
+
 from frontend.server.errors import AuthenticationError
 from frontend.server.wrappers import require_access, initialized
-from frontend.server.User.forms import LoginForm
 from frontend.server.models import User, AuthToken, RefreshToken
-from flask import Response, request, jsonify
+
+from .forms import LoginForm
 
 UserResource = Blueprint('User', __name__, url_prefix='/User', template_folder='templates')
 

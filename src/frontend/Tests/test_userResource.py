@@ -13,7 +13,7 @@ from helpers import login_user, register_user, initialize_server
 class UserResourceTestCase(BaseTestCase):
 
   # Test that flask came up correctly
-  def test_index(self):
+  def test_user_index(self):
     with self.client:
       initialize_server(self)
       tester = app.test_client(self)
@@ -22,7 +22,7 @@ class UserResourceTestCase(BaseTestCase):
       self.assertTrue(b'Hello, World!' in response.data)
 
   # Test that login comes up correctly
-  def test_loginpage(self):
+  def test_user_loginpage(self):
     with self.client:
       initialize_server(self)
       tester = app.test_client(self)
@@ -30,7 +30,7 @@ class UserResourceTestCase(BaseTestCase):
       self.assertEqual(response.status_code, 200)
       self.assertTrue(b'Sign In' in response.data)
 
-  def test_login_admin(self):
+  def test_user_login_admin(self):
     with self.client:
       initialize_server(self)
       response = login_user(self, Config.admin_user, Config.admin_password)
@@ -46,7 +46,7 @@ class UserResourceTestCase(BaseTestCase):
 
       self.assertFalse(AuthToken.jwt_is_expired(token))
 
-  def test_get_jwt(self):
+  def test_user_get_jwt(self):
     with self.client:
       initialize_server(self)
       access_list = ['user', 'train']
@@ -64,7 +64,7 @@ class UserResourceTestCase(BaseTestCase):
       self.assertFalse(AuthToken.jwt_is_expired(token))
 
 
-  def test_set_password(self):
+  def test_user_set_password(self):
     with self.client:
       initialize_server(self)
       register_user(self, username="foo", password="bar")

@@ -23,7 +23,7 @@ class AdminResourceTestCase(BaseTestCase):
       self.assertTrue(b'Server is now initialized!' in response.data)
       self.assertTrue(app.config.get('INITIALIZED'))
 
-  def test_register_user(self):
+  def test_admin_register_user(self):
     with self.client:
       initialize_server(self)
       response = register_user(self,"foo", "bar")

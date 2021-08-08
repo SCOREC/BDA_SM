@@ -1,0 +1,1 @@
+# frontend/server/Resources/__init__.py

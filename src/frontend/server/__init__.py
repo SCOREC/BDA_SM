@@ -11,8 +11,8 @@ migrate = Migrate(app, db)
 
 from frontend.server import routes, models
 
-from frontend.server.Admin.routes import AdminResource
+from frontend.server.Resources.Admin.routes import AdminResource
 app.register_blueprint(AdminResource)
 
-from frontend.server.User.routes import UserResource
+from frontend.server.Resources.User.routes import UserResource
 app.register_blueprint(UserResource)

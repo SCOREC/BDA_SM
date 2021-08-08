@@ -1,6 +1,6 @@
-from app import app, db
-from app.models import *
-from app.routes import *
+from frontend.server import app, db
+from frontend.server.models import *
+from frontend.server.routes import *
 
 @app.shell_context_processor
 def make_shell_context():

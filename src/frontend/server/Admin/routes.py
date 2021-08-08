@@ -62,18 +62,19 @@ def admin_create_user():
 
   return Response('User "{}" created.'.format(username), 200)
 
-@AdminResource.route('/delete_user')
+@AdminResource.route('/delete_user', methods=['POST'])
 @initialized(True)
 @require_access('admin')
 def delete_user():
   username = request.values.get('username')
-  u = User.query.filter_by(username=username)
+  u = User.query.filter_by(username=username).first()
 
   if u is None:
     return Response("No such user", 500)
   else:
     u.delete()
-  return Response("deleted user {}".format(username))
+    db.session.commit()
+  return Response("Deleted user {}.".format(username), 200)
 
 @AdminResource.route('/set_access_list')
 @initialized(True)
@@ -90,17 +91,40 @@ def set_access_list():
   db.session.commit()
   return Response("Updated access list", 200)
 
-@AdminResource.route('/set_password')
+@AdminResource.route('/set_password', methods=['POST'])
 @initialized(True)
 @require_access('admin')
 def admin_set_password():
   username = request.values.get('username')
   password = request.values.get('password')
-  u = User.query.filter_by(username=username)
+  u = User.query.filter_by(username=username).first()
 
   if u is None:
     return Response("No such user", 500)
   else:
     u.set_password(password)
   db.session.commit()
-  return Response("Updated password for {}".format(username), 200)
+  return Response("Updated password for {}.".format(username), 200)
+
+
+@AdminResource.route('/set_access_list', methods=['POST'])
+@initialized(True)
+@require_access('admin')
+def admin_set_access_list():
+  username = request.values.get('username')
+  password = request.values.get('password')
+  access_list = request.form.getlist('access_list')
+
+  for access in access_list:
+    if access not in app.config.get('ADMIN_ACL'):
+      print("{} not a valid access level: {}".format(access))
+      return Response("{} not a valid access level".format(access),500)
+
+  u = User.query.filter_by(username=username).first()
+
+  if u is None:
+    return Response("No such user", 500)
+  else:
+    u.set_access_list(access_list)
+  db.session.commit()
+  return Response("Updated access_list for {} to {}.".format(username, access_list), 200)

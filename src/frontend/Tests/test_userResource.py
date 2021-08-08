@@ -1,28 +1,16 @@
 from flask import current_app, jsonify
+import json
+
 from frontend.server import app
 from frontend.Tests.base import BaseTestCase
 from frontend.Tests import Config
-import json
+from frontend.server.models import AuthToken
 
 from helpers import login_user, register_user, initialize_server
 
 
-from frontend.server.models import AuthToken
 
 class UserResourceTestCase(BaseTestCase):
-
-  #Test that admin initialization works
-  def test_admin_init(self):
-    with self.client:
-      response = self.client.post('/Admin/Init',
-        data=dict(server_secret=app.config.get('SERVER_SECRET'),
-        username=Config.admin_user, 
-        password=Config.admin_password),
-        follow_redirects=True
-      )
-      self.assertEqual(response.status_code, 200)
-      self.assertTrue(b'Server is now initialized!' in response.data)
-      self.assertTrue(app.config.get('INITIALIZED'))
 
   # Test that flask came up correctly
   def test_index(self):
@@ -57,13 +45,6 @@ class UserResourceTestCase(BaseTestCase):
         self.assertIn(access, app.config.get('ADMIN_ACL'))
 
       self.assertFalse(AuthToken.jwt_is_expired(token))
-
-  def test_register_user(self):
-    with self.client:
-      initialize_server(self)
-      response = register_user(self,"foo", "bar")
-      self.assertEqual(response.status_code, 200)
-      self.assertTrue(b'User "foo" created.' in response.data)
 
   def test_get_jwt(self):
     with self.client:

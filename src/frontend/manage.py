@@ -18,7 +18,9 @@ COV = coverage.coverage(
 )
 COV.start()
 
-from frontend.server import app, db, models
+from server import app, db, models
+from server.Logger import models
+
 
 migrate = Migrate(app, db)
 manager = Manager(app)

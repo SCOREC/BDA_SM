@@ -2,11 +2,11 @@ from flask import Blueprint, Response
 from flask import render_template, jsonify
 from flask import request
 
-from frontend.server import db
-from frontend.server.Logger.models import Event
-from frontend.server.models import User, AuthToken, RefreshToken
-from frontend.server.wrappers import require_access, initialized
-from frontend.server.errors import AuthenticationError
+from server import db
+from server.Logger.models import Event
+from server.models import User, AuthToken, RefreshToken
+from server.wrappers import require_access, initialized
+from server.errors import AuthenticationError
 
 from .forms import LoginForm
 

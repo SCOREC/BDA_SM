@@ -1,10 +1,10 @@
 from functools import wraps
 
 from flask.wrappers import Response
-from frontend.server.models import AuthToken
+from server.models import AuthToken
 from flask import request, redirect
-from frontend.server.errors import AuthenticationError
-from frontend.server import app
+from server.errors import AuthenticationError
+from server import app
 
 def require_access(access):
   def inner_function(f):

@@ -1,4 +1,4 @@
-# manage.py
+#!/usr/bin/env python
 
 import os
 import unittest
@@ -11,14 +11,14 @@ COV = coverage.coverage(
     branch=True,
     include='server/*',
     omit=[
-        'frontend/Tests/*',
+        'Tests/*',
         'server/config.py',
         'server/*/__init__.py'
     ]
 )
 COV.start()
 
-from frontend.server import app, db, models
+from server import app, db, models
 
 migrate = Migrate(app, db)
 manager = Manager(app)

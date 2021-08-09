@@ -2,9 +2,11 @@ from flask import Blueprint, Response
 from flask import render_template, jsonify
 from flask import request
 
-from frontend.server.errors import AuthenticationError
-from frontend.server.wrappers import require_access, initialized
+from frontend.server import db
+from frontend.server.Logger.models import Event
 from frontend.server.models import User, AuthToken, RefreshToken
+from frontend.server.wrappers import require_access, initialized
+from frontend.server.errors import AuthenticationError
 
 from .forms import LoginForm
 
@@ -41,19 +43,19 @@ def set_password():
   newpass = request.values.get('newpass')
 
   if r_username != username:
-    print("User {} cannot change password for user {}.".format(r_username, username))
+    Event("SEC", "User {} cannot change password for user {}.".format(r_username, username)).logit()
     return Response("User {} cannot change password for user {}.".format(r_username, username), 502)
   
   user = User.query.filter_by(username=r_username).first()
   if user is None:
-    print("Authorization failed")
+    Event("DATA", "User {} not in Users, but has token.".format(r_username) ).logit()
     return Response("Authorization failed", 500)
 
   if not user.check_password(oldpass):
-    print("Old password does not match")
     return Response("Old password does not match", 501)
 
   user.set_password(newpass)
+  Event("USER", "User {} changed own password.".format(user.username)).logit()
   return Response("Password updated", 200)
 
 ### API routes below ###
@@ -69,14 +71,20 @@ def getToken():
         if user is None:
           print("Failed to look up {} with password {}".format(username, password))
           raise ValueError
-        auth_token = AuthToken(user=user, password=password)
-        refresh_token = RefreshToken(user)
+        if user.check_password(password):
+          auth_token = AuthToken(user=user, password=password)
+          refresh_token = RefreshToken(user)
+        else:
+          return Response("Access denied", 403)
+
     except ValueError as err:
-        print("error: {}".format(err))
         return Response("Unavailable", status=404)
 
 
-    response = jsonify({"token":auth_token.payload, "expiration_date":auth_token.expiration_date})
+    Event("USER","User {} got token, expires {}".format(username, auth_token.expiration_date)).logit()
+    response = jsonify({"token":auth_token.payload,
+              "expiration_date":auth_token.expiration_date,
+              "message":"Success!"})
     response.set_cookie(key='refresh_token', value=refresh_token.payload, httponly=True)
     return response
 

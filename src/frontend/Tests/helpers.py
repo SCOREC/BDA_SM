@@ -2,9 +2,14 @@ import json
 from frontend.Tests import Config
 
 
-def initialize_server(self):
+def initialize_server(self, fail=False):
+  if fail:
+    secret = "NotTheRealSecret"
+  else:
+    secret = Config.SERVER_SECRET
+
   return self.client.post('/Admin/Init',
-    data=dict(server_secret=Config.SERVER_SECRET,
+    data=dict(server_secret=secret,
     username=Config.admin_user, 
     password=Config.admin_password),
     follow_redirects=True

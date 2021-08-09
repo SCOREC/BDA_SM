@@ -1,1 +1,1 @@
-FLASK_APP=authServer.py
+FLASK_APP=frontend.py

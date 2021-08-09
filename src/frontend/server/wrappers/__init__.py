@@ -13,13 +13,23 @@ def require_access(access):
       if not request.headers.get('Authorization'):
         return redirect("/User/login", code=302)
 
-      (bearer, token) = request.headers.get('Authorization').split()
+      try:
+        (bearer, token) = request.headers.get('Authorization').split()
+      except:
+        return Response("Malformed header", 400)
 
-      (username, access_list) = AuthToken.jwt_to_access_list(token)
-      if access in access_list:
+      if token is None:
+        return Response("Access denied", 401)
+
+      try:
+        (username, access_list) = AuthToken.jwt_to_access_list(token)
+      except AuthenticationError:
+        return Response("Access denied", 403)
+
+      if access not in access_list:
+        return Response("Access denied", 403)
+      else:
         return f(*args, **kwargs)
-
-      raise AuthenticationError("User {} does not have {} access".format(username, access)) 
 
     return access_checker
       
@@ -32,8 +42,7 @@ def initialized(state):
       if state == app.config['INITIALIZED']:
         return f(*args, **kwargs)
       else:
-        print("rejecting as wrong state. State is {}".format(app.config.get('INITIALIZED')))
-        return Response("foo", 404)
+        return Response("Server not found", 409)
 
     return initialization_checker
       

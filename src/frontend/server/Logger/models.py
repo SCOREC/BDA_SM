@@ -13,6 +13,10 @@ class Event(db.Model):
   def __init__(self, kind, message):
     self.kind = kind
     self.message = message
+  
+  def logit(self):
+    db.session.add(self)
+    db.session.commit()
 
   def __repr__(self):
     return "id: {}, date: {}, kind: {}\n   message: {}".\

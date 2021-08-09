@@ -16,6 +16,8 @@ def admin_server_init():
   username = request.values.get('username')
   password = request.values.get('password')
 
+  User.query.delete()
+  db.session.commit()
   try:
     if server_secret == app.config.get('SERVER_SECRET'):
       u = User(username=username,
@@ -25,9 +27,9 @@ def admin_server_init():
       db.session.add(u)
       db.session.commit()
     else:
-      return Response("Failed to initialize", 500)
-  except:
-    return Response("Failed to initialize", 500)
+      return Response("Failed to initialize", 501)
+  except Exception as err:
+    return Response("Failed to initialize {}".format(err), 500)
   
   app.config['INITIALIZED'] = True
   return Response("Server is now initialized!", 200)
@@ -44,12 +46,10 @@ def admin_create_user():
   
   olduser = User.query.filter_by(username=username).first()
   if olduser is not None:
-    print("User name already taken. : {}".format(olduser))
-    return Response("User name already taken.", 500)
+    return Response("Username already taken.", 500)
 
   for access in access_list:
     if access not in app.config.get('ADMIN_ACL'):
-      print("{} not a valid access level: {}".format(access))
       return Response("{} not a valid access level".format(access),500)
 
   u = User(username=username,
@@ -75,21 +75,6 @@ def delete_user():
     u.delete()
     db.session.commit()
   return Response("Deleted user {}.".format(username), 200)
-
-@AdminResource.route('/set_access_list')
-@initialized(True)
-@require_access('admin')
-def set_access_list():
-  username = request.values.get('username')
-  access_list = request.values.get('access_list')
-  u = User.query.filter_by(username=username)
-
-  if u is None:
-    return Response("No such user", 500)
-  else:
-    u.set_access_list(access_list)
-  db.session.commit()
-  return Response("Updated access list", 200)
 
 @AdminResource.route('/set_password', methods=['POST'])
 @initialized(True)
@@ -117,13 +102,12 @@ def admin_set_access_list():
 
   for access in access_list:
     if access not in app.config.get('ADMIN_ACL'):
-      print("{} not a valid access level: {}".format(access))
       return Response("{} not a valid access level".format(access),500)
 
   u = User.query.filter_by(username=username).first()
 
   if u is None:
-    return Response("No such user", 500)
+    return Response("No such user as {}".format(username), 500)
   else:
     u.set_access_list(access_list)
   db.session.commit()

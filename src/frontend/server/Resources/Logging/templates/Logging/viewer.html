@@ -1,0 +1,27 @@
+
+<!doctype html>
+<html>
+    <head>
+        {% if title %}
+        <title>{{ title }}</title>
+        {% else %}
+        <title>Log Viewer</title>
+        {% endif %}
+    </head>
+    <body>
+        <table style="width:100%">
+          <tr>
+            <th>Datestamp</th>
+            <th>Event Type</th>
+            <th>Message</th>
+          </tr>
+          {% for event in events %}
+          <tr>
+          <td>{{ event.datestamp }}</td>
+          <td>{{ event.kind }}</td>
+          <td>{{ event.message }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+    </body>
+</html>

@@ -2,9 +2,9 @@ from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 
-from frontend.server import db, app
-from frontend.server.errors import AuthenticationError
-from frontend.server.Logger.models import Event
+from server import db, app
+from server.errors import AuthenticationError
+from server.Logger.models import Event
 
 
 def nowPlusLifetime():

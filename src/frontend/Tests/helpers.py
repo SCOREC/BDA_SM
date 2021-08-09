@@ -1,5 +1,5 @@
 import json
-from frontend.Tests import Config
+from Tests import Config
 
 
 def initialize_server(self, fail=False):

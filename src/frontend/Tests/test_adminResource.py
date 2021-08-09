@@ -1,8 +1,8 @@
 from flask import current_app, jsonify
 import json
-from frontend.server import app
-from frontend.Tests.base import BaseTestCase
-from frontend.Tests import Config
+from server import app
+from Tests.base import BaseTestCase
+from Tests import Config
 
 from helpers import login_user, register_user, initialize_server
 

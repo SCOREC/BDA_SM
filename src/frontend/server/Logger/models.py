@@ -1,4 +1,4 @@
-from frontend.server import db, app
+from server import db, app
 from datetime import datetime, timedelta
 
 class Event(db.Model):

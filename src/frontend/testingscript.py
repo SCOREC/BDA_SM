@@ -1,6 +1,6 @@
 import time
-from frontend.server import app, db
-from frontend.server.models import User, AuthToken, RefreshToken
+from server import app, db
+from server.models import User, AuthToken, RefreshToken
 
 u1 = User(username='maxim', password='foo', access_list=['admin','user'])
 u2 = User(username='iris',password='bar',access_list=['user'])

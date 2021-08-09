@@ -1,6 +1,6 @@
 #!/bin/bash
 
-rm -f authServer.db
+rm -f server/databases/frontend.db*
 rm -rf migrations
 
 flask db init

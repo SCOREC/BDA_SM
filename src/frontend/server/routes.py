@@ -1,9 +1,9 @@
 from flask import render_template, Response
 
-from frontend.server.wrappers import initialized
-from frontend.server import app
-from frontend.server.forms import LoginForm
-from frontend.server.models import User, AuthToken, RefreshToken
+from server.wrappers import initialized
+from server import app
+from server.forms import LoginForm
+from server.models import User, AuthToken, RefreshToken
 
 @app.route('/helloWorld')
 @initialized(True)

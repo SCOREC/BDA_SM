@@ -2,10 +2,10 @@ from flask import Blueprint
 from flask import render_template
 from flask import Response, request, jsonify, abort
 
-from frontend.server import app, db
-from frontend.server.errors import AuthenticationError
-from frontend.server.wrappers import require_access, initialized
-from frontend.server.models import User, AuthToken, RefreshToken
+from server import app, db
+from server.errors import AuthenticationError
+from server.wrappers import require_access, initialized
+from server.models import User, AuthToken, RefreshToken
 
 AdminResource = Blueprint('Admin', __name__, url_prefix='/Admin')
 

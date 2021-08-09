@@ -1,8 +1,8 @@
 # frontend/Tests/base.py
 
 from flask_testing import TestCase
-from frontend.server import app, db
-from frontend.Tests import Config
+from server import app, db
+from Tests import Config
 
 class BaseTestCase(TestCase):
     """ Base Tests """

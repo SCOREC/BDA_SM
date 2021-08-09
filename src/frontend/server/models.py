@@ -1,8 +1,11 @@
-from frontend.server import db, app
 from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
-from frontend.server.errors import AuthenticationError
 import jwt
+
+from frontend.server import db, app
+from frontend.server.errors import AuthenticationError
+from frontend.server.Logger.models import Event
+
 
 def nowPlusLifetime():
     return datetime.utcnow() + timedelta(seconds=app.config.get('JWT_LIFETIME'))
@@ -28,6 +31,10 @@ class User(db.Model):
           self.access_list = access_list
       else:
           self.access_list = list()
+      
+      ev = Event('USERS', 'Created user: {} with access: {}'.format(self.username,self.access_list))
+      db.session.add(ev)
+      db.session.commit()
 
     def __repr__(self):
         return '<User {}>\n'.format(self.username)    
@@ -37,6 +44,7 @@ class User(db.Model):
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
+        db.session.commit()
 
     def set_access_list(self, access_list):
         for access in access_list:
@@ -55,9 +63,12 @@ class User(db.Model):
             return True
     
     def delete(self):
-        AuthToken.query.filter_by(user_id=self.id).delete()
-        db.session.delete(self)
-        db.session.commit()
+      user_id = self.id
+      username = self.username
+      ev = Event("USER", 'Deleted user "{}", id {}'.format(username, user_id) )
+      AuthToken.query.filter_by(user_id=self.id).delete()
+      db.session.delete(self)
+      db.session.commit()
 
 
 class AuthToken(db.Model):
@@ -118,7 +129,6 @@ class AuthToken(db.Model):
         username = data['username']
         expiration_date = datetime.fromtimestamp(data['expiration_date'])
       except Exception as err:
-        print(err)
         raise AuthenticationError("Invalid JWT")
       
       if expiration_date<datetime.utcnow():

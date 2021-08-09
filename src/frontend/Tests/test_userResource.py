@@ -54,6 +54,8 @@ class UserResourceTestCase(BaseTestCase):
       response = login_user(self, username="foo", password="bar")
       data = json.loads(response.data)
       token = data['token']
+      self.assertTrue(response.status_code == 200)
+      self.assertTrue(data['message'] == "Success!")
       
       (r_username, r_access_list) = AuthToken.jwt_to_access_list(token)
       self.assertEqual("foo", r_username)
@@ -68,18 +70,41 @@ class UserResourceTestCase(BaseTestCase):
     with self.client:
       initialize_server(self)
       register_user(self, username="foo", password="bar")
+      register_user(self, username="notfoo", password="bar")
       response = login_user(self, username="foo", password="bar")
       data = json.loads(response.data)
-      token = data['token']
+      footoken = data['token']
 
       response = self.client.post('/User/set_password',
-                                  headers={'Authorization':"Bearer {}".format(token)},
-                                  data=dict(username="foo",
-                                  oldpass="bar",
-                                  newpass="baz"))
+                    headers={'Authorization':"Bearer {}".format(footoken)},
+                    data=dict(
+                      username="foo",
+                      oldpass="bar",
+                      newpass="newpassword",
+                    ))
 
       self.assertEqual(response.status_code, 200)
       self.assertTrue(b'Password updated' in response.data)
-      
 
+      response = login_user(self, username="foo", password="bar") 
+
+      self.assertEqual(response.status_code, 403)
+      self.assertTrue(b'Access denied' in response.data)
                 
+      response = login_user(self, username="foo", password="newpassword") 
+      data = json.loads(response.data)
+      footoken = data['token']
+
+      self.assertTrue(response.status_code == 200)
+      self.assertTrue(data['message'] == "Success!")
+
+      response = self.client.post('/User/set_password',
+                    headers={'Authorization':"Bearer {}".format(footoken)},
+                    data=dict(
+                      username="notfoo",
+                      oldpass="bar",
+                      newpass="baz",
+                    ))
+
+      self.assertTrue(b'User foo cannot change password for user notfoo' in response.data)
+      self.assertEqual(response.status_code, 502)

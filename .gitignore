@@ -12,4 +12,7 @@ archival/*
 */tmp/*
 *.db
 *.db_test
+*.db_log
+*.db_test_log
+databases/*
 

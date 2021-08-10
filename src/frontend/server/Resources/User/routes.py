@@ -97,11 +97,8 @@ def refreshToken():
 
     try:
         refresh_token = RefreshToken.query.filter_by(payload=refresh_token_key).first()
-        print("refreshtoken: ", refresh_token)
         user = User.query.get(refresh_token.user_id)
-        print("user", user)
         auth_token = AuthToken(user, refresh_token=refresh_token)
-        print("auth_token", auth_token)
     except:
         return Response("Unavailable", status=404)
     token =  auth_token.payload

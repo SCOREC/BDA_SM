@@ -4,7 +4,6 @@ import pandas as pd
 import random, string, base64, json
 from pandas.core.base import DataError
 from errors import MKOError
-from network.model import Model
 import tarfile
 
 class MKO(object):
@@ -39,7 +38,6 @@ class MKO(object):
 
   @classmethod
   def from_Model(cls, model):
-    assert(isinstance(model, Model))
 
     savedir = "/tmp"
     m = model._mko

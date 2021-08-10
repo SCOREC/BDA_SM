@@ -1,7 +1,7 @@
 import argparse
 import json
 
-def getConfig(filename=None):
+def get_config(filename=None):
   if filename is None:
     parser = argparse.ArgumentParser(
         description="Get input JSON file as input")

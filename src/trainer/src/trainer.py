@@ -1,9 +1,9 @@
 from sys import exit
 from mko import MKO
 from network.model import Model
-from utilities import getConfig
+from utilities import get_config
 
-c = getConfig()
+c = get_config()
 
 mko = MKO(c)
 assert(mko.topological)
@@ -11,9 +11,11 @@ assert(mko.augmented)
 
 model = Model(mko)
 
-model.train(c)
+model.compile()
+model.train()
 
-mko = model.toMKO(c)
+model.evaluate()
+mko = MKO.from_Model(model)
 
 mko.save(c)
 exit(0)

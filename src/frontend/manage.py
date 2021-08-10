@@ -31,7 +31,7 @@ manager.add_command('db', MigrateCommand)
 @manager.command
 def test():
     """Runs the unit tests without test coverage."""
-    tests = unittest.TestLoader().discover('Tests', pattern='test*.py')
+    tests = unittest.TestLoader().discover('Tests', pattern='test_*.py')
     result = unittest.TextTestRunner(verbosity=2).run(tests)
     if result.wasSuccessful():
         return 0
@@ -49,7 +49,7 @@ def cov():
         print('Coverage Summary:')
         COV.report()
         basedir = os.path.abspath(os.path.dirname(__file__))
-        covdir = '/tmp/coverage' #os.path.join(basedir, 'tmp/coverage')
+        covdir = '/tmp/coverage' 
         COV.html_report(directory=covdir)
         print('HTML version: file://%s/index.html' % covdir)
         COV.erase()

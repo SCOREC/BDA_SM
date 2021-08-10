@@ -1,0 +1,59 @@
+{
+ "version": 1.0,
+ "modelname": "syn4",
+ "savefile": "/tmp/savefile",
+ "trainingData":{
+  "learningRate": 0.001
+ },
+ "network": {
+    "nInputs": 3,
+    "nOutputs": 1,
+    "nLayers": 2,
+    "defaults": {
+      "type": "Dense",
+      "units": 10,
+      "activation": "tanh",
+      "rate": 0.95,
+      "lambda": 1.0e-6
+    },
+    "layers": [
+      {
+        "name": "layer01",
+        "type": "Dense",
+        "units": 20,
+        "activation": "relu"
+      },
+      {
+        "name": "layer02",
+        "type": "variationalDropout",
+        "rate": 0.95
+      },
+      {
+        "name": "layer03",
+        "type": "Dense",
+        "units": 20,
+        "activation": "relu"
+      },
+      {
+        "name": "output",
+        "type": "Dense",
+        "units": 1
+      }
+    ]
+  },
+  "data_descriptor":{
+    "type": "http",
+    "URL": "http://127.0.0.1:5000/get-csv/test4",
+    "inputColumns": 3,
+    "outputColumns" : 1,
+    "serverName": "",
+    "serverJWT": "",
+    "serverURI": "",
+    "tag_ids": [],
+    "attr_ids": [],
+    "start_time": null,
+    "end_time": null,
+    "max_samples": null,
+    "offset": 0
+  }
+}

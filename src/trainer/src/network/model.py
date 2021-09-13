@@ -1,16 +1,47 @@
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.python.keras.optimizer_v2.adam import Adam
-import network.layers as layers
+from tensorflow.keras.optimizers import Adam
+import src.network.layers as layers
 from tensorflow.keras import backend as K
+import os, random, string, base64, tarfile, shutil
+from utilities.contexts import in_directory
 
-class Model(keras.Sequential):
+class Model(keras.Model):
 
   def __init__(self, m, **kwargs):
-    if m.topological:
+
+    self._mko = m
+    super(Model, self).__init__()
+    if m.parameterized:
+
+      tmpdir = "/tmp"
+      uniquename = m.modelname + "".join(random.choices(string.ascii_uppercase + string.digits, k=10))
+      basedir = os.path.join(tmpdir, uniquename) 
+
+      try:
+        os.mkdir(basedir)
+      except:
+        raise SystemError("could not create temporary directory")
       
-      seq = [layers.Input(shape=(m.model_structure['nInputs'],),
-                          name="Inputs")]
+      with in_directory(basedir):
+        tarfilename = "model.bz2"
+        with open(tarfilename, "wb") as fd:
+          fd.write(base64.b64decode(bytes(m.model_saved,'utf-8')))
+          fd.close()
+
+        with tarfile.open(tarfilename, "r:bz2") as tar:
+          tar.extractall()
+          tar.close()
+
+        self = keras.models.load_model("model")
+      shutil.rmtree(basedir)
+      
+    elif m.topological:
+      
+      print("building topological MKO")
+      super(Model, self).__init__(**kwargs)
+      self._layers = []
+      # [layers.Input(shape=(m.model_structure['nInputs'],), name="Inputs")]
 
       for ld in m.model_structure['layers']:
         layer_args = {}
@@ -19,12 +50,21 @@ class Model(keras.Sequential):
           if k in layers.supportedKeywords:
             layer_args[k] = v
         
-        seq.append(layer_func(**layer_args))
+        self._layers.append(layer_func(**layer_args))
 
-      super(Model, self).__init__(seq, **kwargs)
-
-      self._mko = m
     
+  def call(self, input_tensor):
+
+    x = input_tensor
+    for layer in self._layers:
+      x = layer(x)
+    return x
+
+  def get_config(self):
+      config = super().get_config()
+      config.update({"Model":Model})
+      return config
+
   def compile(self, **kwargs):
     
     tc = self._mko.training_controls
@@ -32,9 +72,19 @@ class Model(keras.Sequential):
       kwargs['loss'] = keras.losses.MeanSquaredError(reduction='auto')
     if 'optimizer' not in kwargs:
       lr = tc['learning_rate']
-      kwargs['optimizer'] = Adam(lr=lr)
+      kwargs['optimizer'] = Adam(learning_rate=lr)
     
     super(Model,self).compile(**kwargs)
+
+  def describe(self):
+    try:
+      print("_is_compiled: {}".format(self._is_compiled))
+    except:
+      print("_is_compiled not set")
+    try:
+      print("_is_built: {}".format(self._is_built))
+    except:
+      print("_is_built not set")
 
   def train(self, **kwargs):
 
@@ -67,3 +117,7 @@ class Model(keras.Sequential):
         kwargs['batch_size'] = 64
 
     super(Model, self).evaluate(x_test, y_test, **kwargs)
+
+  def save(self, savename, **kwargs):
+    with keras.utils.custom_object_scope(layers.custom_objects):
+      super(Model, self).save(savename, **kwargs)

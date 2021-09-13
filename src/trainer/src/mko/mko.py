@@ -1,15 +1,20 @@
 import os
 import numpy as np
 import pandas as pd
-import random, string, base64, json
+import random, string, base64, json, shutil, tarfile
 from pandas.core.base import DataError
-from errors import MKOError
-import tarfile
 
-class MKO(object):
+from ..errors import MKOError
+from ..utilities.contexts import in_directory
 
-  def __init__(self, c):
+class MKO():
+
+  def __init__(self, c=None, dict=None):
     
+    if dict is not None:
+      self.__dict__ = dict
+      return 
+
     try:
       self.modelname = c['modelname']
     except:
@@ -17,6 +22,9 @@ class MKO(object):
     
     if "model_saved" in c and c["model_saved"] is not None:
       self.model_saved = c["model_saved"]
+      self._parameterized = True
+    else:
+      self._parameterized = False
 
     if "model_structure" in c:
       self.model_structure = c['model_structure']
@@ -39,22 +47,33 @@ class MKO(object):
   @classmethod
   def from_Model(cls, model):
 
-    savedir = "/tmp"
     m = model._mko
-    savename = m.modelname + "".join(random.choices(string.ascii_uppercase + string.digits, k=10))
-    abssavename =os.path.join(savedir, savename) 
-    model.save(abssavename)
-    tarfilename = abssavename + ".bz2"
-    with tarfile.open(tarfilename, "w:bz2") as tar:
-      tar.add(abssavename, recursive=True)
-      tar.close()
 
-    with open(tarfilename, "rb") as fd:
-      model_saved = fd.read()
-      fd.close()
+    tmpdir = "/tmp"
+    uniquename = m.modelname + "".join(random.choices(string.ascii_uppercase + string.digits, k=10))
+    basedir = os.path.join(tmpdir, uniquename) 
 
+    try:
+      os.mkdir(basedir)
+    except:
+      raise SystemError("could not create temporary directory")
+    
+    with in_directory(basedir):
+      model_save_name = os.path.join(basedir, "model")
+      model.save(model_save_name)
 
-    m.set_parameters(str(base64.b64encode(model_saved)))
+      tarfilename = "model.bz2"
+      with tarfile.open(tarfilename, "w:bz2") as tar:
+        tar.add("model", recursive=True)
+        tar.close()
+
+      with open("model.bz2", "rb") as fd:
+        model_saved = fd.read()
+        fd.close()
+      
+    shutil.rmtree(basedir)
+
+    m.set_parameters(base64.b64encode(model_saved).decode('utf-8'))
     print("type of params: {}".format(type(m.model_saved)))
 
     return m
@@ -63,6 +82,10 @@ class MKO(object):
   def set_parameters(self, param):
     self._parameterized = True
     self.model_saved = param
+
+  @property
+  def parameterized(self):
+    return self._parameterized
 
   @property
   def topological(self):
@@ -153,6 +176,13 @@ class MKO(object):
       self.y_val = a[r2:, ic:ic+oc].tolist()
 
     self._data_populated = True
+
+  @classmethod
+  def load(cls, filename):
+
+    with open(filename, "r") as fd:
+      data = json.load(fd)
+      return MKO(dict=data)
 
   def save(self, c, filename=None):
     try:

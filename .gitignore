@@ -1,4 +1,5 @@
-venv
+venv*
+environments/*
 __pycache__
 *.log
 *.py[cod]

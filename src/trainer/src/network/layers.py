@@ -26,3 +26,7 @@ class variationalDropout(Dropout):
         return K.in_train_phase(dropped_inputs, inputs, training=self.training)
       return K.in_train_phase(dropped_inputs, inputs, training=training)
     return inputs
+
+custom_objects = {
+  "variationalDropout": variationalDropout,
+}

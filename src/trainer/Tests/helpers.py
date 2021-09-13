@@ -1,3 +1,7 @@
+
+def create_test_input(filename="/tmp/testInput.json"):
+  with open(filename, "w") as fd:
+    fd.write("""
 {
  "version": 1.0,
  "modelname": "syn4",
@@ -15,7 +19,7 @@
     "nLayers": 2,
     "defaults": {
       "type": "Dense",
-      "units": 10,
+      "units": 5,
       "activation": "tanh",
       "rate": 0.95,
       "lambda": 1.0e-6
@@ -24,7 +28,7 @@
       {
         "name": "layer01",
         "type": "Dense",
-        "units": 10,
+        "units": 5,
         "activation": "relu"
       },
       {
@@ -35,7 +39,7 @@
       {
         "name": "layer03",
         "type": "Dense",
-        "units": 10,
+        "units": 5,
         "activation": "relu"
       },
       {
@@ -61,3 +65,5 @@
     "offset": 0
   }
 }
+""")
+

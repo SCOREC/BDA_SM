@@ -1,10 +1,10 @@
-import os
+import os, sys
 import unittest
 
 import Tests.helpers
-from src.utilities import get_config
-from src.mko import MKO
-from src.network.model import Model
+from utilities import get_config
+from mko import MKO
+from network.model import Model
 
 class NetworkTestCase(unittest.TestCase):
 

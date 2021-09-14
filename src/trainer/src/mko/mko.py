@@ -4,8 +4,8 @@ import pandas as pd
 import random, string, base64, json, shutil, tarfile
 from pandas.core.base import DataError
 
-from ..errors import MKOError
-from ..utilities.contexts import in_directory
+from errors import MKOError
+from utilities.contexts import in_directory
 
 class MKO():
 
@@ -74,7 +74,6 @@ class MKO():
     shutil.rmtree(basedir)
 
     m.set_parameters(base64.b64encode(model_saved).decode('utf-8'))
-    print("type of params: {}".format(type(m.model_saved)))
 
     return m
 

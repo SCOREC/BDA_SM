@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.optimizers import Adam
-import src.network.layers as layers
+import network.layers as layers
 from tensorflow.keras import backend as K
 import os, random, string, base64, tarfile, shutil
 from utilities.contexts import in_directory
@@ -38,7 +38,6 @@ class Model(keras.Model):
       
     elif m.topological:
       
-      print("building topological MKO")
       super(Model, self).__init__(**kwargs)
       self._layers = []
       # [layers.Input(shape=(m.model_structure['nInputs'],), name="Inputs")]

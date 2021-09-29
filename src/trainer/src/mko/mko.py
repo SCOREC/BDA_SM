@@ -1,4 +1,5 @@
 import os
+import copy
 import numpy as np
 import pandas as pd
 import random, string, base64, json, shutil, tarfile
@@ -9,45 +10,52 @@ from utilities.contexts import in_directory
 
 class MKO():
 
-  def __init__(self, c=None, dict=None):
+  def __init__(self, c=None, orig=None, dict=None):
     
+    if orig is not None:
+      self.__dict__ = vars(orig)
+      return
+
     if dict is not None:
       self.__dict__ = dict
       return 
 
-    try:
-      self.modelname = c['modelname']
-    except:
-      raise AttributeError("No modelname for MKO")
-    
-    if "model_saved" in c and c["model_saved"] is not None:
-      self.model_saved = c["model_saved"]
-      self._parameterized = True
-    else:
-      self._parameterized = False
+    if c is not None:
+      try:
+        self.modelname = c['modelname']
+      except:
+        raise AttributeError("No modelname for MKO")
+      
+      if "model_saved" in c and c["model_saved"] is not None:
+        self.model_saved = c["model_saved"]
+        self._parameterized = True
+      else:
+        self._parameterized = False
 
-    if "model_structure" in c:
-      self.model_structure = c['model_structure']
-      self._topological = True
-    else:
-      self._topological = False
-    
-    if "data_descriptor" in c and c["data_descriptor"] is not None:
-      self._data_descriptor = c['data_descriptor']
-      self._augmented = True
-    else:
-      self._data_descriptor = None
-      self._augmented = False
-    
-    if "training_controls" in c and c["training_controls"] is not None:
-      self.training_controls = c['training_controls']
+      if "model_structure" in c:
+        self.model_structure = c['model_structure']
+        self._topological = True
+      else:
+        self._topological = False
+      
+      if "data_descriptor" in c and c["data_descriptor"] is not None:
+        self._data_descriptor = c['data_descriptor']
+        self._augmented = True
+      else:
+        self._data_descriptor = None
+        self._augmented = False
+      
+      if "training_controls" in c and c["training_controls"] is not None:
+        self.training_controls = c['training_controls']
 
-    self._data_populated = False
+      self._data_populated = False
+    
+    return
 
   @classmethod
   def from_Model(cls, model):
 
-    m = model._mko
+    m = MKO(orig=model._mko)
 
     tmpdir = "/tmp"
     uniquename = m.modelname + "".join(random.choices(string.ascii_uppercase + string.digits, k=10))
@@ -100,6 +108,14 @@ class MKO():
       return None
     return self._data_descriptor
   
+  @property
+  def testing_predictions(self):
+    if not self.augmented:
+      return None
+    if 'testing_predictions' in self._data_descriptor:
+      return self._data_descriptor['testing_predictions']
+    return None
+
   @property
   def training_data(self):
     if not self.augmented:
@@ -182,6 +198,7 @@ class MKO():
     with open(filename, "r") as fd:
       data = json.load(fd)
       return MKO(dict=data)
+
 
   def save(self, c, filename=None):
     try:

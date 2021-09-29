@@ -4,7 +4,7 @@ from tensorflow import keras as keras
 from network.model import Model
 from utilities import get_config
 
-c = get_config()
+c = get_config("src/input.json")
 
 mko = MKO(c)
 assert(mko.topological)
@@ -19,6 +19,7 @@ model.train()
 model.evaluate()
 mko2 = MKO.from_Model(model)
 mod2 = Model(mko2)
+mod2.compile()
 print("mod2 is type:{}".format(type(mod2)))
 mod2.describe()
 mod2.evaluate()

@@ -10,7 +10,7 @@
   "epochs": 10
  },
  "model_structure": {
-    "nInputs": 3,
+    "nInputs": 2,
     "nOutputs": 1,
     "nLayers": 2,
     "defaults": {
@@ -47,8 +47,8 @@
   },
   "data_descriptor":{
     "type": "http",
-    "URL": "http://127.0.0.1:8181/get-csv/test4",
-    "input_features": 3,
+    "URL": "http://127.0.0.1:8181/get-csv/test2",
+    "input_features": 2,
     "output_features" : 1,
     "server_name": "",
     "server_JWT": "",

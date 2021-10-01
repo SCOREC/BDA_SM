@@ -59,7 +59,7 @@ class NetworkTestCase(unittest.TestCase):
     model.train(verbose=0)
     metrics = model.evaluate(verbose=0)
   
-   c = get_config(filename=self.testInputFile)
+    c = get_config(filename=self.testInputFile)
     mko = MKO(c) 
     (x_test, y_test) = mko.testing_data
     model = Model(mko)

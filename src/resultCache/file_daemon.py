@@ -1,10 +1,9 @@
-from genericpath import exists
 from threading import Thread, Event
 from sched import scheduler
+from typing import Union
 import time
 import json
 import os
-from typing import Union
 
 
 class PurgeDaemon(Thread):
@@ -164,7 +163,6 @@ class FileHandler:
             return None
 
         self._purge_daemon.file_lock.add(location)
-        self._purge_daemon.remove_entry(location)
 
         mode = "r"
         if type == bytes:
@@ -174,6 +172,7 @@ class FileHandler:
             data = file.read()
 
         self._purge_daemon.delete(location, True)
+        self._purge_daemon.remove_entry(location)
         self._purge_daemon.file_lock.remove(location)
 
 

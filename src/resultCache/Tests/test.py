@@ -1,13 +1,9 @@
 import unittest
-
-from requests.models import DEFAULT_REDIRECT_LIMIT
 from resultCache.file_daemon import FileHandler
 from resultCache.config import TestConfig as config
-import random
-import string
+from resultCache.Tests.helpers import get_test_set
 import time
-import requests
-import subprocess
+
 
 class TestFileHandler(unittest.TestCase):
     def test_basic_store_and_retrieve_str(self):
@@ -31,19 +27,6 @@ class TestFileHandler(unittest.TestCase):
         self.assertEqual(bin_data, out_data)
         fh.end()
         fh.delete_all(True)
-
-    def generate_string(self, l, n):
-        strings = []
-        for _ in range(n):
-            gen_string = ''.join(random.choice(string.ascii_letters) for _ in range(l))
-            strings.append(gen_string)
-        return strings
-
-    def get_test_set(self):
-        usernames = self.generate_string(config.num_users_test, config.string_len_test)
-        ccs = self.generate_string(config.num_cc_test, config.string_len_test)
-        data = self.generate_string(config.num_data_files, config.num_characters_data_test)
-        return usernames, ccs, data
 
     def put_data_and_save(self, fh, usernames, ccs, data):
         expected = {}
@@ -71,7 +54,7 @@ class TestFileHandler(unittest.TestCase):
     def test_large_volume(self):
         fh = FileHandler(config.min_expiry_time, config.max_expiry_time, config.directory)
 
-        usernames, ccs, data = self.get_test_set()
+        usernames, ccs, data = get_test_set()
 
         try:
             expected = self.put_data_and_save(fh, usernames, ccs, data)
@@ -95,7 +78,7 @@ class TestFileHandler(unittest.TestCase):
     def test_purge_test(self):
         fh = FileHandler(config.min_expiry_time, config.max_expiry_time, config.directory)
 
-        usernames, ccs, data = self.get_test_set()
+        usernames, ccs, data = get_test_set()
         datum = data[0]
 
         self.put_datum(fh, usernames, ccs, datum)
@@ -114,7 +97,7 @@ class TestFileHandler(unittest.TestCase):
     def test_multi_session_purge_test(self):
         fh = FileHandler(config.min_expiry_time, config.max_expiry_time, config.directory)
 
-        usernames, ccs, data = self.get_test_set()
+        usernames, ccs, data = get_test_set()
         datum = data[0]
 
         self.put_datum(fh, usernames, ccs, datum)
@@ -132,52 +115,6 @@ class TestFileHandler(unittest.TestCase):
 
         for case in cases:
             self.assertEqual(*case)
-
-
-    def start_server(self):
-        command = "cd src/resultCache && export ENV=test && export DATA_DIR=.data && ./run_server.sh".split(" ")
-        # command = "ls"
-        return subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
-
-    def send_put(self, username, claim_check, generation_time, data) -> requests.Response:
-        params = {"username": username, "claim_check": claim_check, "generation_time": generation_time}
-        return requests.post("http://127.0.0.1:5000/store_result", data=data, params=params)
-
-    def get_data(self, username, claim_check) -> requests.Response:
-        params = {"username": username, "claim_check": claim_check}
-        return requests.get("http://127.0.0.1:5000/get_result", params=params)
-
-    def kill_server(self):
-        requests.post("http://127.0.0.1:5000/close")
-
-
-    def test_basic_rest_api(self):
-        # proc = self.start_server()
-        # time.sleep(1)
-        username = "abcdefg"
-        claim_check = "1234567"
-        generation_time = "1"
-        data = self.generate_string(config.string_len_test, 1)[0]
-
-        self.send_put(username, claim_check, generation_time, data)
-
-        resp = self.get_data(username, claim_check)
-        # self.kill_server()
-        self.assertEqual(resp.text, data)
-
-    def put_data_rest(self, usernames, ccs, data):
-        data_index = 0
-        for user in usernames:
-            for cc in ccs:
-                datum = data[data_index]
-                self.send_put(user, cc, 0, datum)
-                data_index += 1
-
-    def test_volume_api(self):
-        usernames, ccs, data = self.get_test_set()
-        self.put_data_rest(self, usernames, ccs, data)
-
-
                 
 
 if __name__ == "__main__":

@@ -16,7 +16,7 @@ class ProductionConfig(Config):
 
 class TestConfig(Config):
     max_expiry_time = Constants.one_day_seconds
-    min_expiry_time = 3
+    min_expiry_time = 4
 
     string_len_test = 20
     num_users_test = 20

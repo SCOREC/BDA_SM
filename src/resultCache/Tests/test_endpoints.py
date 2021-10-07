@@ -65,5 +65,59 @@ class EndpointTests(unittest.TestCase):
         time.sleep(4 * config.min_expiry_time)
         self.check_doesnt_exist(usernames, ccs)
 
+    def test_invalid_requests_put(self):
+        origin = "http://127.0.0.1:5000/store_result"
+
+        # with none
+        resp = requests.post(origin)
+        self.assertEqual(resp.status_code, 400)
+
+        # without cc
+        params = {"username": "abc"}
+        resp = requests.post(origin, params=params)
+        self.assertEqual(resp.status_code, 400)
+
+        # non int gen time
+        params = {"username": "abc", "claim_check": "efg", "generation_time": "not_a_number"}
+        resp = requests.post(origin, params=params)
+        self.assertEqual(resp.status_code, 400)
+
+        # get instead of post
+        params = {"username": "abc", "claim_check": "efg", "generation_time": 2}
+        resp = requests.get(origin, params=params)
+        self.assertEqual(resp.status_code, 405)
+
+    
+    def test_invalid_requests_get(self):
+        origin = "http://127.0.0.1:5000/get_result"
+        username = "abc"
+        claim_check = "gre"
+        username_non_existent = "none"
+        claim_check_non_existent = "notExisting"
+
+        self.send_put(username, claim_check, "50000", "")
+
+        # no claim_check
+        params = {"username": username}
+        resp = requests.get(origin, params=params)
+        self.assertEqual(resp.status_code, 400)
+
+        # no username
+        params = {"claim_check": claim_check}
+        resp = requests.get(origin, params=params)
+        self.assertEqual(resp.status_code, 400)
+
+        # user doesnt exist
+        params = {"username": username_non_existent, "claim_check": claim_check}
+        resp = requests.get(origin, params=params)
+        self.assertEqual(resp.status_code, 404)
+
+        # claim_check doesnt exist
+        params = {"username": username, "claim_check": claim_check_non_existent}
+        resp = requests.get(origin, params=params)
+        self.assertEqual(resp.status_code, 404)
+
+
+
 if __name__ == "__main__":
     unittest.main()

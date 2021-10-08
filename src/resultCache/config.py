@@ -12,7 +12,7 @@ class Config:
 class ProductionConfig(Config):
     max_expiry_time = Constants.one_day_seconds
     min_expiry_time = 300 # seconds
-    directory = "."
+    directory = ".data"
 
 class TestConfig(Config):
     max_expiry_time = Constants.one_day_seconds

@@ -13,8 +13,16 @@ def on_start():
 
 def check_input(field, args):
     if field not in args:
-        abort(Response("'username' not in args", 400))
+        abort(Response("'{}' not in args".format(field), 400))
 
+
+"""
+Descrption: Stores input data for later use
+Arguments:
+    username: str
+    claim_check: str
+    generation_time: int - time it took to generate data
+"""
 @app.route('/store_result', methods=['POST'])
 def store():
     check_input('username', request.args)
@@ -43,6 +51,13 @@ def store():
     return Response("success", 200)
 
 
+
+"""
+Description: Retrieves data previously stored, deletes data upon retrieval
+Arguments:
+    username: str   
+    claim_check: str
+"""
 @app.route("/get_result", methods=["GET"])
 def get():
     check_input('username', request.args)

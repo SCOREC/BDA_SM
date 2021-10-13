@@ -62,7 +62,7 @@ class EndpointTests(unittest.TestCase):
     def test_purge_api(self):
         usernames, ccs, data = get_test_set()
         self.put_data_rest(usernames, ccs, data)
-        time.sleep(4 * config.min_expiry_time)
+        time.sleep(8 * config.min_expiry_time)
         self.check_doesnt_exist(usernames, ccs)
 
     def test_invalid_requests_put(self):
@@ -116,6 +116,11 @@ class EndpointTests(unittest.TestCase):
         params = {"username": username, "claim_check": claim_check_non_existent}
         resp = requests.get(origin, params=params)
         self.assertEqual(resp.status_code, 404)
+
+        # delete entry
+        params = {"username": username, "claim_check": claim_check}
+        resp = requests.get(origin, params=params)
+        self.assertEqual(resp.status_code, 200)
 
 
 

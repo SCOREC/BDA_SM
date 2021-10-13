@@ -3,9 +3,9 @@ import string
 from resultCache.config import TestConfig as config
 
 def get_test_set():
-        usernames = generate_string(config.num_users_test, config.string_len_test)
-        ccs = generate_string(config.num_cc_test, config.string_len_test)
-        data = generate_string(config.num_data_files, config.num_characters_data_test)
+        usernames = generate_string(config.string_len_test, config.num_users_test)
+        ccs = generate_string(config.string_len_test, config.num_cc_test)
+        data = generate_string(config.num_characters_data_test, config.num_data_files)
         return usernames, ccs, data
 
 def generate_string(l, n):

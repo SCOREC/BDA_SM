@@ -19,9 +19,9 @@ class TestConfig(Config):
     min_expiry_time = 4
 
     string_len_test = 20
-    num_users_test = 20
-    num_cc_test = 30
-    num_characters_data_test = 500
+    num_users_test = 10
+    num_cc_test = 14
+    num_characters_data_test = 50
     num_data_files = num_users_test * num_cc_test
     directory = "src/resultCache/.data"
 

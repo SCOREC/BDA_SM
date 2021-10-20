@@ -1,6 +1,10 @@
 from fetcher.endpoints import api
 from flask import request
+
+from fetcherMS.fetcher.endpoints import PythonGraphQLRequestSample
 from .get_time_series import perform_get_time_series
+from fetcherMS.fetcher.parsing import mutation_q
+
 import json
 # import numpy as np
 from werkzeug.exceptions import BadRequest
@@ -56,6 +60,19 @@ def gettimeseries():
     matched_data = get_matching_dates(returned_json, query_json)
     return matched_data
     return returned_json
+
+def set_CSV_TimeSeries_data(column_id, column_name, tagid, startTime, endTime):
+    '''
+    Calling Query function for mutation (mutate_CSV.py)
+    '''
+    header = 'mutation { replaceTimeSeriesRange(input: {attributeOrTagId: "' + tagid +'" entries: '
+    footer = ' startTime: "'+ startTime +'" endTime: "' + endTime + '" } ) { clientMutationId json } }'
+    split_df= mutation_q.do_split(mutation_q.get_data,column_id)
+    split_df.rename(columns={column_name:'value'},inplace=True)
+    mutation_data=split_df.to_json(orient='records', lines=False).replace('"timestamp"', 'timestamp').replace('"value"','value').replace('"status"','status')
+    mutation_data.replace('"value"','value')
+    mutation_string = "{}{}{}".format(header, mutation_data, footer)
+    return mutation_string
 
 def get_matching_dates(item_dict, query_json, debug=False, opt=0):
     '''

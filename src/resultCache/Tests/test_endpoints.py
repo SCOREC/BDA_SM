@@ -3,18 +3,25 @@ import requests
 from resultCache.config import TestConfig as config
 import time
 from resultCache.Tests.helpers import generate_string, get_test_set
+from resultCache.Tests.base import BaseTestCase
+from urllib import parse
 
-class EndpointTests(unittest.TestCase):
+class EndpointTests(BaseTestCase):
+    def format_params(self, endpoint, params):
+        parsed = parse.urlparse(endpoint)
+        encoded_params = parse.urlencode(params)
+        parsed = parsed._replace(query=encoded_params)
+        return parse.urlunparse(parsed)
+
     def send_put(self, username, claim_check, generation_time, data) -> requests.Response:
         params = {"username": username, "claim_check": claim_check, "generation_time": generation_time}
-        return requests.post("http://127.0.0.1:5000/store_result", data=data, params=params)
+        endpoint = self.format_params("/store_result", params)
+        return self.client.post(endpoint, data=data)
 
     def get_data(self, username, claim_check) -> requests.Response:
         params = {"username": username, "claim_check": claim_check}
-        return requests.get("http://127.0.0.1:5000/get_result", params=params)
-
-    def kill_server(self):
-        requests.post("http://127.0.0.1:5000/close")
+        endpoint = self.format_params("/get_result", params)
+        return self.client.get(endpoint)
 
     def test_basic_rest_api(self):
         username = "abcdefg"
@@ -25,7 +32,8 @@ class EndpointTests(unittest.TestCase):
         self.send_put(username, claim_check, generation_time, data)
 
         resp = self.get_data(username, claim_check)
-        self.assertEqual(resp.text, data)
+        out = resp.data.decode("utf-8")
+        self.assertEqual(out, data)
 
 
     def put_data_rest(self, usernames, ccs, data):
@@ -45,13 +53,13 @@ class EndpointTests(unittest.TestCase):
         for user in usernames:
             for cc in ccs:
                 resp = self.get_data(user, cc)
-                self.assertEqual(resp.status_code, 200)
-                self.assertEqual(resp.text, expected[user][cc])
+                self.assert200(resp)
+                self.assertEqual(resp.data.decode("utf-8"), expected[user][cc])
 
     def check_doesnt_exist(self, usernames, ccs):
         for user in usernames:
             for cc in ccs:
-                self.assertEqual(self.get_data(user, cc).status_code, 404)
+                self.assert404(self.get_data(user, cc))
 
     def test_volume_api(self):
         usernames, ccs, data = get_test_set()
@@ -66,30 +74,33 @@ class EndpointTests(unittest.TestCase):
         self.check_doesnt_exist(usernames, ccs)
 
     def test_invalid_requests_put(self):
-        origin = "http://127.0.0.1:5000/store_result"
+        origin = "/store_result"
 
         # with none
-        resp = requests.post(origin)
-        self.assertEqual(resp.status_code, 400)
+        resp = self.client.post(origin)
+        self.assert400(resp)
 
         # without cc
         params = {"username": "abc"}
-        resp = requests.post(origin, params=params)
-        self.assertEqual(resp.status_code, 400)
+        param_formatted = self.format_params(origin, params)
+        resp = self.client.post(param_formatted)
+        self.assert400(resp)
 
         # non int gen time
         params = {"username": "abc", "claim_check": "efg", "generation_time": "not_a_number"}
-        resp = requests.post(origin, params=params)
-        self.assertEqual(resp.status_code, 400)
+        param_formatted = self.format_params(origin, params)
+        resp = self.client.post(param_formatted)
+        self.assert400(resp)
 
         # get instead of post
         params = {"username": "abc", "claim_check": "efg", "generation_time": 2}
-        resp = requests.get(origin, params=params)
-        self.assertEqual(resp.status_code, 405)
+        param_formatted = self.format_params(origin, params)
+        resp = self.client.get(param_formatted)
+        self.assert405(resp)
 
     
     def test_invalid_requests_get(self):
-        origin = "http://127.0.0.1:5000/get_result"
+        origin = "/get_result"
         username = "abc"
         claim_check = "gre"
         username_non_existent = "none"
@@ -99,30 +110,30 @@ class EndpointTests(unittest.TestCase):
 
         # no claim_check
         params = {"username": username}
-        resp = requests.get(origin, params=params)
-        self.assertEqual(resp.status_code, 400)
+        param_formatted = self.format_params(origin, params)
+        resp = self.client.get(param_formatted)
+        self.assert400(resp)
 
         # no username
         params = {"claim_check": claim_check}
-        resp = requests.get(origin, params=params)
-        self.assertEqual(resp.status_code, 400)
+        param_formatted = self.format_params(origin, params)
+        resp = self.client.get(param_formatted)
+        self.assert400(resp)
 
         # user doesnt exist
         params = {"username": username_non_existent, "claim_check": claim_check}
-        resp = requests.get(origin, params=params)
-        self.assertEqual(resp.status_code, 404)
+        param_formatted = self.format_params(origin, params)
+        resp = self.client.get(param_formatted)
+        self.assert404(resp)
 
         # claim_check doesnt exist
         params = {"username": username, "claim_check": claim_check_non_existent}
-        resp = requests.get(origin, params=params)
-        self.assertEqual(resp.status_code, 404)
-
-        # delete entry
-        params = {"username": username, "claim_check": claim_check}
-        resp = requests.get(origin, params=params)
-        self.assertEqual(resp.status_code, 200)
+        param_formatted = self.format_params(origin, params)
+        resp = self.client.get(param_formatted)
+        self.assert404(resp)
 
 
 
 if __name__ == "__main__":
     unittest.main()
+    

@@ -12,14 +12,14 @@ RUN venv/bin/pip install --upgrade pip setuptools wheel
 RUN venv/bin/pip install --upgrade -r requirements.txt
 RUN apk del .build-deps
 
-COPY fetcher fetcher
+COPY api api
 COPY tests tests
 
 COPY config.py boot.sh ./
 RUN chmod +x boot.sh
 
 
-ENV FLASK_APP fetcher/__init__.py
+ENV FLASK_APP api/__init__.py
 
 RUN chown -R fetcher:fetcher ./
 

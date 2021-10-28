@@ -2,13 +2,13 @@ try:
     import pytest
     import flask
     from flask import Flask
-    import fetcher
+    import api
     import responses
     import requests
     import unittest
     import json
-    from fetcher import create_app, configure_app, app
-    from fetcher.endpoints.routes import gettimeseries
+    from api import create_app, configure_app, app
+    from api.endpoints.routes import gettimeseries
     from tests.conftest import *
 except Exception as e:
     print("\nSome modules are missing {}".format(e))

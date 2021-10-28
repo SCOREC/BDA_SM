@@ -2,11 +2,11 @@ try:
     import pytest
     import flask
     from flask import Flask
-    import fetcher
+    import api
     import responses
     import unittest
     from unittest.mock import patch
-    from fetcher import create_app, configure_app, app
+    from api import create_app, configure_app, app
 except Exception as e:
     print("\nSome modules are missing {}".format(e))
 

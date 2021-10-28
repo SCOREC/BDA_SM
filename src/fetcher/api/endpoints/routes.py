@@ -1,4 +1,4 @@
-from fetcher.endpoints import api
+from api.endpoints import api
 from flask import request
 from .get_time_series import perform_get_time_series
 import json

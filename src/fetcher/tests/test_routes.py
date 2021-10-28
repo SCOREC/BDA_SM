@@ -4,7 +4,7 @@ try:
     import json
     import pytest
     from flask import Flask
-    from fetcher import configure_app, app, fetcher
+    from api import configure_app, app, fetcher
 except Exception as e:
     print("Some modules are missing {}".format(e))
 

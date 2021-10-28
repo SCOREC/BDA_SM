@@ -1,7 +1,7 @@
 import os
 from flask import Flask
 from config import Config
-from fetcher.endpoints import api as api_bp
+from api.endpoints import api as api_bp
 
 def configure_app(app):
     @app.route('/fetcher_home')

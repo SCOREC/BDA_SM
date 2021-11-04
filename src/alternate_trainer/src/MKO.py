@@ -1,6 +1,5 @@
 from src.json_parser import parse_json_model_structure
 import json
-from typing import Optional
 import pickle
 import numpy as np
 import base64

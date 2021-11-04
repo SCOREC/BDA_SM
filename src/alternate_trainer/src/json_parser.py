@@ -1,6 +1,5 @@
-from keras.regularizers import get
-import tensorflow as tf
-from tensorflow import keras
+from os import stat
+from typing import Any
 from keras import Input, Model
 from keras.layers import Dense, Conv2D
 from src.layers import VariationalDropout
@@ -11,6 +10,12 @@ class Defaults:
     activation = "relu"
     padding = "valid"
     stride = 1
+
+    @staticmethod
+    def get_default_initializer(activation: str) -> str:
+        if activation == "relu" or activation == "leakyrelu":
+            return "he_uniform"
+        return "glorot_uniform"
 
 class LayerKeys:
     TYPE = "type"
@@ -33,57 +38,29 @@ def enforce(field: str, layer_params: dict):
 
     return layer_params[field]
 
-def get_value(field: str, default: any, layer_params: dict) -> any:
+def get_value(field: str, default: Any, layer_params: dict) -> Any:
     if check_in(field, layer_params):
         return layer_params[field]
     return default
 
 def get_dense(layer_params: dict, name: str):
     units = enforce(LayerKeys.UNITS)
-
-    if type(units) != int:
-        raise InputException(LayerKeys.UNITS, ('int', type(units)))
-
     activation = get_value(LayerKeys.ACTIVATION, Defaults.activation, layer_params).lower()
-
-    if activation == "relu" or activation == "leakyrelu":
-        default = "he_uniform"
-    else:
-        default = "glorot_uniform"
-
-    initializer = get_value(LayerKeys.INITIALIZER, default, layer_params)
-
+    initializer = get_value(LayerKeys.INITIALIZER, Defaults.get_default_initializer(activation), layer_params)
+    
     return Dense(units, activation=activation, kernel_initializer=initializer, name=name)
 
 def dropout(layer_params, name):
-    if LayerKeys.RATE not in layer_params:
-        rate = Defaults.rate
-    else:
-        rate = layer_params[LayerKeys.RATE]
-
+    rate = get_value(LayerKeys.RATE, Defaults.rate, layer_params)
+    
     return VariationalDropout(rate, name=name)
 
 def get_convolutional(layer_params, name):
-    if LayerKeys.FILTERS not in layer_params:
-        raise Exception()
-
-    filters = layer_params[LayerKeys.FILTERS]
-
-    if LayerKeys.KERNEL_SIZE not in layer_params:
-        raise Exception()
-
-    kernel_size = layer_params[LayerKeys.KERNEL_SIZE]
-
-    if LayerKeys.STRIDE not in layer_params:
-        stride = Defaults.stride
-    else:
-        stride = layer_params[LayerKeys.STRIDE]
-
-    if LayerKeys.PADDING not in layer_params:
-        padding = Defaults.padding
-    else:
-        padding = layer_params[LayerKeys.PADDING]
-
+    filters = enforce(LayerKeys.FILTERS, layer_params)
+    kernel_size = enforce(LayerKeys.KERNEL_SIZE, layer_params)
+    stride = get_value(LayerKeys.STRIDE, Defaults.stride, layer_params)
+    padding = get_value(LayerKeys.PADDING, Defaults.padding, layer_params)
+    
     return Conv2D(filters, kernel_size, stride, padding, name=name)
 
 

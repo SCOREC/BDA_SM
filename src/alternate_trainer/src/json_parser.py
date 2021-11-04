@@ -1,8 +1,10 @@
+from keras.regularizers import get
 import tensorflow as tf
 from tensorflow import keras
 from keras import Input, Model
 from keras.layers import Dense, Conv2D
 from src.layers import VariationalDropout
+from src.exceptions import InputException, InvalidArgument
 
 class Defaults:
     rate = 0.95
@@ -22,37 +24,36 @@ class LayerKeys:
     STRIDE = "stride"
     PADDING = "padding"
 
-def verify_activation(activation_function): # TODO: implement
-    return True
+def check_in(field: str, layer_params: dict) -> bool:
+    return field in layer_params
 
-def get_dense(layer_params, name): # TODO: write descriptive error names (make exception class)
-    # TODO: clean up validation, should be able to be more modularized
-    if LayerKeys.UNITS not in layer_params:
-        raise Exception()
+def enforce(field: str, layer_params: dict):
+    if check_in(field, layer_params):
+        raise InputException(LayerKeys.UNITS)
 
-    try:
-        units = int(layer_params[LayerKeys.UNITS])
-    except ValueError:
-        raise Exception()
+    return layer_params[field]
 
-    if LayerKeys.ACTIVATION not in layer_params:
-        activation = Defaults.activation
+def get_value(field: str, default: any, layer_params: dict) -> any:
+    if check_in(field, layer_params):
+        return layer_params[field]
+    return default
+
+def get_dense(layer_params: dict, name: str):
+    units = enforce(LayerKeys.UNITS)
+
+    if type(units) != int:
+        raise InputException(LayerKeys.UNITS, ('int', type(units)))
+
+    activation = get_value(LayerKeys.ACTIVATION, Defaults.activation, layer_params).lower()
+
+    if activation == "relu" or activation == "leakyrelu":
+        default = "he_uniform"
     else:
-        activation = layer_params[LayerKeys.ACTIVATION].lower()
+        default = "glorot_uniform"
 
-    if not verify_activation(activation):
-        raise Exception()
-
-    if LayerKeys.INITIALIZER not in layer_params:
-        if activation == "relu" or activation == "leakyrelu":
-            initializer = "he_uniform"
-        else:
-            initializer = "glorot_uniform"
-    else:
-        initializer = layer_params[LayerKeys.INITIALIZER]
+    initializer = get_value(LayerKeys.INITIALIZER, default, layer_params)
 
     return Dense(units, activation=activation, kernel_initializer=initializer, name=name)
-
 
 def dropout(layer_params, name):
     if LayerKeys.RATE not in layer_params:
@@ -94,27 +95,19 @@ layers = {
 }
 
 def get_layer(layer_params, index):
-    if LayerKeys.NAME in layer_params:
-        name = layer_params[LayerKeys.NAME]
-    else:
-        name = "layer_{:02d}".format(index)
-
-    if LayerKeys.TYPE not in layer_params:
-        print(layer_params, str(LayerKeys.TYPE))
-        raise KeyError("'{}' not in layer '{}'".format(LayerKeys.TYPE, name))
-
-    layer_type = layer_params[LayerKeys.TYPE].lower()
+    name = get_value(LayerKeys.NAME, "layer_{:02d}".format(index), layer_params)
+    layer_type = enforce(LayerKeys.TYPE, layer_params).lower()
 
     if layer_type not in layers:
-        raise Exception()
+        raise InvalidArgument(layer_type, layers)
 
     return layers[layer_type](layer_params, name)
 
-def parse_json_model_structure(data_input_shape: tuple, name: str, inputs: list) -> Model:
-    inpt = Input(data_input_shape)
-    x = inpt
-    for index, layer_params in enumerate(inputs):
+def parse_json_model_structure(data_input_shape: tuple, name: str, model_topology: list) -> Model:
+    input_layer = Input(data_input_shape)
+    x = input_layer
+    for index, layer_params in enumerate(model_topology):
         layer_type = get_layer(layer_params, index)
         x = layer_type(x)
 
-    return Model(inputs=inpt, outputs=x, name=name)
+    return Model(inputs=input_layer, outputs=x, name=name)

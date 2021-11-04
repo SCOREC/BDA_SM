@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Any, Union
 from src.json_parser import parse_json_model_structure
 import json
 import pickle
@@ -34,15 +34,20 @@ class MKO:
         return MKO(empty)
 
     @staticmethod
+    def enforce_type(data: Any, field: str, data_type: type):
+        if type(data) != data_type:
+            raise InputException(field, (str(type), type(data)))
+
+    @staticmethod
     def enforce(field: str, input_params: dict):
         if field not in input_params:
             raise InputException(field)
 
-        if field in Fields.LIST_FIELDS and type(input_params[field]) != list:
-            raise InputException(field, ("list", type(input_params[field])))
+        if field in Fields.LIST_FIELDS:
+            MKO.enforce_type(input_params[field], field, list)
 
-        if field in Fields.DICT_FIELDS and type(input_params[field]) != dict:
-            raise InputException(field, ("dict", type(input_params[field])))
+        if field in Fields.DICT_FIELDS:
+            MKO.enforce_type(input_params[field], field, dict)
 
     @property
     def topographic(self):
@@ -142,18 +147,16 @@ class MKO:
         if not self.augmented:
             raise MKOTypeException("augmented")
 
-
         if self._data_type == "file":
             x, y = self.get_data_from_file(self._data_location)
-        if self._data_type == "http":
+        elif self._data_type == "http":
             x, y = self.get_data_from_http(self._data_location)
-        if self._data_type == "fetcher":
+        elif self._data_type == "fetcher":
             x, y = self.get_data_from_fetcher(self._data_location)
         else:
             raise InvalidArgument(self._data_type, ["file", "http", "fetcher"])
 
-        if type(self._train_percent) != float:
-            raise InputException(Fields.TRAIN_PERCENT, ('float', type(self._train_percent)))
+        MKO.enforce_type(self._train_percent, Fields.HyperParams.TRAIN_PERCENT, float)
 
         index = int(self._train_percent * len(x))
         permutation = np.random.permutation(len(x))
@@ -178,11 +181,8 @@ class MKO:
         if not self._compiled:
             raise Exception("model not compiled, call 'compile' before 'train'")
 
-        if type(self._epochs) != int: # change to automattically enforce in Fields
-            raise InputException(Fields.EPOCHS, ("int", type(self._epochs)))
-
-        if type(self._batch_size) != int:
-            raise InputException(Fields.BATCH_SIZE, ("int", type(self._batch_size)))
+        MKO.enforce_type(self._epochs, Fields.HyperParams.EPOCHS, int)
+        MKO.enforce_type(self._batch_size, Fields.HyperParams.BATCH_SIZE, int)
 
         self._model.fit(self._X_train, self._Y_train, epochs=self._epochs, batch_size=self._batch_size)
         self._loss = self._model.evaluate(self._X_test, self._Y_test)

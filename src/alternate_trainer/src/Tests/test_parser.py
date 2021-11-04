@@ -19,7 +19,7 @@ class TestMKO(unittest.TestCase):
             json_file = json.load(file)
         
         mko = MKO(json_file)
-        mko2 = MKO.from_MKO(json.loads(mko.get_json()))
+        mko2 = MKO(json.loads(mko.get_json()))
         self.assertEqual(mko.get_json(), mko2.get_json())
 
 if __name__ == "__main__":

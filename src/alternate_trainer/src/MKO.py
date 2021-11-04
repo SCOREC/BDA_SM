@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any, Iterable, Tuple, Union
 from src.json_parser import parse_json_model_structure
 import json
 import pickle
@@ -9,6 +9,7 @@ from tensorflow.keras import backend as K
 import pandas as pd
 from src.exceptions import InputException, VersionException, MKOTypeException, InvalidArgument
 from src.MKO_fields import Fields
+import os
 
 # temporary placeholder
 version = "1.0"
@@ -50,11 +51,11 @@ class MKO:
             MKO.enforce_type(input_params[field], field, dict)
 
     @property
-    def topographic(self):
+    def topographic(self) -> bool:
         return self._topology != None
 
     @property
-    def augmented(self):
+    def augmented(self) -> bool:
         return self._data
 
     def parse_fields(self, fields: set, input_params: dict):
@@ -129,18 +130,33 @@ class MKO:
         K.set_value(self._model.optimizer.learning_rate, self._learning_rate)
         self._compiled = True
 
-    def get_data_from_file(self, location):
-        with open(location.format("x"), "r") as file:
-            x = pd.read_csv(file).to_numpy()
-        with open(location.format("y"), "r") as file:
-            y = pd.read_csv(file).to_numpy()
-    
-        return x, y
+    def parse_data(self, df: pd.DataFrame) -> Tuple[np.array, np.array]:
+        x = pd.DataFrame()
+        y = pd.DataFrame()
+        for col in df.columns:
+            if col == "Time":
+                continue
 
-    def get_data_from_http(self, location):
+            if "F" in col:
+                x[col] = df[col]
+            if "T" in col:
+                y[col] = df[col]
+
+        return x.to_numpy(), y.to_numpy()
+
+    def get_data_from_file(self, location: str):
+        if not os.path.exists(location):
+            raise FileNotFoundError("'{}' not found".format(location))
+
+        with open(location, "r") as file:
+            df = pd.read_csv(file)
+    
+        return self.parse_data(df)
+
+    def get_data_from_http(self, location: str):
         raise NotImplementedError("'get_data_from_http' not implemted")
 
-    def get_data_from_fetcher(self, location):
+    def get_data_from_fetcher(self, location: str):
         raise NotImplementedError("'get_data_from_fetcher' not implemted")
 
     def load_data(self):
@@ -188,7 +204,7 @@ class MKO:
         self._loss = self._model.evaluate(self._X_test, self._Y_test)
         self._trained += self._epochs
 
-    def make_inference(self, x, samples) -> tf.Tensor:
+    def make_inference(self, x: Iterable, samples: int) -> tf.Tensor:
         if not self.topographic:
             raise MKOTypeException("topographic")
         X = tf.transpose(tf.reshape(tf.repeat(x, repeats=samples), (len(x), samples)))

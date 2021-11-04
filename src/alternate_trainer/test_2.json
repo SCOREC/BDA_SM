@@ -5,34 +5,41 @@
         {
             "type": "dense",
             "activation": "relu",
-            "units": 64
+            "units": 256
         }, {
             "type": "dropout",
             "rate": 0.95
         },{
             "type": "dense",
             "activation": "relu",
-            "units": 32
+            "units": 512
         }, {
             "type": "dropout",
             "rate": 0.95
         }, {
             "type": "dense",
-            "activation": "softmax",
+            "activation": "relu",
+            "units": 64
+        }, {
+            "type": "dropout",
+            "rate": 0.95
+        }, {
+            "type": "dense",
+            "activation": "relu",
             "units": 3
         }
     ],
     "hyper_params": {
-        "epochs": 200,
+        "epochs": 300,
         "batch_size": 64,
-        "data_shape": [4],
+        "data_shape": [2],
         "optimizer": "adam",
         "learning_rate": 0.001,
-        "loss_function": "categorical_crossentropy",
-        "train_percent": 0.8
+        "loss_function": "mse",
+        "train_percent": 0.9
     },
     "data": {
         "data_type": "file",
-        "data_location": "test_data/data.csv"
+        "data_location": "test_data/data_2.csv"
     }
 }

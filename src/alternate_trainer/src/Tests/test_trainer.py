@@ -10,15 +10,14 @@ import numpy as np
 class TestTrainer(unittest.TestCase):
     def __init__(self, *args):
         data_source = "https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data"
-        path_x = "test_data/data_x.csv"
-        path_y = "test_data/data_y.csv"
-        if not os.path.exists(path_x) or not os.path.exists(path_y):
-            resp = input("Would you like to download data to '{}' ([y]/n): ".format(os.path.join(os.getcwd(), path_x))).lower()
+        path = "test_data/data.csv"
+        if not os.path.exists(path):
+            resp = input("Would you like to download data to '{}' ([y]/n): ".format(os.path.join(os.getcwd(), path))).lower()
             if resp == "n":
                 exit(0)
 
             data = requests.get(data_source)
-            str_io = io.StringIO("0,1,2,3,o\n{}".format(data.text))
+            str_io = io.StringIO("F0,F1,F2,F3,o\n{}".format(data.text))
             df = pd.read_csv(str_io)
             df = df.replace("Iris-setosa", 0)
             df = df.replace("Iris-versicolor", 1)
@@ -33,29 +32,40 @@ class TestTrainer(unittest.TestCase):
             df2 = pd.DataFrame(labels)
             df = df.drop('o', axis=1)
 
+            for i, col in enumerate(df2):
+                df["T{}".format(i)] = df2[col]
+
             os.makedirs("test_data", exist_ok=True)
-            with open(path_x, "w") as file:
+            with open(path, "w") as file:
                 file.write(df.to_csv(index=False))
-
-            with open(path_y, "w") as file:
-                file.write(df2.to_csv(index=False))
-
+                
         super().__init__(*args)
-            
 
-    def test_train(self):
-        with open("test.json", 'r') as file:
+    def train_model(self, filename):
+        with open(filename, 'r') as file:
             json_file = json.load(file)
 
         mko = MKO(json_file)
         mko.compile()
         mko.load_data()
         mko.train()
+        return mko
+
+    def test_train(self):
+        mko = self.train_model("test.json")
         inference_x = [5.9,3.0,5.1,1.8]
         gt = [0,0,1]
         inferences = mko.make_inference(inference_x,500)
         means = np.mean(inferences, axis=0)
         self.assertEqual(np.argmax(means), np.argmax(gt))
+
+    def test_train_2(self):
+        mko = self.train_model("test_2.json")
+        inference_x = [5.127105236,1.958719381]
+        gt = [25.24810875,34.65854027,28.23331668]
+        inferences = mko.make_inference(inference_x, 500)
+        means = np.mean(inferences, axis=0)
+        self.assertTrue(np.allclose(means, gt, atol=5))
 
 if __name__ == "__main__":
     unittest.main()

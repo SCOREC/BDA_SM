@@ -1,29 +1,12 @@
-from typing import Optional
-
 class Fields:
-        MODEL_NAME = "model_name" #M
-        TOPOLOGY = "topology" #O - s
-        VERSION = "version" #M
-        HYPER_PARAMS = "hyper_params" #O - e
-        DATA = "data" #O - e
-        WEIGHTS = "weights" #O - s
-        TRAINED = "trained" #O - M
-        LOSS = "loss" #O - M
-
-        MANDATORY_FIELDS = {
-            MODEL_NAME,
-            VERSION,
-        }
-
-        LIST_FIELDS = {
-            TOPOLOGY,
-            WEIGHTS
-        }
-
-        DICT_FIELDS = {
-            HYPER_PARAMS,
-            DATA
-        }
+        MODEL_NAME = "model_name"
+        TOPOLOGY = "topology"
+        VERSION = "version"
+        HYPER_PARAMS = "hyper_params"
+        DATA = "data"
+        WEIGHTS = "weights" 
+        TRAINED = "trained"
+        LOSS = "loss"
 
         class Data:
             DATA_TYPE = "data_type"
@@ -52,6 +35,22 @@ class Fields:
                 LOSS_FUNCTION,
                 TRAIN_PERCENT
             }
+
+        MANDATORY_FIELDS = {
+            MODEL_NAME,
+            VERSION,
+        }
+
+        LIST_FIELDS = {
+            TOPOLOGY,
+            WEIGHTS,
+            HyperParams.DATA_SHAPE
+        }
+
+        DICT_FIELDS = {
+            HYPER_PARAMS,
+            DATA
+        }
 
         OPTIONAL_SUB_FIELDS = {
             DATA: Data,

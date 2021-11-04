@@ -61,7 +61,6 @@ def get_convolutional(layer_params: dict, name: str):
     
     return Conv2D(filters, kernel_size, stride, padding, name=name)
 
-
 layers = {
     "dense": get_dense,
     "dropout": dropout,

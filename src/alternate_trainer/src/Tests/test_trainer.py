@@ -1,7 +1,4 @@
-from re import A
 import unittest
-
-from numpy.core.fromnumeric import argmax
 from src.MKO import MKO
 import json
 import os
@@ -15,7 +12,7 @@ class TestTrainer(unittest.TestCase):
         data_source = "https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data"
         path_x = "test_data/data_x.csv"
         path_y = "test_data/data_y.csv"
-        if not os.path.exists(path_x):
+        if not os.path.exists(path_x) or not os.path.exists(path_y):
             resp = input("Would you like to download data to '{}' ([y]/n): ".format(os.path.join(os.getcwd(), path_x))).lower()
             if resp == "n":
                 exit(0)

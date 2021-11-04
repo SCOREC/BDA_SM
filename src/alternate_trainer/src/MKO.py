@@ -7,6 +7,7 @@ import base64
 import tensorflow as tf
 from tensorflow.keras import backend as K
 import pandas as pd
+from src.exceptions import InputException, VersionException
 
 # temporary placeholder
 version = "1.0"
@@ -50,17 +51,6 @@ class MKO:
             WEIGHTS
         }
 
-    class InputException(Exception):
-        def __init__(self, field: str, type_error: Optional[tuple] = None):
-            if type_error == None:
-                super().__init__("field '{}' not in input json".format(field))
-            else:
-                super().__init__("field '{}' not of type '{}' instead is type '{}'".format(field, type_error[0], type_error[1]))
-
-    class VersionException(Exception):
-        def __input__(self, source_version: str, json_version: str):
-            super().__init__("source version {} != json version {}".format(source_version, json_version))
-
     def __init__(self, params: dict):
         self.parse_params(params)
         self._model = parse_json_model_structure(self._data_shape, self._model_name, self._topology)
@@ -83,19 +73,18 @@ class MKO:
     @staticmethod
     def enforce(field: str, input_params: dict):
         if field not in input_params:
-            raise MKO.InputException(field)
+            raise InputException(field)
 
         if field in MKO.Fields.LIST_FIELDS and type(input_params[field]) != list:
-            raise MKO.InputException(field, ("dict", type(input_params[field])))
+            raise InputException(field, ("dict", type(input_params[field])))
     
-
     def parse_params(self, input_params: dict):
         for field in MKO.Fields.MANDATORY_FIELDS:
             MKO.enforce(field, input_params)
             setattr(self, "_{}".format(field), input_params[field])
 
         if version != self._version:
-            raise MKO.VersionException(version, self._version)
+            raise VersionException(version, self._version)
 
     def compile(self):
         self._model.compile(loss=self._loss_function, optimizer=self._optimizer)
@@ -109,7 +98,7 @@ class MKO:
             y = pd.read_csv(file).to_numpy()
 
         if type(self._train_percent) != float:
-            raise MKO.InputException(MKO.Fields.TRAIN_PERCENT, ('float', type(self._train_percent)))
+            raise InputException(MKO.Fields.TRAIN_PERCENT, ('float', type(self._train_percent)))
         index = int(self._train_percent * len(x))
         permutation = np.random.permutation(len(x))
         x = x[permutation]
@@ -128,10 +117,10 @@ class MKO:
             raise Exception("model not compiled, call 'compile' before train")
 
         if type(self._epochs) != int: # change to automattically enforce in Fields
-            raise MKO.InputException(MKO.Fields.EPOCHS, ("int", type(self._epochs)))
+            raise InputException(MKO.Fields.EPOCHS, ("int", type(self._epochs)))
 
         if type(self._batch_size) != int:
-            raise MKO.InputException(MKO.Fields.BATCH_SIZE, ("int", type(self._batch_size)))
+            raise InputException(MKO.Fields.BATCH_SIZE, ("int", type(self._batch_size)))
 
         self._model.fit(self._X_train, self._Y_train, epochs=self._epochs, batch_size=self._batch_size)
         self._loss = self._model.evaluate(self._X_test, self._Y_test)

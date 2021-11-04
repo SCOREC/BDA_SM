@@ -28,7 +28,7 @@ class Fields:
 
         class Data:
             DATA_TYPE = "data_type"
-            LOCATION = "location"
+            LOCATION = "data_location"
 
             MANDATORY_FIELDS = {
                 DATA_TYPE,

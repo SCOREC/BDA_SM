@@ -1,4 +1,5 @@
-from re import S
+from re import S, U
+from typing import Union
 from src.json_parser import parse_json_model_structure
 import json
 import pickle
@@ -77,7 +78,7 @@ class MKO:
             # assert data_shape and topology exists
             self._model = parse_json_model_structure(self._data_shape, self._model_name, self._topology)
         else:
-            self.topology = None
+            self._topology = None
 
         if Fields.WEIGHTS in input_params:
             MKO.enforce(Fields.WEIGHTS, input_params)
@@ -86,6 +87,32 @@ class MKO:
 
         if version != self._version:
             raise VersionException(version, self._version)
+
+    def add_hyper_params(self, hyper_params: Union[dict, str]):
+        if type(hyper_params) == str:
+            self.add_hyper_params(self, json.loads(hyper_params))
+
+        
+        self._hyper_params = True
+        self.parse_fields(Fields.OPTIONAL_FIELDS[Fields.HYPER_PARAMS].MANDATORY_FIELDS, hyper_params)
+
+
+    def add_topology(self, topology: Union[list, str]):
+        # assert hyper params
+        if type(topology) == str:
+            self.add_topology(self, json.loads(topology))
+            return
+
+        self._topology = topology
+        self._model = parse_json_model_structure(self._data_shape, self._model_name, self._topology)
+
+
+    def add_data(self, data: Union[dict, str]):
+        if type(data) == str:
+            self.add_data(json.loads(data))
+
+        self._data = True
+        self.parse_fields(Fields.OPTIONAL_FIELDS[Fields.DATA], data)
 
     def compile(self):
         # assert topological
@@ -154,7 +181,7 @@ class MKO:
         for field_enum in Fields.OPTIONAL_SUB_FIELDS:
             if getattr(self, "_{}".format(field_enum)):
                 to_save[field_enum] = {}
-                self.save_fields(Fields.OPTIONAL_SUB_FIELDS[field_enum], to_save[field_enum])
+                self.save_fields(Fields.OPTIONAL_SUB_FIELDS[field_enum].MANDATORY_FIELDS, to_save[field_enum])
 
         self.save_fields(Fields.OPTIONAL_FIELDS, to_save)            
 

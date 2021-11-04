@@ -33,29 +33,28 @@ def check_in(field: str, layer_params: dict) -> bool:
     return field in layer_params
 
 def enforce(field: str, layer_params: dict):
-    if check_in(field, layer_params):
-        raise InputException(LayerKeys.UNITS)
+    if not check_in(field, layer_params):
+        raise InputException(field)
 
     return layer_params[field]
 
 def get_value(field: str, default: Any, layer_params: dict) -> Any:
     if check_in(field, layer_params):
         return layer_params[field]
+
     return default
 
 def get_dense(layer_params: dict, name: str):
-    units = enforce(LayerKeys.UNITS)
+    units = enforce(LayerKeys.UNITS, layer_params)
     activation = get_value(LayerKeys.ACTIVATION, Defaults.activation, layer_params).lower()
     initializer = get_value(LayerKeys.INITIALIZER, Defaults.get_default_initializer(activation), layer_params)
-    
     return Dense(units, activation=activation, kernel_initializer=initializer, name=name)
 
-def dropout(layer_params, name):
+def dropout(layer_params: dict, name: str):
     rate = get_value(LayerKeys.RATE, Defaults.rate, layer_params)
-    
     return VariationalDropout(rate, name=name)
 
-def get_convolutional(layer_params, name):
+def get_convolutional(layer_params: dict, name: str):
     filters = enforce(LayerKeys.FILTERS, layer_params)
     kernel_size = enforce(LayerKeys.KERNEL_SIZE, layer_params)
     stride = get_value(LayerKeys.STRIDE, Defaults.stride, layer_params)
@@ -71,7 +70,7 @@ layers = {
     "convolutional": get_convolutional,
 }
 
-def get_layer(layer_params, index):
+def get_layer(layer_params: dict, index: int):
     name = get_value(LayerKeys.NAME, "layer_{:02d}".format(index), layer_params)
     layer_type = enforce(LayerKeys.TYPE, layer_params).lower()
 

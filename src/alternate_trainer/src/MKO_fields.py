@@ -1,6 +1,5 @@
 from typing import Optional
 
-
 class Fields:
         MODEL_NAME = "model_name" #M
         TOPOLOGY = "topology" #O - s

@@ -1,0 +1,31 @@
+{
+    "epochs": 2,
+    "batch_size": 64,
+    "data_shape": [3],
+    "model_name": "model",
+    "topology": [
+        {
+            "type": "dense",
+            "activation": "relu",
+            "units": 64,
+            "kernel_initializer": "glorot_uniform"
+        }, {
+            "type": "dropout"
+        }, {
+            "type": "dense",
+            "activation": "relu",
+            "units": 3,
+            "kernel_initializer": "he_uniform"
+        }
+    ],
+
+    "version": "1.0",
+    "optimizer": "adam",
+    "hyper_params": {
+
+    },
+
+    "learning_rate": 3.2,
+    "loss_function": "mse",
+    "data_path": "./data.csv"
+}

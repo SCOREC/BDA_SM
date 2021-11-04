@@ -1,21 +1,27 @@
 {
-    "epochs": 2,
-    "batch_size": 64,
-    "data_shape": [3],
+    "epochs": 200,
+    "batch_size": 5,
+    "data_shape": [4],
     "model_name": "model",
     "topology": [
         {
             "type": "dense",
             "activation": "relu",
-            "units": 64,
-            "kernel_initializer": "glorot_uniform"
+            "units": 10
         }, {
-            "type": "dropout"
-        }, {
+            "type": "dropout",
+            "rate": 0.95
+        },{
             "type": "dense",
             "activation": "relu",
-            "units": 3,
-            "kernel_initializer": "he_uniform"
+            "units": 10
+        }, {
+            "type": "dropout",
+            "rate": 0.95
+        }, {
+            "type": "dense",
+            "activation": "softmax",
+            "units": 3
         }
     ],
 
@@ -25,7 +31,8 @@
 
     },
 
-    "learning_rate": 3.2,
-    "loss_function": "mse",
-    "data_path": "./data.csv"
+    "learning_rate": 0.001,
+    "loss_function": "categorical_crossentropy",
+    "data_path": "test_data/data_{}.csv",
+    "train_percent": 0.8
 }

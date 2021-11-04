@@ -2,7 +2,7 @@ import tensorflow as tf
 from tensorflow import keras
 from keras import Input, Model
 from keras.layers import Dense, Conv2D
-from src.layers import variationalDropout
+from src.layers import VariationalDropout
 
 class Defaults:
     rate = 0.95
@@ -47,7 +47,7 @@ def get_dense(layer_params, name): # TODO: write descriptive error names (make e
         if activation == "relu" or activation == "leakyrelu":
             initializer = "he_uniform"
         else:
-            initializer = "golorot_uniform"
+            initializer = "glorot_uniform"
     else:
         initializer = layer_params[LayerKeys.INITIALIZER]
 
@@ -60,7 +60,7 @@ def dropout(layer_params, name):
     else:
         rate = layer_params[LayerKeys.RATE]
 
-    return variationalDropout(rate, name=name)
+    return VariationalDropout(rate, name=name)
 
 def get_convolutional(layer_params, name):
     if LayerKeys.FILTERS not in layer_params:

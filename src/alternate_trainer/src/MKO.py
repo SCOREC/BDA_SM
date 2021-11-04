@@ -6,6 +6,7 @@ import numpy as np
 import base64
 import tensorflow as tf
 from tensorflow.keras import backend as K
+import pandas as pd
 
 # temporary placeholder
 version = "1.0"
@@ -23,6 +24,11 @@ class MKO:
         LEARNING_RATE = "learning_rate"
         LOSS_FUNCTION = "loss_function"
         DATA_PATH = "data_path"
+        TRAIN_PERCENT= "train_percent"
+
+        WEIGHTS = "weights"
+        TRAINED = "trained"
+        LOSS = "loss"
 
         MANDATORY_FIELDS = {
             EPOCHS,
@@ -34,11 +40,14 @@ class MKO:
             OPTIMIZER,
             # HYPER_PARAMS,
             LOSS_FUNCTION,
-            DATA_PATH
+            DATA_PATH,
+            TRAIN_PERCENT,
+            LEARNING_RATE,
         }
 
         LIST_FIELDS = {
-            TOPOLOGY
+            TOPOLOGY,
+            WEIGHTS
         }
 
     class InputException(Exception):
@@ -61,9 +70,15 @@ class MKO:
         self._data_loaded = False
 
     @staticmethod
-    def from_MKO(mko: str):
-        # TODO: Implement
-        pass
+    def from_MKO(mko: dict):
+        mko_object = MKO(mko)
+        MKO.enforce(MKO.Fields.WEIGHTS, mko)
+        mko_object._model.set_weights([MKO.b64decode_array(w) for w in mko[MKO.Fields.WEIGHTS]])
+        MKO.enforce(MKO.Fields.LOSS, mko)
+        mko_object._loss = mko[MKO.Fields.LOSS]
+        MKO.enforce(MKO.Fields.TRAINED, mko)
+        mko_object._trained = mko[MKO.Fields.TRAINED]
+        return mko_object
 
     @staticmethod
     def enforce(field: str, input_params: dict):
@@ -87,7 +102,22 @@ class MKO:
         K.set_value(self._model.optimizer.learning_rate, self._learning_rate)
         self._compiled = True
 
-    def load_data(self): # TODO: implement
+    def load_data(self): # TODO: implement data_descripter instead of path
+        with open(self._data_path.format("x"), "r") as file:
+            x = pd.read_csv(file).to_numpy()
+        with open(self._data_path.format("y"), "r") as file:
+            y = pd.read_csv(file).to_numpy()
+
+        if type(self._train_percent) != float:
+            raise MKO.InputException(MKO.Fields.TRAIN_PERCENT, ('float', type(self._train_percent)))
+        index = int(self._train_percent * len(x))
+        permutation = np.random.permutation(len(x))
+        x = x[permutation]
+        y = y[permutation]
+        self._X_train = x[0:index]
+        self._X_test = x[index:]
+        self._Y_train = y[0:index]
+        self._Y_test = y[index:]
         self._data_loaded = True
 
     def train(self):
@@ -109,7 +139,7 @@ class MKO:
     def make_inference(self, x, samples) -> tf.Tensor:
         X = tf.transpose(tf.reshape(tf.repeat(x, repeats=samples), (len(x), samples)))
         return self._model.predict(X)
-
+        
     @staticmethod
     def b64decode_array(string: str) -> np.array:
         return pickle.loads(base64.b64decode(string))
@@ -123,14 +153,14 @@ class MKO:
         for field in MKO.Fields.MANDATORY_FIELDS:
             to_save[field] = getattr(self, "_{}".format(field))
 
-        to_save["trained"] = self._trained
-        to_save["loss"] = self._loss
+        to_save[MKO.Fields.TRAINED] = self._trained
+        to_save[MKO.Fields.LOSS] = self._loss
         np_weights = self._model.get_weights()
         b64_encoded_w = []
         for w in np_weights:
             b64_encoded_w.append(MKO.b64encode_array(w))
 
-        to_save["weights"] = b64_encoded_w
+        to_save[MKO.Fields.WEIGHTS] = b64_encoded_w
 
         return to_save
     

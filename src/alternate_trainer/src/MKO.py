@@ -1,4 +1,3 @@
-from re import S, U
 from typing import Union
 from src.json_parser import parse_json_model_structure
 import json
@@ -8,7 +7,7 @@ import base64
 import tensorflow as tf
 from tensorflow.keras import backend as K
 import pandas as pd
-from src.exceptions import InputException, VersionException
+from src.exceptions import InputException, VersionException, MKOTypeException, InvalidArgument
 from src.MKO_fields import Fields
 
 # temporary placeholder
@@ -75,7 +74,9 @@ class MKO:
         if Fields.TOPOLOGY in input_params:
             MKO.enforce(Fields.TOPOLOGY, input_params)
             self._topology = input_params[Fields.TOPOLOGY]
-            # assert data_shape and topology exists
+            if self._hyper_params == False:
+                raise InputException(Fields.HYPER_PARAMS)
+            
             self._model = parse_json_model_structure(self._data_shape, self._model_name, self._topology)
         else:
             self._topology = None
@@ -98,7 +99,9 @@ class MKO:
 
 
     def add_topology(self, topology: Union[list, str]):
-        # assert hyper params
+        if self._hyper_params == False:
+            raise Exception("hyper_parameters not defined, use 'add_hyper_params' before 'add_topology'")
+
         if type(topology) == str:
             self.add_topology(self, json.loads(topology))
             return
@@ -115,20 +118,43 @@ class MKO:
         self.parse_fields(Fields.OPTIONAL_FIELDS[Fields.DATA], data)
 
     def compile(self):
-        # assert topological
+        if not self.topographic:
+            raise MKOTypeException("topographic")
         self._model.compile(loss=self._loss_function, optimizer=self._optimizer)
         K.set_value(self._model.optimizer.learning_rate, self._learning_rate)
         self._compiled = True
 
-    def load_data(self): # TODO: implement data_descripter instead of path
-        # assert augmented
-        with open(self._data_path.format("x"), "r") as file:
+    def get_data_from_file(self, location):
+        with open(location.format("x"), "r") as file:
             x = pd.read_csv(file).to_numpy()
-        with open(self._data_path.format("y"), "r") as file:
+        with open(location.format("y"), "r") as file:
             y = pd.read_csv(file).to_numpy()
+    
+        return x, y
+
+    def get_data_from_http(self, location):
+        raise NotImplementedError("'get_data_from_http' not implemted")
+
+    def get_data_from_fetcher(self, location):
+        raise NotImplementedError("'get_data_from_fetcher' not implemted")
+
+    def load_data(self):
+        if not self.augmented:
+            raise MKOTypeException("augmented")
+
+
+        if self._data_type == "file":
+            x, y = self.get_data_from_file(self._data_location)
+        if self._data_type == "http":
+            x, y = self.get_data_from_http(self._data_location)
+        if self._data_type == "fetcher":
+            x, y = self.get_data_from_fetcher(self._data_location)
+        else:
+            raise InvalidArgument(self._data_type, ["file", "http", "fetcher"])
 
         if type(self._train_percent) != float:
             raise InputException(Fields.TRAIN_PERCENT, ('float', type(self._train_percent)))
+
         index = int(self._train_percent * len(x))
         permutation = np.random.permutation(len(x))
         x = x[permutation]
@@ -140,12 +166,17 @@ class MKO:
         self._data_loaded = True
 
     def train(self):
-        # assert augmented + topological
+        if not self.topographic:
+            raise MKOTypeException("topographic")
+
+        if not self.augmented:
+            raise MKOTypeException("augmented")
+
         if not self._data_loaded:
             raise Exception("data not loaded, call 'load_data' before 'train'")
 
         if not self._compiled:
-            raise Exception("model not compiled, call 'compile' before train")
+            raise Exception("model not compiled, call 'compile' before 'train'")
 
         if type(self._epochs) != int: # change to automattically enforce in Fields
             raise InputException(Fields.EPOCHS, ("int", type(self._epochs)))
@@ -158,7 +189,8 @@ class MKO:
         self._trained += self._epochs
 
     def make_inference(self, x, samples) -> tf.Tensor:
-        # assert topological
+        if not self.topographic:
+            raise MKOTypeException("topographic")
         X = tf.transpose(tf.reshape(tf.repeat(x, repeats=samples), (len(x), samples)))
         return self._model.predict(X)
         

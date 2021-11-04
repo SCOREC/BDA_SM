@@ -1,4 +1,3 @@
-from os import stat
 from typing import Any
 from keras import Input, Model
 from keras.layers import Dense, Conv2D

@@ -1,38 +1,47 @@
+from typing import DefaultDict
 from .PythonGraphQLRequestSample import perform_graphql_request, get_bearer_token
 from werkzeug.exceptions import abort, BadRequest
+from collections import defaultdict
 
-'''
-Requirements:
-1. Parse the time series info into the  graphql query
-2. Return a jsonified object containing the auth + result as the output
-3. Handle error checking
-'''
-
-def perform_get_time_series(auth_json, query_json, check_auth=True):
+def get_data(auth_json, query_json, check_auth = True):
     if query_json:
-        max_samples = query_json['max_samples']
-        eq_ids = query_json['tag_ids']
-        start_time = query_json['start_time']
-        end_time = query_json['end_time']
-    else:
-        raise BadRequest('query_json object is None')
-
+        equipment_name = query_json['Equipment']
+        attribute_name = query_json['Attribute']
+    else: raise  BadRequest(' No data in query_json')
     print("Requesting Data from CESMII Smart Manufacturing Platform...")
     print()
 
     ''' Request some timeseries data''' 
-    smp_query = f'''
-        query {{
-            getRawHistoryDataWithSampling(maxSamples: {max_samples}, 
-                            ids: {eq_ids}, 
-                            startTime: "{start_time}", 
-                            endTime: "{end_time}") {{
-            id
-            dataType
-            floatvalue
-            ts
-        }}        
-    }}'''
+    smp_query = """
+        query {
+                typeToAttributeTypes(filter: {displayName: {equalTo: ""}})
+                {
+                    id
+                    dataType
+                    floatvalue
+                    id
+                    displayName
+                    partOf {
+                        displayName
+                        description
+                        id
+                        thingsByTypeId
+                        {
+                            displayName
+                            id
+                            updatedTimestamp
+                            attributesByPartOfId
+                            {
+                                displayName
+                                id
+                            }
+                        }
+                    }
+                }
+            }
+               
+    """
+
     smp_query = smp_query.replace("\'","\"")
     smp_response = ""
 
@@ -44,7 +53,6 @@ def perform_get_time_series(auth_json, query_json, check_auth=True):
 
     try:
         # Try to request data with the current bearer token
-        print(smp_query)
         smp_response = perform_graphql_request(smp_query, auth_json["url"],  headers={"Authorization": current_bearer_token})
     except Exception as e:
         if "forbidden" in str(e).lower() or "unauthorized" in str(e).lower():

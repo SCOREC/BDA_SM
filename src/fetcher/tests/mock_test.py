@@ -1,22 +1,8 @@
-try:
-    import pytest
-    import flask
-    from flask import Flask
-    import api
-    import responses
-    import requests
-    import unittest
-    import json
-    from api import create_app, configure_app, app
-    from api.endpoints.routes import gettimeseries
-    from tests.conftest import *
-except Exception as e:
-    print("\nSome modules are missing {}".format(e))
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock
+import pytest
+import responses
+import requests
+import json
+from tests.conftest import *
 
 @pytest.fixture
 def mocked_responses():

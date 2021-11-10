@@ -5,6 +5,10 @@ from resultCache.config import config
 
 file_handler: FileHandler = None
 
+def set_config(new_config):
+    global config
+    config = new_config
+
 @app.before_first_request
 def on_start():
     global file_handler

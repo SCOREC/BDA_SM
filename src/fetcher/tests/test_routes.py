@@ -9,10 +9,10 @@ except Exception as e:
     print("Some modules are missing {}".format(e))
 
 json_from_trainer = {
-    "auth_json" : {"authenticator": "abolajiDemo",
-                "password": "memphis",
-                "name": "Dami06",
-                "role": "rpi_graphql",
+    "auth_json" : {"authenticator": "kaushp",
+                "password": "welcome001",
+                "name": "kaushp",
+                "role": "rpi_ro_group",
                 "url": "https://rpi.cesmii.net/graphql"
                 },
    "query_json" : {"tag_ids": ["984"],
@@ -47,13 +47,26 @@ def test_app_content(client, trainer_str):
     assert response.content_type == "application/json"
     assert response.status_code == 200
 
-def test_fetcher_route(client, trainer_str):
+def test_getTS(client, trainer_str):
     url = '/api/gettimeseries'
-
     response = client.get(url, query_string={'query':trainer_str})
     print(response.get_data())
     assert b'ts' or b'data' in response.get_data()
     assert b'215' in response.get_data()
+    assert response.status_code == 200
+
+def test_getET(client, trainer_str):
+    url = '/api/getEquipmentTypes'
+    response = client.get(url, query_string = {'query': trainer_str})
+    print(response.get_data())
+    assert b'data' in response.get_data()
+    assert response.status_code == 200
+
+def test_getEquipments(client, trainer_str):
+    url = '/api/getEquipment'
+    response = client.get(url, query_string = {'query': trainer_str})
+    print(response.get_data())
+    assert b'data' in response.get_data()
     assert response.status_code == 200
 
 def test_fetcher_no_auth(client):

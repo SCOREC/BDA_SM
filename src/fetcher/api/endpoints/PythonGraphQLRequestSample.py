@@ -12,6 +12,7 @@ import json
       you could authenticate with each request (assuming bandwidth and latency aren't factors in your use-case). '''
 
 class ExceptionErr(Exception):
+  print("why")
   def __init__(self, http_status_code, reason):
     self.http_status_code = http_status_code
     self.reason = reason
@@ -43,8 +44,7 @@ def get_bearer_token (auth_json):
     }}
   """, url = url) 
   jwt_request = response['data']['authenticationRequest']['jwtRequest']
-  if jwt_request['challenge'] is None:
-      raise Exception(jwt_request['message'])
+  if jwt_request['challenge'] is None: raise Exception(jwt_request['message'])
   else:
       print("Challenge received: " + jwt_request['challenge'])
       response=perform_graphql_request(f"""

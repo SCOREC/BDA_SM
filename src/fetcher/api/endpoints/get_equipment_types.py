@@ -2,38 +2,30 @@ from .PythonGraphQLRequestSample import perform_graphql_request, get_bearer_toke
 from werkzeug.exceptions import abort, BadRequest
 
 '''
-Requirements:
-1. Parse the time series info into the  graphql query
-2. Return a jsonified object containing the auth + result as the output
-3. Handle error checking
+Grapping all the equipment
+
 '''
 
-def perform_get_time_series(auth_json, query_json, check_auth=True):
-    if query_json:
-        max_samples = query_json['max_samples']
-        eq_ids = query_json['tag_ids']
-        start_time = query_json['start_time']
-        end_time = query_json['end_time']
-    else:
-        raise BadRequest('query_json object is None')
-
+def perform_getEquipmentTypes(auth_json, check_auth=True):
+    
     print("Requesting Data from CESMII Smart Manufacturing Platform...")
-    print()
 
-    ''' Request some timeseries data''' 
-    smp_query = f'''
-        query {{
-            getRawHistoryDataWithSampling(maxSamples: {max_samples}, 
-                            ids: {eq_ids}, 
-                            startTime: "{start_time}", 
-                            endTime: "{end_time}") {{
-            id
-            dataType
-            floatvalue
-            ts
-        }}        
-    }}'''
-    smp_query = smp_query.replace("\'","\"")
+    smp_query = """query {
+            things(condition: {typeName: "type"},
+            filter: {displayName: {isNull: false}}) 
+            {
+                id
+                displayName
+                relativeName
+                description
+            }
+    }"""
+    # smp_query = """query {
+    #         equipments {
+    #             displayName,
+    #             id
+    #         }
+    # }"""
     smp_response = ""
 
     # Get the first bearer token
@@ -41,7 +33,6 @@ def perform_get_time_series(auth_json, query_json, check_auth=True):
         current_bearer_token = get_bearer_token(auth_json)
     else:
         raise BadRequest('auth_json object is None')
-
     try:
         # Try to request data with the current bearer token
         print(smp_query)

@@ -1,6 +1,6 @@
 from typing import Any
 from keras import Input, Model
-from keras.layers import Dense, Conv2D
+from keras.layers import Dense, Conv2D, Layer
 from src.layers import VariationalDropout
 from src.exceptions import InputException, InvalidArgument
 
@@ -16,6 +16,7 @@ class Defaults:
             return "he_uniform"
         return "glorot_uniform"
 
+
 class LayerKeys:
     TYPE = "type"
     UNITS = "units"
@@ -28,14 +29,17 @@ class LayerKeys:
     STRIDE = "stride"
     PADDING = "padding"
 
+
 def check_in(field: str, layer_params: dict) -> bool:
     return field in layer_params
 
-def enforce(field: str, layer_params: dict):
+
+def enforce(field: str, layer_params: dict) -> str:
     if not check_in(field, layer_params):
         raise InputException(field)
 
     return layer_params[field]
+
 
 def get_value(field: str, default: Any, layer_params: dict) -> Any:
     if check_in(field, layer_params):
@@ -43,23 +47,27 @@ def get_value(field: str, default: Any, layer_params: dict) -> Any:
 
     return default
 
-def get_dense(layer_params: dict, name: str):
+
+def get_dense(layer_params: dict, name: str) -> Dense:
     units = enforce(LayerKeys.UNITS, layer_params)
     activation = get_value(LayerKeys.ACTIVATION, Defaults.activation, layer_params).lower()
     initializer = get_value(LayerKeys.INITIALIZER, Defaults.get_default_initializer(activation), layer_params)
     return Dense(units, activation=activation, kernel_initializer=initializer, name=name)
 
-def dropout(layer_params: dict, name: str):
+
+def dropout(layer_params: dict, name: str) -> VariationalDropout:
     rate = get_value(LayerKeys.RATE, Defaults.rate, layer_params)
     return VariationalDropout(rate, name=name)
 
-def get_convolutional(layer_params: dict, name: str):
+
+def get_convolutional(layer_params: dict, name: str) -> Conv2D:
     filters = enforce(LayerKeys.FILTERS, layer_params)
     kernel_size = enforce(LayerKeys.KERNEL_SIZE, layer_params)
     stride = get_value(LayerKeys.STRIDE, Defaults.stride, layer_params)
     padding = get_value(LayerKeys.PADDING, Defaults.padding, layer_params)
     
     return Conv2D(filters, kernel_size, stride, padding, name=name)
+
 
 layers = {
     "dense": get_dense,
@@ -68,7 +76,8 @@ layers = {
     "convolutional": get_convolutional,
 }
 
-def get_layer(layer_params: dict, index: int):
+
+def get_layer(layer_params: dict, index: int) -> Layer:
     name = get_value(LayerKeys.NAME, "layer_{:02d}".format(index), layer_params)
     layer_type = enforce(LayerKeys.TYPE, layer_params).lower()
 
@@ -76,6 +85,7 @@ def get_layer(layer_params: dict, index: int):
         raise InvalidArgument(layer_type, layers)
 
     return layers[layer_type](layer_params, name)
+
 
 def parse_json_model_structure(data_input_shape: tuple, name: str, model_topology: list) -> Model:
     input_layer = Input(data_input_shape)

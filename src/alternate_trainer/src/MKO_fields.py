@@ -11,10 +11,26 @@ class Fields:
         class Data:
             DATA_TYPE = "data_type"
             LOCATION = "data_location"
+            FETCHER = "fetcher"
+            LOCAL = "local"
+            HTTP = "http"
+            AUTH = "auth_json"
+            QUERY = "query_json"
+
+            DATA_TYPES = {
+                LOCAL,
+                HTTP,
+                FETCHER
+            }
 
             MANDATORY_FIELDS = {
                 DATA_TYPE,
                 LOCATION
+            }
+
+            MANDATORY_FETCHER_FIELDS = {
+                AUTH,
+                QUERY
             }
 
         class HyperParams:
@@ -49,7 +65,9 @@ class Fields:
 
         DICT_FIELDS = {
             HYPER_PARAMS,
-            DATA
+            DATA,
+            Data.AUTH,
+            Data.QUERY
         }
 
         OPTIONAL_SUB_FIELDS = {
@@ -61,3 +79,4 @@ class Fields:
             TRAINED,
             LOSS,
         }
+        

@@ -1,13 +1,8 @@
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras.layers import Dropout, Dense, Input, Activation
+from tensorflow.keras.layers import Dropout
 from tensorflow.keras import backend as K
-#tf.debugging.set_log_device_placement(True)
-
-supportedKeywords = ['units', 'rate', 'activation']
 
 class VariationalDropout(Dropout):
     def __init__(self, rate, always_drop=True, noise_shape=None, seed=None, **kwargs):

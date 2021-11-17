@@ -13,13 +13,13 @@ def getdata():
     auth_json = None
     query_json = None
     if request_data:
-        if 'auth_json' in request_data and 'query_json' in request_data:
+        if 'auth_json' in request_data and 'get_data' in request_data:
             auth_json = request_data['auth_json']
-            query_json = request_data['query_json']
+            query_json = request_data['get_data']
 
             if not query_json: raise BadRequest('No input in the query')
             elif not 'Equipment' in query_json: raise BadRequest('No Equipment name found in the query')
-            elif not 'Atrribute' in query_json: raise BadRequest('No Attribute found in the query')
+            elif not 'Attribute' in query_json: raise BadRequest('No Attribute found in the query')
 
             return_json = get_data(auth_json, query_json)
 

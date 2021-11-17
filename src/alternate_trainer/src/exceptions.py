@@ -3,7 +3,7 @@ from typing import Optional, Tuple
 class InputException(Exception):
     def __init__(self, field: str, type_error: Optional[Tuple[type, type]] = None):
         if type_error == None:
-            super().__init__("field '{}' not in input json".format(field))
+            super().__init__("field '{}' not in input".format(field))
         else:
             super().__init__("field '{}' not of type '{}' instead is type '{}'".format(field, str(type_error[0]), str(type_error[1])))
 

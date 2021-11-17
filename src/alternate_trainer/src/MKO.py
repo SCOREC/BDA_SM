@@ -31,12 +31,12 @@ class MKO:
 
 
     @staticmethod
-    def from_json(json_text: str):
+    def from_json(json_text: str) -> 'MKO':
         return MKO(json.loads(json_text))
 
 
     @staticmethod
-    def from_empty(name: str):
+    def from_empty(name: str) -> 'MKO':
         empty = {
             Fields.MODEL_NAME: name,
             Fields.VERSION: version
@@ -78,6 +78,13 @@ class MKO:
             setattr(self, "_{}".format(field), input_params[field])
 
 
+    def validate_fetcher_format(self, data: dict):
+        if self._data_type == Fields.Data.FETCHER:
+                for field in Fields.Data.MANDATORY_FETCHER_FIELDS:
+                    if field not in data:
+                        raise InputException(field)
+
+
     def parse_params(self, input_params: dict):
         self.parse_fields(Fields.MANDATORY_FIELDS, input_params)
 
@@ -96,10 +103,7 @@ class MKO:
                 setattr(self, "_{}".format(field), input_params[field])
 
         if self.augmented:
-            if self._data_type == Fields.Data.FETCHER:
-                for field in Fields.Data.MANDATORY_FETCHER_FIELDS:
-                    if field not in input_params[Fields.DATA]:
-                        raise InputException(field)
+            self.validate_fetcher_format(input_params[Fields.DATA])
 
         if Fields.TOPOLOGY in input_params:
             MKO.enforce(Fields.TOPOLOGY, input_params)
@@ -129,6 +133,8 @@ class MKO:
         if type(hyper_params) == str:
             self.add_hyper_params(self, json.loads(hyper_params))
 
+        MKO.enforce_type(hyper_params, "hyper_params", dict)
+
         self._hyper_params = True
         self.parse_fields(
             Fields.OPTIONAL_FIELDS[Fields.HYPER_PARAMS].MANDATORY_FIELDS, 
@@ -144,6 +150,8 @@ class MKO:
             self.add_topology(self, json.loads(topology))
             return
 
+        MKO.enforce_type(topology, "topology", list)
+
         self._topology = topology
         self._model = parse_json_model_structure(
             self._data_shape, 
@@ -156,8 +164,13 @@ class MKO:
         if type(data) == str:
             self.add_data(json.loads(data))
 
+        MKO.enforce_type(data, "data", list)
         self._data = True
-        self.parse_fields(Fields.OPTIONAL_FIELDS[Fields.DATA], data)
+        self.parse_fields(
+            Fields.OPTIONAL_SUB_FIELDS[Fields.DATA].MANDATORY_FIELDS, 
+            data
+        )
+        self.validate_fetcher_format(data)
 
 
     def compile(self):

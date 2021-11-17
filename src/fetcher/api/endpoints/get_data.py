@@ -11,38 +11,31 @@ def get_data(auth_json, query_json, check_auth = True):
     print("Requesting Data from CESMII Smart Manufacturing Platform...")
     print()
 
-    ''' Request some timeseries data''' 
-    smp_query = """
-        query {
-                typeToAttributeTypes(filter: {displayName: {equalTo: ""}})
-                {
-                    id
-                    dataType
-                    floatvalue
-                    id
-                    displayName
-                    partOf {
+    smp_query = f'''
+        query {{
+                    typeToAttributeTypes(filter: {{displayName: {{equalTo: {attribute_name}}}}}) {{
+                        id
+                        dataType
+                        maxValue
+                        id
                         displayName
+                        partOf {{
                         description
                         id
-                        thingsByTypeId
-                        {
-                            displayName
-                            id
-                            updatedTimestamp
-                            attributesByPartOfId
-                            {
+                            thingsByTypeId(filter:  {{displayName: {{equalTo: {equipment_name}}}}}) {{
                                 displayName
                                 id
-                            }
-                        }
-                    }
-                }
-            }
-               
-    """
-
-    smp_query = smp_query.replace("\'","\"")
+                                updatedTimestamp
+                                attributesByPartOfId(filter: {{displayName: {{equalTo: {attribute_name}}}}}) {{
+                                    floatValue
+                                    intValue
+                                    id
+                                }}
+                            }}
+                        }}
+                    }}
+            }}
+    '''
     smp_response = ""
 
     # Get the first bearer token

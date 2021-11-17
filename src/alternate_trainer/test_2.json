@@ -39,7 +39,7 @@
         "train_percent": 0.9
     },
     "data": {
-        "data_type": "file",
+        "data_type": "local",
         "data_location": "test_data/data_2.csv"
     }
 }

@@ -216,11 +216,12 @@ class MKO:
             Fields.Data.QUERY: self._query_json, 
             Fields.Data.AUTH: self._auth_json,
         }
+        
         fetcher_data = query_fetcher(location, json.dumps(args))
         fetcher_json = json.loads(fetcher_data)
-        x_s = fetcher_json["data"]
-        y_s = 
-        return self.parse_data(df)
+        x_s = np.array(fetcher_json["data"])
+        y_s = np.array(fetcher_json["y_labels"])
+        return x_s, y_s
 
 
     def load_data(self):

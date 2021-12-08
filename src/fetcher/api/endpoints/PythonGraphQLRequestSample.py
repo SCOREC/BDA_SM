@@ -11,8 +11,7 @@ import json
       expiry and renewal -- as shown below. As an alternative, you could start your life-cycle with authentication, or
       you could authenticate with each request (assuming bandwidth and latency aren't factors in your use-case). '''
 
-class ExceptionErr(Exception):
-  print("why")
+class No_Request(Exception):
   def __init__(self, http_status_code, reason):
     self.http_status_code = http_status_code
     self.reason = reason
@@ -23,7 +22,7 @@ def perform_graphql_request(content, url=None, headers=None):
   if r.ok:
     return r.json()
   else:
-    raise ExceptionErr(r.status_code, r.reason)
+    raise No_Request(r.status_code, r.reason)
 
 def get_bearer_token (auth_json):
   auth = auth_json["authenticator"]

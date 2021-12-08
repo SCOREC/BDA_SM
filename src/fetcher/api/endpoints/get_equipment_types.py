@@ -6,7 +6,7 @@ Grapping all the equipment
 
 '''
 
-def perform_getEquipmentTypes(auth_json, check_auth=True):
+def Perform_getEquipmentTypes(auth_json, check_auth=True):
     
     print("Requesting Data from CESMII Smart Manufacturing Platform...")
 

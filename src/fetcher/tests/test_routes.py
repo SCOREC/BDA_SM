@@ -4,15 +4,15 @@ try:
     import json
     import pytest
     from flask import Flask
-    from fetcher import configure_app, app, fetcher
+    from api import configure_app, app, fetcher
 except Exception as e:
     print("Some modules are missing {}".format(e))
 
 json_from_trainer = {
-    "auth_json" : {"authenticator": "abolajiDemo",
-                "password": "memphis",
-                "name": "Dami06",
-                "role": "rpi_graphql",
+    "auth_json" : {"authenticator": "kaushp",
+                "password": "welcome001",
+                "name": "kaushp",
+                "role": "rpi_ro_group",
                 "url": "https://rpi.cesmii.net/graphql"
                 },
    "query_json" : {"tag_ids": ["984"],
@@ -20,7 +20,12 @@ json_from_trainer = {
                 "end_time": "now",
                 "GMT_prefix_sign":"plus",
                 "max_samples": 0
-    }
+                },
+
+    "get_data" : {
+                    "Attribute": "Electric Potential",
+                    "Equipment": "Motor"
+                 }
 }
 
 @pytest.fixture(autouse=True)
@@ -47,13 +52,32 @@ def test_app_content(client, trainer_str):
     assert response.content_type == "application/json"
     assert response.status_code == 200
 
-def test_fetcher_route(client, trainer_str):
+def test_getTS(client, trainer_str):
     url = '/api/gettimeseries'
-
     response = client.get(url, query_string={'query':trainer_str})
     print(response.get_data())
     assert b'ts' or b'data' in response.get_data()
     assert b'215' in response.get_data()
+    assert response.status_code == 200
+
+# def test_getData(client, trainer_str):
+#     url = '/api/getdata'
+#     response = client.get(url, query_string = {'query': trainer_str})
+#     print(response.get_data())
+#     assert response.status_code == 200
+
+def test_getET(client, trainer_str):
+    url = '/api/getEquipmentTypes'
+    response = client.get(url, query_string = {'query': trainer_str})
+    print(response.get_data())
+    assert b'data' in response.get_data()
+    assert response.status_code == 200
+
+def test_getEquipments(client, trainer_str):
+    url = '/api/getEquipment'
+    response = client.get(url, query_string = {'query': trainer_str})
+    print(response.get_data())
+    assert b'data' in response.get_data()
     assert response.status_code == 200
 
 def test_fetcher_no_auth(client):

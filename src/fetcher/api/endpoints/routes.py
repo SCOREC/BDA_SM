@@ -1,25 +1,57 @@
-from fetcher.endpoints import api
+from api.endpoints import api
 from flask import request
 from .get_time_series import perform_get_time_series
+from .get_data import get_data
+from .get_equipment_types import Perform_getEquipmentTypes
+from .get_equipments import Perform_getEquipments
 import json
-# import numpy as np
 from werkzeug.exceptions import BadRequest
 
-# valid input json to the fetcher should contain these fields
-# json_from_trainer = {
-#     "auth_json" : {"authenticator": "abolajiDemo",
-#                 "password": "memphis",
-#                 "name": "Dami06",
-#                 "role": "rpi_graphql",
-#                 "url": "https://rpi.cesmii.net/graphql"
-#                 },
-#    "query_json" : {"tag_ids": ["917","907","909"],
-#                 "start_time": "2021-00-23T20:51:40.071032+00:00",
-#                 "end_time": "now",
-#                 "GMT_prefix_sign":"plus",
-#                 "max_samples": 0
-#     }
-# }
+@api.route('/getdata', methods = ['GET'])
+def getdata():
+    request_data = json.loads(request.args.get('query'))
+    auth_json = None
+    query_json = None
+    if request_data:
+        if 'auth_json' in request_data and 'get_data' in request_data:
+            auth_json = request_data['auth_json']
+            query_json = request_data['get_data']
+
+            if not query_json: raise BadRequest('No input in the query')
+            elif not 'Equipment' in query_json: raise BadRequest('No Equipment name found in the query')
+            elif not 'Attribute' in query_json: raise BadRequest('No Attribute found in the query')
+
+            return_json = get_data(auth_json, query_json)
+
+        else: raise BadRequest("no auth and query data in request")
+    else: raise BadRequest("Invalid Trader Json")
+    if not return_json: raise(' No JSON returned from CESMII')
+    return return_json
+
+@api.route('/getEquipment', methods = ['GET'])
+def getEquipment():
+    request_data = json.loads(request.args.get('query'))
+    auth_json = None
+    if request_data:
+        if 'auth_json' not in request_data: raise BadRequest("no auth and query data in request")
+        auth_json = request_data['auth_json']
+        return_json = Perform_getEquipmentTypes(auth_json)
+    else: raise BadRequest("Invalid Trader Json")
+    if not return_json: raise(' No JSON returned from CESMII')
+    return return_json
+
+@api.route('/getEquipmentTypes', methods = ['GET'])
+def getEquipmentTypes():
+    request_data = json.loads(request.args.get('query'))
+    auth_json = None
+    if request_data:
+        if 'auth_json' not in request_data: raise BadRequest("no auth and query data in request")
+        auth_json = request_data['auth_json']
+        return_json = Perform_getEquipmentTypes(auth_json)
+    else: raise BadRequest("Invalid Trader Json")
+    if not return_json: raise(' No JSON returned from CESMII')
+    return return_json
+
 @api.route('/gettimeseries', methods=['GET'])
 def gettimeseries():
     

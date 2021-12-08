@@ -1,6 +1,7 @@
 from threading import Thread, Event
 from sched import scheduler
 from typing import Union
+import shutil
 import time
 import json
 import os
@@ -112,6 +113,9 @@ class FileHandler:
         else:
             self._directory = os.path.join(os.getcwd(), root_directory)
 
+        if not os.path.exists(self._directory):
+            os.makedirs(self._directory)
+
         self._min_expiry_time = min_expiry_time
         self._max_expiry_time = max_expiry_time
 
@@ -179,5 +183,8 @@ class FileHandler:
         return data
 
     def delete_all(self, delete_schedule=False):
-        self._purge_daemon.delete_all(delete_schedule)
-        
+        if delete_schedule:
+            shutil.rmtree(self._directory, ignore_errors=True)
+        else:
+            self._purge_daemon.delete_all(False)
+            

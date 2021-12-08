@@ -31,9 +31,10 @@ def parse_args():
 
 
 def post(args: argparse.Namespace, generation_time: int, mko_json: str):
-    print("posting {}".format(mko_json))
-    print("took {} ms".format(generation_time*1000))
+    # print("posting {}".format(mko_json))
+    # print("took {} ms".format(generation_time*1000))
     # post_result_cache(args.URI, args.username, args.claim_check, 1000*generation_time, mko_json)
+    pass
 
 
 def load_json(json_file: str) -> dict:
@@ -48,9 +49,10 @@ def load_json(json_file: str) -> dict:
 
 def train(args: argparse.Namespace):
     prev_time = time.time()
-    mko = MKO(load_json(args.json_file[0]))
+    mko = MKO.from_json(load_json(args.json_file[0]))
     mko.compile()
-    mko.train()
+    mko.load_data()
+    # mko.train()
     mko_json = mko.get_json()
     generation_time = time.time() - prev_time
     post(args, generation_time, mko_json)
@@ -65,7 +67,7 @@ def create(args: argparse.Namespace):
 
 def add(args: argparse.Namespace):
     prev_time = time.time()
-    mko = MKO(load_json(args.json_file[0]))
+    mko = MKO.from_json(load_json(args.json_file[0]))
     to_add = load_json(args.add[1])
     add_type = args.add[0].lower()
     if add_type not in AddTypes.types:

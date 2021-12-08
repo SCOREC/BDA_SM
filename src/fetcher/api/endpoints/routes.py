@@ -2,8 +2,8 @@ from api.endpoints import api
 from flask import request
 from .get_time_series import perform_get_time_series
 from .get_data import get_data
-from .get_equipment_types import perform_getEquipmentTypes
-from .get_equipments import perform_getEquipments
+from .get_equipment_types import Perform_getEquipmentTypes
+from .get_equipments import Perform_getEquipments
 import json
 from werkzeug.exceptions import BadRequest
 
@@ -35,7 +35,7 @@ def getEquipment():
     if request_data:
         if 'auth_json' not in request_data: raise BadRequest("no auth and query data in request")
         auth_json = request_data['auth_json']
-        return_json = perform_getEquipmentTypes(auth_json)
+        return_json = Perform_getEquipmentTypes(auth_json)
     else: raise BadRequest("Invalid Trader Json")
     if not return_json: raise(' No JSON returned from CESMII')
     return return_json
@@ -47,7 +47,7 @@ def getEquipmentTypes():
     if request_data:
         if 'auth_json' not in request_data: raise BadRequest("no auth and query data in request")
         auth_json = request_data['auth_json']
-        return_json = perform_getEquipmentTypes(auth_json)
+        return_json = Perform_getEquipmentTypes(auth_json)
     else: raise BadRequest("Invalid Trader Json")
     if not return_json: raise(' No JSON returned from CESMII')
     return return_json

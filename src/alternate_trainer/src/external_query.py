@@ -1,5 +1,6 @@
 import requests
 from src.exceptions import ConnectionException, InputException
+import json
 
 # valid input json to the fetcher should contain these fields
 # json_from_trainer = {
@@ -18,15 +19,20 @@ from src.exceptions import ConnectionException, InputException
 # }
 
 def check_connection(resp: requests.Response, URI: str):
-    if resp != 200:
+    if resp.status_code != 200:
         raise ConnectionException(URI)
 
-def query_fetcher(URI: str, args: dict) -> str:
+def query_fetcher(URI: str, args: str) -> str:
     params = {
         "query": args
     }
 
-    resp = requests.get(URI, params=params)
+    resp = requests.get("{}/api/gettimeseries".format(URI), params=params)
+    # print(resp)
+    result = json.loads(resp.text)
+    print("<", 40*"-", ">")
+    print(result)
+    print("<", 40*"-", ">")
     check_connection(resp, URI)
     return resp.text
 

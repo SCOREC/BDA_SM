@@ -41,19 +41,19 @@
     "data": {
         "data_type": "fetcher",
         "auth_json" : {
-            "authenticator": "abolajiDemo",
-            "password": "memphis",
-            "name": "Dami06",
-            "role": "rpi_graphql",
+            "authenticator": "kaushp",
+            "password": "welcome001",
+            "name": "kaushp",
+            "role": "rpi_ro_group",
             "url": "https://rpi.cesmii.net/graphql"
         },
         "query_json" : {
-            "tag_ids": ["917","907","909"],
-            "start_time": "2021-00-23T20:51:40.071032+00:00",
+            "tag_ids": ["984"],
+            "start_time": "2020-01-23T20:51:40.071032+00:00",
             "end_time": "now",
             "GMT_prefix_sign":"plus",
             "max_samples": 0
         },
-        "data_location": "enter fetcher url here"
+        "data_location": "http://127.0.0.1:8000"
     }
 }

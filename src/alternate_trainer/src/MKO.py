@@ -80,9 +80,7 @@ class MKO:
 
     def validate_fetcher_format(self, data: dict):
         if self._data_type == Fields.Data.FETCHER:
-                for field in Fields.Data.MANDATORY_FETCHER_FIELDS:
-                    if field not in data:
-                        raise InputException(field)
+                self.parse_fields(Fields.Data.MANDATORY_FETCHER_FIELDS, data)
 
 
     def parse_params(self, input_params: dict):
@@ -103,6 +101,7 @@ class MKO:
                 setattr(self, "_{}".format(field), input_params[field])
 
         if self.augmented:
+
             self.validate_fetcher_format(input_params[Fields.DATA])
 
         if Fields.TOPOLOGY in input_params:
@@ -215,9 +214,12 @@ class MKO:
     def get_data_from_fetcher(self, location: str) -> pd.DataFrame:
         args = {
             Fields.Data.QUERY: self._query_json, 
-            Fields.Data.AUTH: self._auth_json
+            Fields.Data.AUTH: self._auth_json,
         }
-        df = pd.read_csv(io.StringIO(query_fetcher(location, args)))
+        fetcher_data = query_fetcher(location, json.dumps(args))
+        fetcher_json = json.loads(fetcher_data)
+        x_s = fetcher_json["data"]
+        y_s = 
         return self.parse_data(df)
 
 

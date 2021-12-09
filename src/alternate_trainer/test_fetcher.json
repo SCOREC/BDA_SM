@@ -26,13 +26,13 @@
         }, {
             "type": "dense",
             "activation": "relu",
-            "units": 3
+            "units": 2
         }
     ],
     "hyper_params": {
         "epochs": 300,
         "batch_size": 64,
-        "data_shape": [2],
+        "data_shape": [1],
         "optimizer": "adam",
         "learning_rate": 0.001,
         "loss_function": "mse",

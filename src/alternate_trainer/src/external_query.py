@@ -20,7 +20,7 @@ import json
 
 def check_connection(resp: requests.Response, URI: str):
     if resp.status_code != 200:
-        raise ConnectionException(URI)
+        raise ConnectionException(URI, resp.text)
 
 def query_fetcher(URI: str, args: str) -> str:
     params = {
@@ -39,7 +39,7 @@ def get_http(URI: str) -> str:
 def post_result_cache(URI: str, username: str, claim_check: str, generation_time: float, mko_json: str):
     params = {
         "claim_check": claim_check,
-        "generation_time": generation_time,
+        "generation_time": int(generation_time),
         "username": username
     }
 

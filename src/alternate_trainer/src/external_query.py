@@ -28,11 +28,6 @@ def query_fetcher(URI: str, args: str) -> str:
     }
 
     resp = requests.get("{}/api/gettimeseries".format(URI), params=params)
-    # print(resp)
-    result = json.loads(resp.text)
-    print("<", 40*"-", ">")
-    print(result)
-    print("<", 40*"-", ">")
     check_connection(resp, URI)
     return resp.text
 

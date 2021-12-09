@@ -31,10 +31,9 @@ def parse_args():
 
 
 def post(args: argparse.Namespace, generation_time: int, mko_json: str):
-    # print("posting {}".format(mko_json))
-    # print("took {} ms".format(generation_time*1000))
+    print("posting {}".format(mko_json))
+    print("took {} ms".format(generation_time*1000))
     # post_result_cache(args.URI, args.username, args.claim_check, 1000*generation_time, mko_json)
-    pass
 
 
 def load_json(json_file: str) -> dict:
@@ -87,7 +86,6 @@ def add(args: argparse.Namespace):
 
 def main():
     args = parse_args()
-    print(args)
 
     if args.add != None:
         add(args)

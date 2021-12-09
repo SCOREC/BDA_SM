@@ -315,7 +315,7 @@ class MKO:
         return self.topographic and self.augmented and self._data_loaded and self._compiled
 
 
-    def train(self, verbose=1):
+    def train(self, verbose=0):
         if not self._trainable():
             return
 

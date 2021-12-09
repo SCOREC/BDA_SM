@@ -31,9 +31,7 @@ def parse_args():
 
 
 def post(args: argparse.Namespace, generation_time: int, mko_json: str):
-    print("posting {}".format(mko_json))
-    print("took {} ms".format(generation_time*1000))
-    # post_result_cache(args.URI, args.username, args.claim_check, 1000*generation_time, mko_json)
+    post_result_cache(args.URI, args.username, args.claim_check, 1000 * generation_time, mko_json)
 
 
 def load_json(json_file: str) -> dict:
@@ -51,7 +49,7 @@ def train(args: argparse.Namespace):
     mko = MKO.from_json(load_json(args.json_file[0]))
     mko.compile()
     mko.load_data()
-    # mko.train()
+    mko.train()
     mko_json = mko.get_json()
     generation_time = time.time() - prev_time
     post(args, generation_time, mko_json)

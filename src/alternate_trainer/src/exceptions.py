@@ -18,9 +18,9 @@ class VersionException(UserError):
     def __init__(self, source_version: str, json_version: str):
         super().__init__("source version {} != json version {}".format(source_version, json_version))
 
-class ConnectionException(UserError):
-    def __init__(self, URI: str):
-        super().__init__("unable to connect to URI: '{}'".format(URI))
+class ConnectionException(Exception):
+    def __init__(self, URI: str, err_msg: str):
+        super().__init__("unable to connect to URI: '{}', error message: '{}'".format(URI, err_msg))
 
 class MKOTypeException(UserError):
     def __init__(self, expected_type: str):

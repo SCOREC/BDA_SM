@@ -16,6 +16,12 @@ class Fields:
             HTTP = "http"
             AUTH = "auth_json"
             QUERY = "query_json"
+            X_TAGS = "x_tags"
+            Y_TAGS = "y_tags"
+            X_MU = "x_mu"
+            X_STD = "x_std"
+            Y_MU = "y_mu"
+            Y_STD = "y_std"
 
             DATA_TYPES = {
                 LOCAL,
@@ -25,12 +31,18 @@ class Fields:
 
             MANDATORY_FIELDS = {
                 DATA_TYPE,
-                LOCATION
+                LOCATION,
+                X_MU,
+                X_STD,
+                Y_MU,
+                Y_STD
             }
 
             MANDATORY_FETCHER_FIELDS = {
                 AUTH,
-                QUERY
+                QUERY,
+                X_TAGS,
+                Y_TAGS
             }
 
         class HyperParams:

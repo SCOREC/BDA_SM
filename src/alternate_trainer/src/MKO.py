@@ -212,17 +212,57 @@ class MKO:
 
 
     def get_data_from_fetcher(self, location: str) -> pd.DataFrame:
+        ids = self._x_tags + self._y_tags
+        query = self._query_json
+        query["tag_ids"] = ids # Remove string
         args = {
-            Fields.Data.QUERY: self._query_json, 
+            Fields.Data.QUERY: query, 
             Fields.Data.AUTH: self._auth_json,
         }
         
         fetcher_data = query_fetcher(location, json.dumps(args))
         fetcher_json = json.loads(fetcher_data)
-        x_s = np.array(fetcher_json["data"])
-        y_s = np.array(fetcher_json["y_labels"])
-        return x_s, y_s
+        data = np.array(fetcher_json["data"])
+        df = pd.DataFrame(data=data, columns=fetcher_json["x_labels"], index=fetcher_json["y_labels"])
+        return df[self._x_tags].to_numpy(), df[self._y_tags].to_numpy()
 
+    def normalize(self, data: Iterable, is_x: bool = False, raise_if_none=False) -> np.array:
+        data = np.array(data)
+
+        
+        if is_x:
+            if self._x_mu is not None and self._x_std is not None:
+                return (data - np.array(self._x_mu)) / np.array(self._x_std)
+
+            if raise_if_none:
+                if self._x_mu is None:
+                    raise InputException(Fields.Data.X_MU)
+                else:
+                    raise InputException(Fields.Data.X_STD)
+                    
+        else:
+            if self._y_mu is not None and self._y_std is not None:
+                return (data - np.array(self._y_mu)) / np.array(self._y_std)
+
+            if raise_if_none:
+                if self._y_mu is None:
+                    raise InputException(Fields.Data.Y_MU)
+                else:
+                    raise InputException(Fields.Data.Y_STD)
+                    
+
+
+        mu =  list(np.mean(data, axis=0))
+        sigma = list(np.std(data, axis=0))
+
+        if is_x:
+            self._x_mu = mu
+            self._x_std = sigma
+        else:
+            self._y_mu = mu
+            self._y_std = sigma
+
+        return self.normalize(data, is_x)
 
     def load_data(self):
         if not self.augmented:
@@ -236,6 +276,9 @@ class MKO:
             x, y = self.get_data_from_fetcher(self._data_location)
         else:
             raise InvalidArgument(self._data_type, list(Fields.Data.DATA_TYPES))
+
+        x = self.normalize(x, is_x=True)
+        y = self.normalize(y)
 
         MKO.enforce_type(self._train_percent, Fields.HyperParams.TRAIN_PERCENT, float)
 
@@ -268,10 +311,11 @@ class MKO:
                 raise Exception("model not compiled, call 'compile' before 'train'")
 
             return True
+
         return self.topographic and self.augmented and self._data_loaded and self._compiled
 
 
-    def train(self, verbose=1):
+    def train(self, verbose=0):
         if not self._trainable():
             return
 
@@ -310,12 +354,15 @@ class MKO:
         if not self.topographic:
             raise MKOTypeException("topographic")
 
+        x = self.normalize(x, is_x=True, raise_if_none=True)
+
         X = tf.transpose(
                 tf.reshape(
                     tf.repeat(x, repeats=samples), 
                     (len(x), samples)
                 )
         )
+
         return self._model.predict(X)
 
 

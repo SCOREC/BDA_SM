@@ -104,7 +104,6 @@ def add_mko(mko: str, add_type: str, add_loc: str, post_args: tuple):
 
 def main():
     args = parse_args()
-    print(args)
 
     if args.add != None:
         add(args)

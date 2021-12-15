@@ -44,6 +44,7 @@ def store():
         abort(Response("file handler not initialized", 500))
 
     try:
+        print("storing:", data)
         file_handler.put(username, claim_check, generation_time, data)    
     except Exception as e:
         app.log_exception(e)

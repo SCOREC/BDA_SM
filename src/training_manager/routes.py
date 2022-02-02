@@ -1,7 +1,6 @@
 from flask import request, abort, Response
 from training_manager import app
-from alternate_trainer.src.exceptions import UserError
-from alternate_trainer.src import trainer 
+import os
 
 def get_input(field, args):
     if field not in args:
@@ -19,25 +18,27 @@ def get_post_args(args):
 def create_MKO():
     model_name = get_input("model_name", request.args)
     post_args = get_post_args(request.args)
-    try:
-        trainer.create_mko(model_name, post_args)
-    except UserError as e:
-        abort(Response("USER ERROR: {}".format(e), 400))
-    except Exception as e:
-        abort(Response("ERROR: {}".format(e), 500))
+    os.system("python -m ")
+    # try:
+    #     trainer.create_mko(model_name, post_args)
+    # except UserError as e:
+    #     abort(Response("USER ERROR: {}".format(e), 400))
+    # except Exception as e:
+    #     abort(Response("ERROR: {}".format(e), 500))
+
 
 @app.route('/add_component', methods=['POST'])
 def add_data():
     add_type = get_input("type", request.args)
     json_to_add = get_input("to_add", request.args)
     mko = get_input("model_MKO", request.args)
-    post_args = get_post_args(request.args)
-    try:
-        trainer.add_mko_create_file(mko, add_type, json_to_add, post_args)
-    except UserError as e:
-        abort(Response("USER ERROR: {}".format(e), 400))
-    except Exception as e:
-        abort(Response("ERROR: {}".format(e), 500))
+    # post_args = get_post_args(request.args)
+    # try:
+    #     trainer.add_mko_create_file(mko, add_type, json_to_add, post_args)
+    # except UserError as e:
+    #     abort(Response("USER ERROR: {}".format(e), 400))
+    # except Exception as e:
+    #     abort(Response("ERROR: {}".format(e), 500))
 
 @app.route('/delete_param', methods=['POST'])
 def delete_param():
@@ -47,9 +48,9 @@ def delete_param():
 def delete_param():
     mko = get_input("model_MKO", request.args)
     post_args = get_post_args(request.args)
-    try:
-        trainer.train_mko(mko, post_args)
-    except UserError as e:
-        abort(Response("USER ERROR: {}".format(e), 400))
-    except Exception as e:
-        abort(Response("ERROR: {}".format(e), 500))
+    # try:
+    #     trainer.train_mko(mko, post_args)
+    # except UserError as e:
+    #     abort(Response("USER ERROR: {}".format(e), 400))
+    # except Exception as e:
+    #     abort(Response("ERROR: {}".format(e), 500))

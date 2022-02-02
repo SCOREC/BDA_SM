@@ -45,7 +45,7 @@ def delete_param():
     pass
 
 @app.route('/train', methods=['POST'])
-def delete_param():
+def train():
     mko = get_input("model_MKO", request.args)
     post_args = get_post_args(request.args)
     # try:

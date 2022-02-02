@@ -226,13 +226,18 @@ class MKO:
         df = pd.DataFrame(data=data, columns=fetcher_json["x_labels"], index=fetcher_json["y_labels"])
         return df[self._x_tags].to_numpy(), df[self._y_tags].to_numpy()
 
-    def normalize(self, data: Iterable, is_x: bool = False, raise_if_none=False) -> np.array:
+    def normalize(self, data: Iterable, is_x: bool = False, reverse: bool = False, raise_if_none: bool = False) -> np.array:
         data = np.array(data)
 
-        
+        if reverse:
+            raise_if_none = True
+
         if is_x:
             if self._x_mu is not None and self._x_std is not None:
-                return (data - np.array(self._x_mu)) / np.array(self._x_std)
+                if not reverse:
+                    return (data - np.array(self._x_mu)) / np.array(self._x_std)
+                else:
+                    return data * np.array(self._x_std) + np.array(self._x_mu)
 
             if raise_if_none:
                 if self._x_mu is None:
@@ -242,7 +247,10 @@ class MKO:
                     
         else:
             if self._y_mu is not None and self._y_std is not None:
-                return (data - np.array(self._y_mu)) / np.array(self._y_std)
+                if not reverse:
+                    return (data - np.array(self._y_mu)) / np.array(self._y_std)
+                else:
+                    return data * np.array(self._y_std) + np.array(self._y_mu)
 
             if raise_if_none:
                 if self._y_mu is None:
@@ -363,7 +371,7 @@ class MKO:
                 )
         )
 
-        return self._model.predict(X)
+        return self.normalize(self._model.predict(X), reverse=True)
 
 
     @staticmethod

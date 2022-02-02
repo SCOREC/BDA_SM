@@ -45,3 +45,12 @@ def post_result_cache(URI: str, username: str, claim_check: str, generation_time
 
     resp = requests.post(URI, params=params, data=mko_json)
     check_connection(resp, URI)
+
+def post_status(URI: str, username: str, claim_check: str, status: float):
+    params = {
+        "claim_check": claim_check,
+        "username": username
+    }
+
+    resp = requests.post(URI, params=params, data=str(status))
+    check_connection(resp, URI)

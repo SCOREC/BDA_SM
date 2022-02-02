@@ -32,7 +32,11 @@
         "train_percent": 0.8
     },
     "data": {
+        "x_mu": null,
+        "x_std": null,
+        "y_mu": null,
+        "y_std": null,
         "data_type": "local",
-        "data_location": "test_data/data.csv"
+        "data_location": ".test_data/data.csv"
     }
 }

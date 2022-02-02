@@ -5,21 +5,14 @@
         {
             "type": "dense",
             "activation": "relu",
-            "units": 256
+            "units": 64
         }, {
             "type": "dropout",
             "rate": 0.95
         },{
             "type": "dense",
             "activation": "relu",
-            "units": 512
-        }, {
-            "type": "dropout",
-            "rate": 0.95
-        }, {
-            "type": "dense",
-            "activation": "relu",
-            "units": 64
+            "units": 32
         }, {
             "type": "dropout",
             "rate": 0.95
@@ -39,7 +32,11 @@
         "train_percent": 0.9
     },
     "data": {
+        "x_mu": null,
+        "x_std": null,
+        "y_mu": null,
+        "y_std": null,
         "data_type": "local",
-        "data_location": "test_data/data_2.csv"
+        "data_location": ".test_data/data_2.csv"
     }
 }

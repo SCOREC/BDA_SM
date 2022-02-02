@@ -208,8 +208,8 @@ class FileHandler:
         return str(file_contents["status"])
 
 
-    def get(self, username: str, claim_check: str) -> Optional[str]:
-        file_contents = self._get_file(username, claim_check)
+    def get(self, username: str, claim_check: str, remove: bool = True) -> Optional[str]:
+        file_contents = self._get_file(username, claim_check, remove=remove)
 
         if file_contents == None:
             return None

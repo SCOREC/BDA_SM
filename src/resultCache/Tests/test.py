@@ -29,22 +29,22 @@ class TestFileHandler(unittest.TestCase):
                 fh.put(user, cc, 0, datum)
         return expected
 
-    def get_fh(self, fh, user, cc):
-        c = fh.get(user, cc)
+    def get_fh(self, fh, user, cc, should_delete=True):
+        c = fh.get(user, cc, should_delete)
         if c == None:
             return c
 
         return json.loads(c)['contents']
 
-    def check_eq(self, fh, usernames, ccs, expected, single_expectation=False) -> list:
+    def check_eq(self, fh, usernames, ccs, expected, single_expectation=False, should_delete=True) -> list:
         cases = []
         
         for user in usernames:
                 for cc in ccs:
                     if single_expectation:
-                        cases.append((expected, self.get_fh(fh, user,cc) ))
+                        cases.append((expected, self.get_fh(fh, user, cc, should_delete) ))
                     else:
-                        cases.append((expected[user][cc], self.get_fh(fh, user, cc)))
+                        cases.append((expected[user][cc], self.get_fh(fh, user, cc, should_delete)))
         return cases
 
     def test_large_volume(self):

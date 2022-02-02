@@ -1,16 +1,17 @@
 import unittest
-from src.MKO import MKO
+from alternate_trainer.src.MKO import MKO
 import json
 import os
 import pandas as pd
 import requests
 import io
 import numpy as np
+from alternate_trainer.src.Tests.data_2_saver import data_2
 
 class TestTrainer(unittest.TestCase):
     def __init__(self, *args):
         data_source = "https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data"
-        path = "test_data/data.csv"
+        path = ".test_data/data.csv"
         if not os.path.exists(path):
             resp = input("Would you like to download data to '{}' ([y]/n): ".format(os.path.join(os.getcwd(), path))).lower()
             if resp == "n":
@@ -35,9 +36,12 @@ class TestTrainer(unittest.TestCase):
             for i, col in enumerate(df2):
                 df["T{}".format(i)] = df2[col]
 
-            os.makedirs("test_data", exist_ok=True)
+            os.makedirs(".test_data", exist_ok=True)
             with open(path, "w") as file:
                 file.write(df.to_csv(index=False))
+
+            with open(".test_data/data_2.csv", "w") as file:
+                file.write(data_2)
                 
         super().__init__(*args)
 
@@ -52,15 +56,16 @@ class TestTrainer(unittest.TestCase):
         return mko
 
     def test_train(self):
-        mko = self.train_model("test.json")
+        mko = self.train_model("alternate_trainer/test.json")
         inference_x = [5.9,3.0,5.1,1.8]
         gt = [0,0,1]
-        inferences = mko.make_inference(inference_x,500)
+        inferences = mko.make_inference(inference_x, 500)
         means = np.mean(inferences, axis=0)
+        print(means)
         self.assertEqual(np.argmax(means), np.argmax(gt))
 
     def test_train_2(self):
-        mko = self.train_model("test_2.json")
+        mko = self.train_model("alternate_trainer/test_2.json")
         inference_x = [5.127105236,1.958719381]
         gt = [25.24810875,34.65854027,28.23331668]
         inferences = mko.make_inference(inference_x, 500)

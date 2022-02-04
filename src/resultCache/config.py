@@ -40,5 +40,3 @@ def _get_config() -> Config:
     return config
 
 config = _get_config()
-
-

@@ -56,11 +56,16 @@ def store_result():
     return Response("success", 200)
 
 
+"""
+Descrption: Updates entry with status, creates entry if it doesn't exist
+Arguments:
+    username: str
+    claim_check: str
+"""
 @app.route('/update_status', methods=['POST'])
 def store_status(): #should set generation time to max
     check_input('username', request.args)
     check_input('claim_check', request.args)
-
 
     username = request.args['username']
     claim_check = request.args["claim_check"]
@@ -88,20 +93,21 @@ def store_status(): #should set generation time to max
     return Response("success", 200)
 
 
+"""
+Descrption: Stores any errors associated with 
+Arguments:
+    username: str
+    claim_check: str
+"""
 @app.route('/put_error', methods=['POST'])
 def store_error():
     check_input('username', request.args)
     check_input('claim_check', request.args)
-    check_input('generation_time', request.args)
 
 
     username = request.args['username']
     claim_check = request.args["claim_check"]
-    try:
-        generation_time = int(request.args["generation_time"])
-    except ValueError:
-        abort(Response("'{}' not of type 'int'".format(request.args["generation_time"]), 400))
-
+    generation_time = config.max_expiry_time
     errors = request.data
 
     if file_handler == None:

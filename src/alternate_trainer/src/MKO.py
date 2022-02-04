@@ -1,5 +1,7 @@
 import io
 from typing import Any, Iterable, Tuple, Union
+
+from grpc import Status
 from src.json_parser import parse_json_model_structure
 import json
 import pickle
@@ -8,6 +10,7 @@ import base64
 import tensorflow as tf
 from tensorflow.keras import backend as K
 import pandas as pd
+from training_callback import StatusCallback
 from src.exceptions import (
     InputException, 
     VersionException, 
@@ -80,7 +83,7 @@ class MKO:
 
     def validate_fetcher_format(self, data: dict):
         if self._data_type == Fields.Data.FETCHER:
-                self.parse_fields(Fields.Data.MANDATORY_FETCHER_FIELDS, data)
+            self.parse_fields(Fields.Data.MANDATORY_FETCHER_FIELDS, data)
 
 
     def parse_params(self, input_params: dict):
@@ -323,7 +326,7 @@ class MKO:
         return self.topographic and self.augmented and self._data_loaded and self._compiled
 
 
-    def train(self, verbose=0):
+    def train(self, verbose: int = 0, push_update_args: tuple = None):
         if not self._trainable():
             return
 
@@ -335,14 +338,17 @@ class MKO:
             self._Y_train, 
             epochs=self._epochs, 
             batch_size=self._batch_size,
-            verbose=verbose
+            verbose=verbose,
+            callbacks=[StatusCallback(push_update_args, self._epochs)]
         )
+
         self._loss = self._model.evaluate(
             self._X_test, 
             self._Y_test, 
             batch_size=self._batch_size,
             verbose=verbose
         )
+        
         self._trained += self._epochs
 
     def evaluate(self, verbose=1):

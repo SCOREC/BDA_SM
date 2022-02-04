@@ -1,6 +1,6 @@
 import argparse
 import os
-from src.external_query import post_result_cache
+from src.external_query import post_result_cache, post_error
 from src.MKO import MKO
 from src.exceptions import InputException, InvalidArgument
 from tempfile import NamedTemporaryFile as TempFile
@@ -33,9 +33,9 @@ def parse_args():
 
 def post(post_args: tuple, generation_time: int, mko_json: str):
     URI, username, claim_check = post_args
-    # print("posting {}".format(mko_json))
-    # print("took {} ms".format(generation_time*1000))
-    # post_result_cache(args.URI, args.username, args.claim_check, 1000*generation_time, mko_json)
+    print("posting {}".format(mko_json))
+    print("took {} ms".format(generation_time*1000))
+    # post_result_cache(URI, username, claim_check, 1000*generation_time, mko_json)
 
 def get_post_args(args: argparse.Namespace):
     return (args.URI, args.username, args.claim_check)
@@ -58,7 +58,7 @@ def train_mko(mko: str, post_args: tuple):
     mko = MKO.from_json(load_json(mko))
     mko.compile()
     mko.load_data()
-    mko.train()
+    mko.train(push_updates_args=post_args)
     mko_json = mko.get_json()
     generation_time = time.time() - prev_time
     post(post_args, generation_time, mko_json)
@@ -105,12 +105,15 @@ def add_mko(mko: str, add_type: str, add_loc: str, post_args: tuple):
 def main():
     args = parse_args()
 
-    if args.add != None:
-        add(args)
-    if args.function == "create":
-        create(args)
-    elif args.function == "train":
-        train(args)
+    try:    
+        if args.add != None:
+            add(args)
+        if args.function == "create":
+            create(args)
+        elif args.function == "train":
+            train(args)
+    except Exception as e:
+        post_error(*get_post_args(args), str(e))
 
 if __name__ == '__main__':
     main()

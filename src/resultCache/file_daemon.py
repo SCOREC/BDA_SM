@@ -28,7 +28,6 @@ class PurgeDaemon(Thread):
             os.makedirs(path)
 
     def save_schedule(self):
-        # TODO: create dir if not created already
         to_save = []
         for event in self._scheduler.queue:
             delete_time = (event.argument[1], event.time)

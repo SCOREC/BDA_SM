@@ -1,5 +1,5 @@
 import unittest
-from src.MKO import MKO
+from trainer.src.MKO import MKO
 import json
 
 class TestMKO(unittest.TestCase):

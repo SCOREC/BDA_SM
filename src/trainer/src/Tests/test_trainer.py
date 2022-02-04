@@ -61,7 +61,6 @@ class TestTrainer(unittest.TestCase):
         gt = [0,0,1]
         inferences = mko.make_inference(inference_x, 500)
         means = np.mean(inferences, axis=0)
-        print(means)
         self.assertEqual(np.argmax(means), np.argmax(gt))
 
     def test_train_2(self):

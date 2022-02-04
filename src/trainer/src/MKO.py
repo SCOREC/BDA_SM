@@ -331,13 +331,15 @@ class MKO:
         MKO.enforce_type(self._epochs, Fields.HyperParams.EPOCHS, int)
         MKO.enforce_type(self._batch_size, Fields.HyperParams.BATCH_SIZE, int)
 
+        callbacks = [StatusCallback(push_update_args, self._epochs)] if push_update_args != None else []
+
         self._model.fit(
             self._X_train, 
             self._Y_train, 
             epochs=self._epochs, 
             batch_size=self._batch_size,
             verbose=verbose,
-            callbacks=[StatusCallback(push_update_args, self._epochs)]
+            callbacks=callbacks
         )
 
         self._loss = self._model.evaluate(

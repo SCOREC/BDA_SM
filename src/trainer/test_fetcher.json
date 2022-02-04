@@ -1,0 +1,50 @@
+{
+    "model_name": "model",
+    "version": "1.0",
+    "topology": [
+        {
+            "type": "dense",
+            "activation": "relu",
+            "units": 512
+        }, {
+            "type": "dropout",
+            "rate": 0.95
+        }, {
+            "type": "dense",
+            "activation": "relu",
+            "units": 2
+        }
+    ],
+    "hyper_params": {
+        "epochs": 300,
+        "batch_size": 64,
+        "data_shape": [1],
+        "optimizer": "adam",
+        "learning_rate": 0.001,
+        "loss_function": "mse",
+        "train_percent": 0.9
+    },
+    "data": {
+        "x_mu": null,
+        "x_std": null,
+        "y_mu": null,
+        "y_std": null,
+        "data_type": "fetcher",
+        "auth_json" : {
+            "authenticator": "kaushp",
+            "password": "welcome001",
+            "name": "kaushp",
+            "role": "rpi_ro_group",
+            "url": "https://rpi.cesmii.net/graphql"
+        },
+        "x_tags": ["984"],
+        "y_tags": ["983", "985"],
+        "query_json" : {
+            "start_time": "2020-01-23T20:51:40.071032+00:00",
+            "end_time": "now",
+            "GMT_prefix_sign":"plus",
+            "max_samples": 0
+        },
+        "data_location": "http://127.0.0.1:8000"
+    }
+}

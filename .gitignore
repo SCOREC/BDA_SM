@@ -16,4 +16,6 @@ archival/*
 *.db_log
 *.db_test_log
 databases/*
+.data/
+.test_data/
 

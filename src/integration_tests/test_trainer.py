@@ -7,75 +7,75 @@ import time
 import copy
 
 class TrainerTests(BaseTest):
-    # def test_mko_creation(self):
-    #     params = {
-    #         "username": "person",
-    #         "claim_check": "check",
-    #         "model_name": "models_name",
-    #         "result_cache_URI": self.get_rc()
-    #     }
+    def test_mko_creation(self):
+        params = {
+            "username": "person",
+            "claim_check": "check",
+            "model_name": "models_name",
+            "result_cache_URI": self.get_rc()
+        }
 
-    #     formatted_params = format_params("/create_MKO", params)
+        formatted_params = format_params("/create_MKO", params)
 
-    #     resp = requests.post(self.get_tm(formatted_params))
-    #     self.assertEqual(resp.status_code, 200)
+        resp = requests.post(self.get_tm(formatted_params))
+        self.assertEqual(resp.status_code, 200)
 
-    #     del params["model_name"]
-    #     del params["result_cache_URI"]
+        del params["model_name"]
+        del params["result_cache_URI"]
 
-    #     formatted_params = format_params("/get_status", params)
+        formatted_params = format_params("/get_status", params)
 
 
-    #     time.sleep(20)
-    #     resp = requests.get(self.get_rc(formatted_params))
-    #     self.assertEqual(resp.status_code, 200)
+        time.sleep(20)
+        resp = requests.get(self.get_rc(formatted_params))
+        self.assertEqual(resp.status_code, 200)
 
-    #     self.assertEqual(float(resp.text), 1)
+        self.assertEqual(float(resp.text), 1)
 
-    #     formatted_params = format_params("/get_result", params)
+        formatted_params = format_params("/get_result", params)
         
-    #     resp = requests.get(self.get_rc(formatted_params))
-    #     self.assertEqual(resp.status_code, 200)
+        resp = requests.get(self.get_rc(formatted_params))
+        self.assertEqual(resp.status_code, 200)
 
         
-    #     self.assertEqual(json.loads(json.loads(resp.text)["contents"])["model_name"], "models_name")
+        self.assertEqual(json.loads(json.loads(resp.text)["contents"])["model_name"], "models_name")
 
-    # def test_training(self):
-    #     with open("trainer/test_2.json", "r") as file: # check if this exists before using
-    #         test_json = file.read()
+    def test_training(self):
+        with open("trainer/test_2.json", "r") as file: # check if this exists before using
+            test_json = file.read()
 
 
-    #     params = {
-    #         "username": "person",
-    #         "claim_check": "check",
-    #         "model_MKO": test_json,
-    #         "result_cache_URI": self.get_rc()
-    #     }
+        params = {
+            "username": "person",
+            "claim_check": "check",
+            "model_MKO": test_json,
+            "result_cache_URI": self.get_rc()
+        }
 
-    #     formatted_params = format_params("/train", params)
+        formatted_params = format_params("/train", params)
 
-    #     resp = requests.post(self.get_tm(formatted_params))
-    #     self.assertEqual(resp.status_code, 200)
+        resp = requests.post(self.get_tm(formatted_params))
+        self.assertEqual(resp.status_code, 200)
 
-    #     del params["model_MKO"]
-    #     del params["result_cache_URI"]
+        del params["model_MKO"]
+        del params["result_cache_URI"]
 
-    #     formatted_params = format_params("/get_status", params)
+        formatted_params = format_params("/get_status", params)
 
-    #     time.sleep(20)
-    #     status = 0
-    #     while status != 1:
-    #         resp = requests.get(self.get_rc(formatted_params))
-    #         self.assertEqual(resp.status_code, 200)
-    #         status = float(resp.text)
-    #         time.sleep(1)
+        time.sleep(20)
+        status = 0
+        while status != 1:
+            resp = requests.get(self.get_rc(formatted_params))
+            self.assertEqual(resp.status_code, 200)
+            status = float(resp.text)
+            time.sleep(1)
 
-    #     formatted_params = format_params("/get_result", params)
+        formatted_params = format_params("/get_result", params)
         
-    #     resp = requests.get(self.get_rc(formatted_params))
-    #     self.assertEqual(resp.status_code, 200)
+        resp = requests.get(self.get_rc(formatted_params))
+        self.assertEqual(resp.status_code, 200)
         
-    #     self.assertLessEqual(json.loads(json.loads(resp.text)["contents"])["loss"], 20)
+        self.assertLessEqual(json.loads(json.loads(resp.text)["contents"])["loss"], 20)
 
     def add_test(self, add_type):
         with open("trainer/test.json", "r") as file: # check if this exists before using

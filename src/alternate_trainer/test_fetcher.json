@@ -5,21 +5,7 @@
         {
             "type": "dense",
             "activation": "relu",
-            "units": 256
-        }, {
-            "type": "dropout",
-            "rate": 0.95
-        },{
-            "type": "dense",
-            "activation": "relu",
             "units": 512
-        }, {
-            "type": "dropout",
-            "rate": 0.95
-        }, {
-            "type": "dense",
-            "activation": "relu",
-            "units": 64
         }, {
             "type": "dropout",
             "rate": 0.95

@@ -1,5 +1,5 @@
 import requests
-from src.exceptions import ConnectionException, InputException
+from alternate_trainer.src.exceptions import ConnectionException
 
 # valid input json to the fetcher should contain these fields
 # json_from_trainer = {
@@ -42,7 +42,7 @@ def post_result_cache(URI: str, username: str, claim_check: str, generation_time
         "username": username
     }
 
-    resp = requests.post(URI + "/store_results", params=params, data=mko_json)
+    resp = requests.post(URI + "/store_result", params=params, data=mko_json)
     check_connection(resp, URI)
 
 def post_status(URI: str, username: str, claim_check: str, status: float):

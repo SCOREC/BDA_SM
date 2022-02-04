@@ -1,8 +1,6 @@
 import io
 from typing import Any, Iterable, Tuple, Union
-
-from grpc import Status
-from src.json_parser import parse_json_model_structure
+from alternate_trainer.src.json_parser import parse_json_model_structure
 import json
 import pickle
 import numpy as np
@@ -10,15 +8,15 @@ import base64
 import tensorflow as tf
 from tensorflow.keras import backend as K
 import pandas as pd
-from training_callback import StatusCallback
-from src.exceptions import (
+from alternate_trainer.src.training_callback import StatusCallback
+from alternate_trainer.src.exceptions import (
     InputException, 
     VersionException, 
     MKOTypeException, 
     InvalidArgument
 )
-from src.MKO_fields import Fields
-from src.external_query import get_http, query_fetcher
+from alternate_trainer.src.MKO_fields import Fields
+from alternate_trainer.src.external_query import get_http, query_fetcher
 import os
 
 # temporary placeholder
@@ -348,7 +346,7 @@ class MKO:
             batch_size=self._batch_size,
             verbose=verbose
         )
-        
+
         self._trained += self._epochs
 
     def evaluate(self, verbose=1):

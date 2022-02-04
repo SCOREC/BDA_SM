@@ -4,18 +4,18 @@ import json
 
 class TestMKO(unittest.TestCase):
     def test_parse(self):
-        with open("alternate_trainer/test.json", "r") as file:
+        with open("trainer/test.json", "r") as file:
             json_file = json.load(file)
     
         mko = MKO(json_file)
 
-        with open("alternate_trainer/test_out.json", "r") as file:
+        with open("trainer/test_out.json", "r") as file:
             expected_out = file.read()
 
         self.assertEqual(json.dumps(json.loads(mko._model.to_json())["config"]["layers"]), expected_out)
 
     def test_save_and_load(self):
-        with open("alternate_trainer/test.json", "r") as file:
+        with open("trainer/test.json", "r") as file:
             json_file = json.load(file)
         
         mko = MKO(json_file)

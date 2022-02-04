@@ -1,12 +1,12 @@
 import unittest
-from alternate_trainer.src.MKO import MKO
+from trainer.src.MKO import MKO
 import json
 import os
 import pandas as pd
 import requests
 import io
 import numpy as np
-from alternate_trainer.src.Tests.data_2_saver import data_2
+from trainer.src.Tests.data_2_saver import data_2
 
 class TestTrainer(unittest.TestCase):
     def __init__(self, *args):
@@ -56,7 +56,7 @@ class TestTrainer(unittest.TestCase):
         return mko
 
     def test_train(self):
-        mko = self.train_model("alternate_trainer/test.json")
+        mko = self.train_model("trainer/test.json")
         inference_x = [5.9,3.0,5.1,1.8]
         gt = [0,0,1]
         inferences = mko.make_inference(inference_x, 500)
@@ -65,7 +65,7 @@ class TestTrainer(unittest.TestCase):
         self.assertEqual(np.argmax(means), np.argmax(gt))
 
     def test_train_2(self):
-        mko = self.train_model("alternate_trainer/test_2.json")
+        mko = self.train_model("trainer/test_2.json")
         inference_x = [5.127105236,1.958719381]
         gt = [25.24810875,34.65854027,28.23331668]
         inferences = mko.make_inference(inference_x, 500)

@@ -1,4 +1,3 @@
-from calendar import c
 import unittest
 import requests
 from resultCache.config import TestConfig as config

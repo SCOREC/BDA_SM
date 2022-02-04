@@ -22,7 +22,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Trains an MKO')
     parser.add_argument('-f', nargs=1, dest='json_file', const=None, default=None, type=str, help='path to json file for MKO')
     parser.add_argument('--create', dest='function', action='store_const', const='create', default='create', help='create MKO')
-    parser.add_argument('--name', nargs=1, dest='name', default='model', help='name of model')
+    parser.add_argument('--name', nargs=1, dest='name', default=['model'], help='name of model')
     parser.add_argument('--add', nargs=2, dest='add', help='add to MKO file, first args is type second is location')
     parser.add_argument('--train', dest='function', action='store_const', const='train', help='train MKO object')
     parser.add_argument('username', metavar='username', type=str, help='username of user')
@@ -64,7 +64,7 @@ def train_mko(mko: str, post_args: tuple):
     post(post_args, generation_time, mko_json)
 
 def create(args: argparse.Namespace):
-    create_mko(args.name, get_post_args(args))
+    create_mko(args.name[0], get_post_args(args))
 
 def create_mko(model_name: str, post_args: tuple):
     prev_time = time.time()
@@ -108,12 +108,13 @@ def main():
     try:    
         if args.add != None:
             add(args)
-        if args.function == "create":
+        elif args.function == "create":
             create(args)
         elif args.function == "train":
             train(args)
     except Exception as e:
         post_error(*get_post_args(args), str(e))
+        raise e
 
 if __name__ == '__main__':
     main()

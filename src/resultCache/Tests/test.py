@@ -2,29 +2,19 @@ import unittest
 from resultCache.file_daemon import FileHandler
 from resultCache.config import TestConfig as config
 from resultCache.Tests.helpers import get_test_set
+import json
 import time
 
 
 class TestFileHandler(unittest.TestCase):
-    def test_basic_store_and_retrieve_str(self):
+    def test_basic_store_and_retrieve(self):
         fh = FileHandler(config.min_expiry_time, config.max_expiry_time, config.directory)
         username = "user"
         cc = "test_str"
         str_data = "test_data\ntesttest"
         fh.put(username, cc, 0, str_data)
-        out_data = fh.get(username, cc, str)
+        out_data = json.loads(fh.get(username, cc))['contents']
         self.assertEqual(str_data, out_data)
-        fh.end()
-        fh.delete_all(True)
-
-    def test_basic_store_and_retrieve_bin(self):
-        fh = FileHandler(config.min_expiry_time, config.max_expiry_time, config.directory)
-        username = "user"
-        cc = "test_str"
-        bin_data = b"test_data\ntesttest"
-        fh.put(username, cc, 0, bin_data)
-        out_data = fh.get(username, cc, bytes)
-        self.assertEqual(bin_data, out_data)
         fh.end()
         fh.delete_all(True)
 
@@ -39,16 +29,22 @@ class TestFileHandler(unittest.TestCase):
                 fh.put(user, cc, 0, datum)
         return expected
 
-    def check_eq(self, fh, usernames, ccs, expected, type, single_expectation=False) -> list:
+    def get_fh(self, fh, user, cc, should_delete=True):
+        c = fh.get(user, cc, should_delete)
+        if c == None:
+            return c
+
+        return json.loads(c)['contents']
+
+    def check_eq(self, fh, usernames, ccs, expected, single_expectation=False, should_delete=True) -> list:
         cases = []
         
-
         for user in usernames:
                 for cc in ccs:
                     if single_expectation:
-                        cases.append((expected, fh.get(user, cc, type)))
+                        cases.append((expected, self.get_fh(fh, user, cc, should_delete) ))
                     else:
-                        cases.append((expected[user][cc], fh.get(user, cc, type)))
+                        cases.append((expected[user][cc], self.get_fh(fh, user, cc, should_delete)))
         return cases
 
     def test_large_volume(self):
@@ -58,7 +54,7 @@ class TestFileHandler(unittest.TestCase):
 
         try:
             expected = self.put_data_and_save(fh, usernames, ccs, data)
-            cases = self.check_eq(fh, usernames, ccs, expected, str)
+            cases = self.check_eq(fh, usernames, ccs, expected)
         except Exception as e:
             fh.end()
             fh.delete_all(True)
@@ -85,7 +81,7 @@ class TestFileHandler(unittest.TestCase):
 
         time.sleep(2 * config.min_expiry_time)
 
-        cases = self.check_eq(fh, usernames, ccs, None, str, single_expectation=True)
+        cases = self.check_eq(fh, usernames, ccs, None, single_expectation=True)
 
         fh.end()
         fh.delete_all(True)
@@ -108,7 +104,7 @@ class TestFileHandler(unittest.TestCase):
 
         time.sleep(2 * config.min_expiry_time)
 
-        cases = self.check_eq(fh, usernames, ccs, None, str, single_expectation=True)
+        cases = self.check_eq(fh, usernames, ccs, None, single_expectation=True)
 
         fh.end()
         fh.delete_all(True)

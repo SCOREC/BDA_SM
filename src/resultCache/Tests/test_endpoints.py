@@ -1,3 +1,4 @@
+from calendar import c
 import unittest
 import requests
 from resultCache.config import TestConfig as config
@@ -5,6 +6,7 @@ import time
 from resultCache.Tests.helpers import generate_string, get_test_set
 from resultCache.Tests.base import BaseTestCase
 from urllib import parse
+import json
 
 class EndpointTests(BaseTestCase):
     def format_params(self, endpoint, params):
@@ -32,7 +34,7 @@ class EndpointTests(BaseTestCase):
         self.send_put(username, claim_check, generation_time, data)
 
         resp = self.get_data(username, claim_check)
-        out = resp.data.decode("utf-8")
+        out = json.loads(resp.data.decode("utf-8"))['contents']
         self.assertEqual(out, data)
 
 
@@ -54,7 +56,7 @@ class EndpointTests(BaseTestCase):
             for cc in ccs:
                 resp = self.get_data(user, cc)
                 self.assert200(resp)
-                self.assertEqual(resp.data.decode("utf-8"), expected[user][cc])
+                self.assertEqual(json.loads(resp.data.decode("utf-8"))['contents'], expected[user][cc])
 
     def check_doesnt_exist(self, usernames, ccs):
         for user in usernames:
@@ -130,6 +132,28 @@ class EndpointTests(BaseTestCase):
         params = {"username": username, "claim_check": claim_check_non_existent}
         param_formatted = self.format_params(origin, params)
         resp = self.client.get(param_formatted)
+        self.assert404(resp)
+
+    def test_update_status(self):
+        origin_1 = "/update_status"
+        origin_2 = "/get_status"
+        params = {
+            "username": "abc",
+            "claim_check": "few"
+        }
+        p1 = self.format_params(origin_1, params)
+        p2 = self.format_params(origin_2, params)
+        resp = self.client.post(p1, data="0.1")
+        self.assert200(resp)
+        resp = self.client.get(p2)
+        self.assert200(resp)
+        self.assertEqual(resp.data.decode("utf-8"), "0.1")
+        self.send_put(params["username"], params["claim_check"], 1, "hi")
+        resp = self.client.get(p2)
+        self.assert200(resp) 
+        self.assertEqual(resp.data.decode("utf-8"), "1.0")
+        self.get_data(params["username"], params["claim_check"])
+        resp = self.client.get(p2)
         self.assert404(resp)
 
 

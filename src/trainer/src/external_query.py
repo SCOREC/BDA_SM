@@ -1,5 +1,5 @@
 import requests
-from alternate_trainer.src.exceptions import ConnectionException
+from trainer.src.exceptions import ConnectionException
 
 # valid input json to the fetcher should contain these fields
 # json_from_trainer = {

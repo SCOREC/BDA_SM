@@ -1,6 +1,6 @@
 import io
 from typing import Any, Iterable, Tuple, Union
-from alternate_trainer.src.json_parser import parse_json_model_structure
+from trainer.src.json_parser import parse_json_model_structure
 import json
 import pickle
 import numpy as np
@@ -8,15 +8,15 @@ import base64
 import tensorflow as tf
 from tensorflow.keras import backend as K
 import pandas as pd
-from alternate_trainer.src.training_callback import StatusCallback
-from alternate_trainer.src.exceptions import (
+from trainer.src.training_callback import StatusCallback
+from trainer.src.exceptions import (
     InputException, 
     VersionException, 
     MKOTypeException, 
     InvalidArgument
 )
-from alternate_trainer.src.MKO_fields import Fields
-from alternate_trainer.src.external_query import get_http, query_fetcher
+from trainer.src.MKO_fields import Fields
+from trainer.src.external_query import get_http, query_fetcher
 import os
 
 # temporary placeholder

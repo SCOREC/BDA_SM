@@ -42,7 +42,7 @@ def store_result():
     except ValueError:
         abort(Response("'{}' not of type 'int'".format(request.args["generation_time"]), 400))
 
-    data = request.data.decode("ascii")
+    data = request.data.decode("utf-8")
 
     if file_handler == None:
         abort(Response("file handler not initialized", 500))
@@ -71,7 +71,7 @@ def store_status(): #should set generation time to max
     claim_check = request.args["claim_check"]
     generation_time = config.max_expiry_time
 
-    status = request.data
+    status = request.data.decode("utf-8")
 
     if file_handler == None:
         abort(Response("file handler not initialized", 500))
@@ -108,7 +108,7 @@ def store_error():
     username = request.args['username']
     claim_check = request.args["claim_check"]
     generation_time = config.max_expiry_time
-    errors = request.data
+    errors = request.data.decode("utf-8")
 
     if file_handler == None:
         abort(Response("file handler not initialized", 500))

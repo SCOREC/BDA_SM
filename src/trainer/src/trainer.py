@@ -18,6 +18,7 @@ class AddTypes:
         TOPOLOGY
     }
 
+# command line arguments
 def parse_args():
     parser = argparse.ArgumentParser(description='Trains an MKO')
     parser.add_argument('-f', nargs=1, dest='json_file', const=None, default=None, type=str, help='path to json file for MKO')
@@ -31,15 +32,18 @@ def parse_args():
     return parser.parse_args()
 
 
+# post_args: tuple of command line arguments (URI, username, claim_check)
+# generation_time: seconds to generate
+# mko_json: data to send to resultCache
 def post(post_args: tuple, generation_time: int, mko_json: str):
     URI, username, claim_check = post_args
-    # print("posting {}".format(mko_json))
-    # print("took {} ms".format(generation_time*1000))
     post_result_cache(URI, username, claim_check, 1000*generation_time, mko_json)
 
+# converts command line parser to tuple
 def get_post_args(args: argparse.Namespace):
     return (args.URI, args.username, args.claim_check)
 
+# loads json file
 def load_json(json_file: str) -> dict:
     if json_file == None:
         raise InputException("json file")
@@ -50,9 +54,13 @@ def load_json(json_file: str) -> dict:
     with open(json_file, 'r') as file:
         return file.read()
 
+# args: command line parser
+# trains model according to args
 def train(args: argparse.Namespace):
     train_mko(args.json_file[0], get_post_args(args))
 
+# mko: file location of mko
+# post_args: (URI, usernae, claim_check)
 def train_mko(mko: str, post_args: tuple):
     prev_time = time.time()
     mko = MKO.from_json(load_json(mko))
@@ -63,26 +71,30 @@ def train_mko(mko: str, post_args: tuple):
     generation_time = time.time() - prev_time
     post(post_args, generation_time, mko_json)
 
+# args: command line parser
+# creates new mko given the name
 def create(args: argparse.Namespace):
     create_mko(args.name[0], get_post_args(args))
 
+# model_name: name of the new model
+# post_args: (URI, usernae, claim_check)
+# creates new mko and posts to resultCache
 def create_mko(model_name: str, post_args: tuple):
     prev_time = time.time()
     mko_json = MKO.from_empty(model_name).get_json()
     generation_time = time.time() - prev_time
     post(post_args, generation_time, mko_json)
 
+# args: command line parser
+# adds a json object to the mko
 def add(args: argparse.Namespace):
     add_mko(args.json_file[0], args.add[0].lower(), args.add[1], get_post_args(args))
 
-def add_mko_create_file(mko: str, add_type: str, to_add: str, post_args: tuple):
-    file = TempFile("w", delete=False)
-    file.write(to_add)
-    file.close()
-    add_loc = file.name
-    add_mko(mko, add_type, add_loc, post_args)
-    os.unlink(add_loc)
-
+# mko: file location of mko
+# add_type: portion of mko to append to (data, hyperparams, etc.)
+# to_add: location of new json file to merge with mko
+# post_args: (URI, usernae, claim_check)
+# combines to_add as a sub field of mko under the to_add tag
 def add_mko(mko: str, add_type: str, add_loc: str, post_args: tuple):
     prev_time = time.time()
     mko = MKO.from_json(load_json(mko))

@@ -23,6 +23,11 @@ def save_file(data):
     f.close()
     return f.name
 
+# result_chache_URI: URI of result cache
+# username: username of user
+# claim_check: specified claim_check to post to
+# model_name: name of the model to be created
+# creates mko and posts to resultChache
 @app.route('/create_MKO', methods=['POST'])
 def create_MKO():
     model_name = get_input("model_name", request.args)
@@ -30,6 +35,13 @@ def create_MKO():
     Popen([*executable_path, username, claim_check, URI, "--create", "--name", model_name])
     return Response("success", 200)
 
+# result_chache_URI: URI of result cache
+# username: username of user
+# claim_check: specified claim_check to post to
+# type: type of portion to add (eg. data, hyperparmams, etc.)
+# to_add: json string of portion to add
+# model_MKO: json string of mko 
+# merges the to_add json with the model_MKO under the type field
 @app.route('/add_component', methods=['POST'])
 def add_data():
     add_type = get_input("type", request.args)
@@ -43,10 +55,11 @@ def add_data():
     Popen([*executable_path, username, claim_check, URI, "-f", mko_loc, "--add", add_type, add_loc])
     return Response("success", 200)
     
-# @app.route('/delete_param', methods=['POST'])
-# def delete_param():
-#     pass
-
+# result_chache_URI: URI of result cache
+# username: username of user
+# claim_check: specified claim_check to post to
+# model_MKO: json string of mko 
+# trains the model specified by the parameters
 @app.route('/train', methods=['POST'])
 def train():
     mko = get_input("model_MKO", request.args)

@@ -19,7 +19,6 @@ from trainer.src.MKO_fields import Fields
 from trainer.src.external_query import get_http, query_fetcher
 import os
 
-# temporary placeholder
 version = "1.0"
 
 class MKO:
@@ -31,11 +30,15 @@ class MKO:
         self.parse_params(params)
 
 
+    # json_text: string representing mko as json
+    # generates mko from json text
     @staticmethod
     def from_json(json_text: str) -> 'MKO':
         return MKO(json.loads(json_text))
 
 
+    # name: name of the model
+    # create base requirement mko from the name
     @staticmethod
     def from_empty(name: str) -> 'MKO':
         empty = {
@@ -44,13 +47,20 @@ class MKO:
         }
         return MKO(empty)
 
-
+    # data: data of type to check
+    # field: name representing the data
+    # data_type: type that the data must be
+    # checks to ensure 'data' is type 'data_type'
     @staticmethod
     def enforce_type(data: Any, field: str, data_type: type):
         if type(data) != data_type:
             raise InputException(field, (type, type(data)))
 
-
+    # field: field to check
+    # input_params: location to check from
+    # check if 'field' is in 'input_params'
+    # also checks if the data is correct type
+    # if list or dict
     @staticmethod
     def enforce(field: str, input_params: dict):
         if field not in input_params:
@@ -63,27 +73,38 @@ class MKO:
             MKO.enforce_type(input_params[field], field, dict)
 
 
+    # does the mko have a model layout described
     @property
     def topographic(self) -> bool:
         return self._topology != None
 
 
+    # does the mko have a data definition
     @property
     def augmented(self) -> bool:
         return self._data
 
 
+    # fields: set of fields to parse
+    # input_params: dict object to parse from
+    # for each field in fields add the name of the field
+    # as a parameter to store in self
+    # eg. field = "x" then self._x = input_params["x"]
     def parse_fields(self, fields: set, input_params: dict):
         for field in fields:
             MKO.enforce(field, input_params)
             setattr(self, "_{}".format(field), input_params[field])
 
 
+    # data: data descriptor
+    # ensures that data descriptor for fetcher is correct
     def validate_fetcher_format(self, data: dict):
         if self._data_type == Fields.Data.FETCHER:
             self.parse_fields(Fields.Data.MANDATORY_FETCHER_FIELDS, data)
 
 
+    # input_params: full json object
+    # parse the json object into mko 
     def parse_params(self, input_params: dict):
         self.parse_fields(Fields.MANDATORY_FIELDS, input_params)
 
@@ -128,6 +149,8 @@ class MKO:
             raise VersionException(version, self._version)
 
 
+    # hyper_params: hyperparams to add
+    # merges hyperparams with mko
     def add_hyper_params(self, hyper_params: Union[dict, str]):
         if type(hyper_params) == str:
             self.add_hyper_params(json.loads(hyper_params))
@@ -142,6 +165,9 @@ class MKO:
         )
 
 
+    # topology: topology to add
+    # merges topology with mko
+    # must have data defined before
     def add_topology(self, topology: Union[list, str]):
         if self._hyper_params == False:
             raise Exception("hyper_parameters not defined, use 'add_hyper_params' before 'add_topology'")
@@ -160,6 +186,8 @@ class MKO:
         )
 
 
+    # data: data descriptor to add
+    # merges data with mko
     def add_data(self, data: Union[dict, str]):
         if type(data) == str:
             self.add_data(json.loads(data))
@@ -173,6 +201,7 @@ class MKO:
         self.validate_fetcher_format(data)
 
 
+    # compiles the model
     def compile(self):
         if not self.topographic:
             raise MKOTypeException("topographic")
@@ -182,6 +211,8 @@ class MKO:
         self._compiled = True
 
 
+    # df: dataframe of data
+    # parses csv data to be used by the model
     def parse_data(self, df: pd.DataFrame) -> Tuple[np.array, np.array]:
         x = pd.DataFrame()
         y = pd.DataFrame()
@@ -196,7 +227,8 @@ class MKO:
 
         return x.to_numpy(), y.to_numpy()
 
-
+    # location: file location
+    # reads csv from file
     def get_data_from_file(self, location: str) -> Tuple[np.array, np.array]:
         if not os.path.exists(location):
             raise FileNotFoundError("'{}' not found".format(location))
@@ -207,15 +239,18 @@ class MKO:
         return self.parse_data(df)
 
 
+    # location: request location
+    # gets data from http request and parses
     def get_data_from_http(self, location: str) -> Tuple[np.array, np.array]:
         df = pd.read_csv(io.StringIO(get_http(location)))
         return self.parse_data(df)
 
-
+    # location: fetcher server location
+    # requests data from fetcher and parses
     def get_data_from_fetcher(self, location: str) -> pd.DataFrame:
         ids = self._x_tags + self._y_tags
         query = self._query_json
-        query["tag_ids"] = ids # Remove string
+        query["tag_ids"] = ids
         args = {
             Fields.Data.QUERY: query, 
             Fields.Data.AUTH: self._auth_json,
@@ -227,6 +262,11 @@ class MKO:
         df = pd.DataFrame(data=data, columns=fetcher_json["x_labels"], index=fetcher_json["y_labels"])
         return df[self._x_tags].to_numpy(), df[self._y_tags].to_numpy()
 
+    # data: dataset
+    # is_x: is the data x if not y
+    # reverse: should de-normalize
+    # raise_if_none: if mu or std not defined raise exception
+    # normalizes / de-normalized data, calculates mu and std if none
     def normalize(self, data: Iterable, is_x: bool = False, reverse: bool = False, raise_if_none: bool = False) -> np.array:
         data = np.array(data)
 
@@ -273,6 +313,7 @@ class MKO:
 
         return self.normalize(data, is_x)
 
+    # loads data according to data descriptor
     def load_data(self):
         if not self.augmented:
             raise MKOTypeException("augmented")
@@ -304,7 +345,8 @@ class MKO:
 
         self._data_loaded = True
 
-
+    # throw_exceptions: should throw exceptions if true
+    # is trainable
     def _trainable(self, throw_exceptions=True) -> bool:
         if throw_exceptions:
             if not self.topographic:
@@ -324,6 +366,9 @@ class MKO:
         return self.topographic and self.augmented and self._data_loaded and self._compiled
 
 
+    # verbose: how much should be printed
+    # push_update_args: should push updates to resultCache
+    # train the model if trainable
     def train(self, verbose: int = 0, push_update_args: tuple = None):
         if not self._trainable():
             return
@@ -351,6 +396,8 @@ class MKO:
 
         self._trained += self._epochs
 
+    # verbose: how much is printed
+    # evaluates the model
     def evaluate(self, verbose=1):
         if not self._trainable():
             return
@@ -364,6 +411,9 @@ class MKO:
         )
 
 
+    # x: input data
+    # samples: number of times to run interation
+    # use variational dropout to approximate distribution
     def make_inference(self, x: Iterable, samples: int) -> tf.Tensor:
         if not self.topographic:
             raise MKOTypeException("topographic")
@@ -380,11 +430,13 @@ class MKO:
         return self.normalize(self._model.predict(X), reverse=True)
 
 
+    # return unpickled version of string
     @staticmethod
     def b64decode_array(string: str) -> np.array:
         return pickle.loads(base64.b64decode(string))
 
 
+    # return pickled version of array
     @staticmethod
     def b64encode_array(array: np.array) -> str:
         return base64.b64encode(
@@ -392,11 +444,15 @@ class MKO:
         ).decode('ascii')
 
 
+    # fields: fields to save
+    # to_save: json object
+    # for each filed in fields save in json object
     def save_fields(self, fields: set, to_save: dict):
         for field in fields:
             to_save[field] = getattr(self, "_{}".format(field))
 
 
+    # get json object representation of mko
     def get_dict(self) -> dict:
         to_save = {}
         self.save_fields(Fields.MANDATORY_FIELDS, to_save)
@@ -421,17 +477,19 @@ class MKO:
             to_save[Fields.TOPOLOGY] = self._topology
 
         return to_save
-    
 
+
+    # get string json string representation of mko
     def get_json(self) -> str:
         return json.dumps(self.get_dict())
     
 
+    # returns json string
     def __str__(self) -> str:
         return self.get_json()
         
-
+        
+    # returns json string
     def __repr__(self) -> str:
         return self.get_json()
-
         

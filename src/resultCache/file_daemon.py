@@ -1,6 +1,6 @@
 from threading import Thread, Event
 from sched import scheduler
-from typing import Optional
+from typing import Optional, List
 import time
 import json
 import os
@@ -118,7 +118,7 @@ class PurgeDaemon(Thread):
 
 
 class FileHandler:
-    def __init__(self, min_expiry_time, max_expiry_time, root_directory: str = "."):
+    def __init__(self, min_expiry_time, max_expiry_time, rate_average_window, root_directory: str = "."):
         if os.path.isabs(root_directory):
             self._directory = root_directory
         else:
@@ -127,6 +127,7 @@ class FileHandler:
         if not os.path.exists(self._directory):
             os.makedirs(self._directory)
 
+        self._rate_average_window = rate_average_window
         self._min_expiry_time = min_expiry_time
         self._max_expiry_time = max_expiry_time
 
@@ -134,6 +135,29 @@ class FileHandler:
         self._purge_daemon = PurgeDaemon(min_expiry_time, schedule_location)
         self._purge_daemon.start()
 
+    def get_rate(self, username: str, claim_check: str):
+        status_history = self.get_status(username, claim_check)
+        if status_history == None:
+            return None
+        
+        if len(status_history) <= 1:
+            return None
+
+        dp1 = status_history[0]
+        dp2 = status_history[1]
+
+        rate_calc = lambda dp1, dp2 : (dp2[1] - dp1[1]) / (dp2[0] - dp1[0])
+        alpha = 1 / self._rate_average_window
+
+        ewa = rate_calc(dp1, dp2)
+
+        for i in range(2, len(status_history)):
+            dp1 = dp2
+            dp1 = status_history[i]
+            rate = rate_calc(dp1, dp2)
+            ewa = alpha * rate + (1-alpha) * ewa
+
+        return ewa
 
     def end(self):
         self._purge_daemon.end()
@@ -154,14 +178,22 @@ class FileHandler:
     def get_expiry_time(self, generation_time) -> int:
         return min(5 * generation_time + self._min_expiry_time, self._max_expiry_time)
 
-    def _put_file(self, username: str, claim_check: str, generation_time: int, data: Optional[str], status: float, errors: Optional[str] = None):
+    def _push_update(self, username: str, claim_check: str, generation_time: int, data: Optional[str], status: float, errors: Optional[str] = None):
+        status_history = self.get_status(username, claim_check)
+        if status_history == None:
+            status_history = []
+
+        status_history.append((time.time(), status))
+        self._put_file(self, username, claim_check, generation_time, data, status_history, errors)
+
+    def _put_file(self, username: str, claim_check: str, generation_time: int, data: Optional[str], status_history: List[tuple], errors: Optional[str] = None):
         expiry_time = self.get_expiry_time(generation_time) + time.time()
         location = self.get_file_location(username, claim_check, create_folders=True)
         self._purge_daemon.remove_entry(location)
 
         file_contents = {
             "data": data,
-            "status": status,   
+            "status": status_history,  
             "errors": errors
         }
 
@@ -171,13 +203,13 @@ class FileHandler:
         self._purge_daemon.add_entry(location, expiry_time)
 
     def put(self, username: str, claim_check: str, generation_time: int, data: str):
-        self._put_file(username, claim_check, generation_time, data, 1.0)
+        self._push_update(username, claim_check, generation_time, data, 1.0)
 
     def update_status(self, username: str, claim_check: str, generation_time: int, status: float):
-        self._put_file(username, claim_check, generation_time, None, status)
+        self._push_update(username, claim_check, generation_time, None, status)
 
     def update_error(self, username: str, claim_check: str, generation_time: int, errors: str):
-        self._put_file(username, claim_check, generation_time, None, 1.0, errors)
+        self._push_update(username, claim_check, generation_time, None, 1.0, errors)
 
     def _get_file(self, username: str, claim_check: str, remove: bool = True) -> dict:
         location = self.get_file_location(username, claim_check)
@@ -201,7 +233,7 @@ class FileHandler:
 
         return json.loads(data)
 
-    def get_status(self, username: str, claim_check: str) -> Optional[float]:
+    def get_status(self, username: str, claim_check: str) -> Optional[List[tuple]]:
         file_contents = self._get_file(username, claim_check, False)
 
         if file_contents == None:

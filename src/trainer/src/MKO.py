@@ -1,5 +1,6 @@
 import io
 from typing import Any, Iterable, Tuple, Union
+from src.trainer.src.external_query import post_status
 from trainer.src.json_parser import parse_json_model_structure
 import json
 import pickle
@@ -29,11 +30,17 @@ class MKO:
         self._loss = None
         self.parse_params(params)
 
+    # string: string representing mko as b64 encoded json
+    # generates mko from text
+    @staticmethod
+    def from_b64str(string: str) -> 'MKO':
+        return MKO._from_json(base64.b64decode(string).decode("utf-8"))
+
 
     # json_text: string representing mko as json
     # generates mko from json text
     @staticmethod
-    def from_json(json_text: str) -> 'MKO':
+    def _from_json(json_text: str) -> 'MKO':
         return MKO(json.loads(json_text))
 
 
@@ -376,7 +383,10 @@ class MKO:
         MKO.enforce_type(self._epochs, Fields.HyperParams.EPOCHS, int)
         MKO.enforce_type(self._batch_size, Fields.HyperParams.BATCH_SIZE, int)
 
-        callbacks = [StatusCallback(push_update_args, self._epochs)] if push_update_args != None else []
+        callbacks = []
+        if push_update_args:
+            post_status(*push_update_args, 0)
+            callbacks = [StatusCallback(push_update_args, self._epochs)]
 
         self._model.fit(
             self._X_train, 
@@ -480,16 +490,19 @@ class MKO:
 
 
     # get string json string representation of mko
-    def get_json(self) -> str:
+    def _get_json(self) -> str:
         return json.dumps(self.get_dict())
     
+    def get_b64(self) -> str:
+        json_str = self._get_json()
+        return base64.b64encode(bytes(json_str, "utf-8")).decode("utf-8")
 
-    # returns json string
+    # returns b64 encoded string
     def __str__(self) -> str:
-        return self.get_json()
+        return self.get_b64()
         
         
-    # returns json string
+    # returns b64 encoded string
     def __repr__(self) -> str:
-        return self.get_json()
+        return self.get_b64()
         

@@ -32,7 +32,7 @@ def save_file(data):
 def create_MKO():
     model_name = get_input("model_name", request.args)
     URI, username, claim_check = get_post_args(request.args)
-    Popen([*executable_path, username, claim_check, URI, "--create", "--name", model_name])
+    Popen([*executable_path, username, claim_check, URI, "--create", "--name", "--delete", model_name])
     return Response("success", 200)
 
 # result_chache_URI: URI of result cache
@@ -52,7 +52,7 @@ def add_data():
     # potential problem that temp get filled up but never deleted - should i wait for completion in this case?
     add_loc = save_file(json_to_add)
     mko_loc = save_file(mko)
-    Popen([*executable_path, username, claim_check, URI, "-f", mko_loc, "--add", add_type, add_loc])
+    Popen([*executable_path, username, claim_check, URI, "-f", mko_loc, "--add", "--delete", add_type, add_loc])
     return Response("success", 200)
     
 # result_chache_URI: URI of result cache
@@ -65,5 +65,5 @@ def train():
     mko = get_input("model_MKO", request.args)
     URI, username, claim_check = get_post_args(request.args)
     mko_loc = save_file(mko)
-    Popen([*executable_path, username, claim_check, URI, "-f", mko_loc, "--train"])
+    Popen([*executable_path, username, claim_check, URI, "-f", mko_loc, "--delete", "--train"])
     return Response("success", 200)

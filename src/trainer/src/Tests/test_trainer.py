@@ -13,10 +13,6 @@ class TestTrainer(unittest.TestCase):
         data_source = "https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data"
         path = ".test_data/data.csv"
         if not os.path.exists(path):
-            resp = input("Would you like to download data to '{}' ([y]/n): ".format(os.path.join(os.getcwd(), path))).lower()
-            if resp == "n":
-                exit(0)
-
             data = requests.get(data_source)
             str_io = io.StringIO("F0,F1,F2,F3,o\n{}".format(data.text))
             df = pd.read_csv(str_io)

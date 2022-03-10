@@ -16,7 +16,9 @@ class BaseConfig(object):
   JWT_ALGORITHM = 'HS256'
   JWT_SECRET = os.environ.get('JWTSECRET') or SECRET_KEY
   JWT_SECRET = JWT_SECRET + jwt_salt
-  ADMIN_ACL = ['user', 'admin', 'train', 'infer', 'logs']
+  ADMIN_ACL = ['user', 'admin', 'train', 'infer', 'analyze', 'logs']
+  TRAINING_MANAGER_HOST = None
+  INFERENCE_MANAGER_HOST = None
 
 class DevelopmentConfig(BaseConfig):
   """Development configuration"""
@@ -27,6 +29,8 @@ class DevelopmentConfig(BaseConfig):
         'sqlite:///' + os.path.join(basedir, database_name)
   SQLALCHEMY_BINDS = {'log': SQLALCHEMY_DATABASE_URI + '_log'}
   SERVER_SECRET = '0123'
+  TRAINING_MANAGER_HOST = 'http://localhost:8100/'
+  INFERENCE_MANAGER_HOST = 'http://localhost:8200/'
   
 class TestingConfiguration(BaseConfig):
   DEBUG = True
@@ -40,6 +44,8 @@ class TestingConfiguration(BaseConfig):
   SERVER_SECRET = '0123'
   admin_user = "admin"
   admin_password = "adpass"
+  TRAINING_MANAGER_HOST = 'http://localhost:8100/'
+  INFERENCE_MANAGER_HOST = 'http://localhost:8200/'
   
 class ProductionConfiguration(BaseConfig):
   """For deployment"""

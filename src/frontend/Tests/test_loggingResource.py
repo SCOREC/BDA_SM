@@ -5,7 +5,7 @@ from Tests.base import BaseTestCase
 from Tests import Config
 from server.models import AuthToken
 
-from helpers import login_user, register_user, initialize_server
+from Tests.helpers import login_user, register_user, initialize_server
 
 
 class LoggingResourceTestCase(BaseTestCase):

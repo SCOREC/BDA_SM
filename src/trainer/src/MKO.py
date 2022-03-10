@@ -102,7 +102,6 @@ class MKO:
                 setattr(self, "_{}".format(field), input_params[field])
 
         if self.augmented:
-
             self.validate_fetcher_format(input_params[Fields.DATA])
 
         if Fields.TOPOLOGY in input_params:
@@ -131,13 +130,14 @@ class MKO:
 
     def add_hyper_params(self, hyper_params: Union[dict, str]):
         if type(hyper_params) == str:
-            self.add_hyper_params(self, json.loads(hyper_params))
+            self.add_hyper_params(json.loads(hyper_params))
+            return
 
         MKO.enforce_type(hyper_params, "hyper_params", dict)
 
         self._hyper_params = True
         self.parse_fields(
-            Fields.OPTIONAL_FIELDS[Fields.HYPER_PARAMS].MANDATORY_FIELDS, 
+            Fields.OPTIONAL_SUB_FIELDS[Fields.HYPER_PARAMS].MANDATORY_FIELDS, 
             hyper_params
         )
 
@@ -147,7 +147,7 @@ class MKO:
             raise Exception("hyper_parameters not defined, use 'add_hyper_params' before 'add_topology'")
 
         if type(topology) == str:
-            self.add_topology(self, json.loads(topology))
+            self.add_topology(json.loads(topology))
             return
 
         MKO.enforce_type(topology, "topology", list)
@@ -163,8 +163,8 @@ class MKO:
     def add_data(self, data: Union[dict, str]):
         if type(data) == str:
             self.add_data(json.loads(data))
+            return
 
-        MKO.enforce_type(data, "data", list)
         self._data = True
         self.parse_fields(
             Fields.OPTIONAL_SUB_FIELDS[Fields.DATA].MANDATORY_FIELDS, 

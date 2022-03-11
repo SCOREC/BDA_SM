@@ -1,5 +1,4 @@
-from flask import request
-from flask.wrappers import Response
+from flask import request, Response
 import requests
 
 def forward_request(target_url,*args, **kwargs):

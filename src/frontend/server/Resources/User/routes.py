@@ -75,6 +75,7 @@ def getToken():
           auth_token = AuthToken(user=user, password=password)
           refresh_token = RefreshToken(user)
         else:
+          Event("USER", "Failed getToken from {} with {}".format(user, password)).logit()
           return Response("Access denied", 403)
 
     except ValueError as err:
@@ -99,6 +100,9 @@ def refreshToken():
         refresh_token = RefreshToken.query.filter_by(payload=refresh_token_key).first()
         user = User.query.get(refresh_token.user_id)
         auth_token = AuthToken(user, refresh_token=refresh_token)
+        AuthToken.purge_expired()
+        refresh_token = RefreshToken(user)
+        RefreshToken.purge_expired()
     except:
         return Response("Unavailable", status=404)
     token =  auth_token.payload

@@ -160,8 +160,9 @@ class AuthToken(db.Model):
         if date is None:
             date = datetime.utcnow()
 
-        AuthToken.query.filter(AuthToken.expiration_date<date).delete()
+        number_deleted = AuthToken.query.filter(AuthToken.expiration_date<date).delete()
         db.session.commit()
+        Event("MAINT", 'Purged {} expired AuthTokens'.format(number_deleted)).logit()
         return
     
     def purge_user(id):
@@ -224,8 +225,9 @@ class RefreshToken(db.Model):
         if date is None:
             date = datetime.utcnow()
 
-        RefreshToken.query.filter(RefreshToken.expiration_date<date).delete()
+        number_deleted = RefreshToken.query.filter(RefreshToken.expiration_date<date).delete()
         db.session.commit()
+        Event("MAINT", 'Purged {} expired RefeshTokens'.format(number_deleted)).logit()
         return
 
     @property

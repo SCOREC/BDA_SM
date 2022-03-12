@@ -1,5 +1,5 @@
 # frontend/server/Resources/Logging/routes.py
-from flask import Blueprint, Response
+from flask import Blueprint
 from flask import render_template, jsonify
 from flask import request
 

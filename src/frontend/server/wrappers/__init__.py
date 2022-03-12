@@ -1,6 +1,6 @@
 from functools import wraps
 
-from flask.wrappers import Response
+from flask import Response
 from server.models import AuthToken
 from flask import request, redirect
 from server.errors import AuthenticationError
@@ -14,7 +14,8 @@ def require_access(access):
         return redirect("/User/login", code=302)
 
       try:
-        (bearer, token) = request.headers.get('Authorization').split()
+        header = request.headers.get('Authorization')
+        (_, token) = header.split()
       except:
         return Response("Malformed header", 400)
 

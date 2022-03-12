@@ -14,7 +14,8 @@ def require_access(access):
         return redirect("/User/login", code=302)
 
       try:
-        token = request.headers.get('Authorization')
+        header = request.headers.get('Authorization')
+        (_, token) = header.split()
       except:
         return Response("Malformed header", 400)
 

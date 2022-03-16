@@ -131,13 +131,66 @@ class TrainerTests(BaseTest):
         self.assertTrue(add_type in json.loads(json.loads(resp.text)['contents']))
 
     def test_add_data(self):
-        self.add_test("data")
+        with open("trainer/test.json", "r") as file:
+            test_json = file.read()
 
-    def test_add_hp(self):
-        self.add_test("hyper_params")
 
-    def test_add_top(self):
-        self.add_test("topology")
+        full_json = json.loads(test_json)
+
+        del full_json["hyper_params"]
+        del full_json["topology"]
+
+        original_json = copy.deepcopy(full_json)
+        
+        del full_json["data"]
+
+        params = {
+            "username": "person",
+            "claim_check": "check",
+            "model_MKO": json.dumps(full_json),
+            "authenticator": original_json["data"]["auth_json"]["authenticator"],
+            "password": original_json["data"]["auth_json"]["password"],
+            "name": original_json["data"]["auth_json"]["name"],
+            "role": original_json["data"]["auth_json"]["role"],
+            "graphql_url": original_json["data"]["auth_json"]["url"],
+            "x_tags": original_json["data"]["x_tags"],
+            "y_tags": original_json["data"]["y_tags"],
+            "start_time": original_json["data"]["query_json"]["start_time"],
+            "end_time": original_json["data"]["query_json"]["end_time"],
+            "data_location": original_json["data"]["data_location"],
+            "result_cache_URI": self.get_rc()
+        }
+
+        formatted_params = format_params("/add_component", params)
+
+        resp = requests.post(self.get_tm(formatted_params))
+        self.assertEqual(resp.status_code, 200)
+
+        formatted_params = format_params("/get_status", params)
+
+        time.sleep(20)
+        status = 0
+        while status != 1:
+            resp = requests.get(self.get_rc(formatted_params))
+            self.assertEqual(resp.status_code, 200)
+            status = float(resp.text)
+            time.sleep(1)
+
+        formatted_params = format_params("/get_result", params)
+        
+        resp = requests.get(self.get_rc(formatted_params))
+        self.assertEqual(resp.status_code, 200)
+        
+        mko = json.loads(json.loads(resp.text)['contents'])
+        self.assertTrue("data" in mko)
+        self.assertTrue(mko == original_json)
+
+
+    # def test_add_hp(self):
+    #     self.add_test("hyper_params")
+
+    # def test_add_top(self):
+    #     self.add_test("topology")
 
 
 if __name__ == "__main__":

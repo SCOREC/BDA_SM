@@ -194,7 +194,7 @@ Arguments:
     claim_check: str
 """
 @app.route("/get_eta", methods=["GET"])
-def get_status():
+def get_eta():
     check_input('username', request.args)
     check_input('claim_check', request.args)
 
@@ -226,6 +226,6 @@ def get_status():
 Description: Gets the current time estimate of request completion
 """
 @app.route("/get_claim_check", methods=["GET"])
-def get_status():
+def get_claim_check():
     data = str(uuid4())
     return Response(data, 200)

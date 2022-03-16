@@ -1,196 +1,33 @@
-from integration_tests.base import BaseTest
-from integration_tests.helpers import format_params
 import unittest
+from trainer.src.MKO import MKO
 import json
-import requests
-import time
-import copy
 
-class TrainerTests(BaseTest):
-    def test_mko_creation(self):
-        params = {
-            "username": "person",
-            "claim_check": "check",
-            "model_name": "models_name",
-            "result_cache_URI": self.get_rc()
-        }
+class TestMKO(unittest.TestCase):
+    def test_parse(self):
+        with open("trainer/test.mko", "r") as file:
+            mko_data = file.read()
 
-        formatted_params = format_params("/create_MKO", params)
+        with open("trainer/test_out.json", "r") as file:
+            expected_out = file.read()
+    
+        mko = MKO.from_b64str(mko_data)
 
-        resp = requests.post(self.get_tm(formatted_params))
-        self.assertEqual(resp.status_code, 200)
+        # mko = MKO(json_data)
+        # print(mko._get_json())
 
-        del params["model_name"]
-        del params["result_cache_URI"]
+        # with open("trainer/test.mko", "w") as file:
+        #     file.write(mko.get_b64())
 
-        formatted_params = format_params("/get_status", params)
+        # print(mko.get_b64())
+        self.assertEqual(json.dumps(json.loads(mko._model.to_json())["config"]["layers"]), expected_out)
 
-
-        time.sleep(20)
-        resp = requests.get(self.get_rc(formatted_params))
-        self.assertEqual(resp.status_code, 200)
-
-        self.assertEqual(float(resp.text), 1)
-
-        formatted_params = format_params("/get_result", params)
+    def test_save_and_load(self):
+        with open("trainer/test.mko", "r") as file:
+            mko_data = file.read()
         
-        resp = requests.get(self.get_rc(formatted_params))
-        self.assertEqual(resp.status_code, 200)
-
-        
-        self.assertEqual(json.loads(json.loads(resp.text)["contents"])["model_name"], "models_name")
-
-    def test_training(self):
-        with open("trainer/test_2.json", "r") as file: # check if this exists before using
-            test_json = file.read()
-
-
-        params = {
-            "username": "person",
-            "claim_check": "check",
-            "model_MKO": test_json,
-            "result_cache_URI": self.get_rc()
-        }
-
-        formatted_params = format_params("/train", params)
-
-        resp = requests.post(self.get_tm(formatted_params))
-        self.assertEqual(resp.status_code, 200)
-
-        del params["model_MKO"]
-        del params["result_cache_URI"]
-
-        formatted_params = format_params("/get_status", params)
-
-        time.sleep(20)
-        status = 0
-        while status != 1:
-            resp = requests.get(self.get_rc(formatted_params))
-            self.assertEqual(resp.status_code, 200)
-            status = float(resp.text)
-            time.sleep(1)
-
-        formatted_params = format_params("/get_result", params)
-        
-        resp = requests.get(self.get_rc(formatted_params))
-        self.assertEqual(resp.status_code, 200)
-        
-        self.assertLessEqual(json.loads(json.loads(resp.text)["contents"])["loss"], 20)
-
-    def add_test(self, add_type):
-        with open("trainer/test.json", "r") as file: # check if this exists before using
-            test_json = file.read()
-
-
-        full_json = json.loads(test_json)
-
-        original_json = copy.deepcopy(full_json)
-
-
-        if add_type == "hyper_params":
-            del original_json["topology"]
-
-        del original_json[add_type]
-
-        to_add_json = full_json[add_type]
-
-        params = {
-            "username": "person",
-            "claim_check": "check",
-            "model_MKO": json.dumps(original_json),
-            "to_add": json.dumps(to_add_json),
-            "type": add_type,
-            "result_cache_URI": self.get_rc()
-        }
-
-        formatted_params = format_params("/add_component", params)
-
-        resp = requests.post(self.get_tm(formatted_params))
-        self.assertEqual(resp.status_code, 200)
-
-        del params["model_MKO"]
-        del params["result_cache_URI"]
-        del params["to_add"]
-        del params["type"]
-
-        formatted_params = format_params("/get_status", params)
-
-        time.sleep(20)
-        status = 0
-        while status != 1:
-            resp = requests.get(self.get_rc(formatted_params))
-            self.assertEqual(resp.status_code, 200)
-            status = float(resp.text)
-            time.sleep(1)
-
-        formatted_params = format_params("/get_result", params)
-        
-        resp = requests.get(self.get_rc(formatted_params))
-        self.assertEqual(resp.status_code, 200)
-        
-        self.assertTrue(add_type in json.loads(json.loads(resp.text)['contents']))
-
-    def test_add_data(self):
-        with open("trainer/test.json", "r") as file:
-            test_json = file.read()
-
-
-        full_json = json.loads(test_json)
-
-        del full_json["hyper_params"]
-        del full_json["topology"]
-
-        original_json = copy.deepcopy(full_json)
-        
-        del full_json["data"]
-
-        params = {
-            "username": "person",
-            "claim_check": "check",
-            "model_MKO": json.dumps(full_json),
-            "authenticator": original_json["data"]["auth_json"]["authenticator"],
-            "password": original_json["data"]["auth_json"]["password"],
-            "name": original_json["data"]["auth_json"]["name"],
-            "role": original_json["data"]["auth_json"]["role"],
-            "graphql_url": original_json["data"]["auth_json"]["url"],
-            "x_tags": original_json["data"]["x_tags"],
-            "y_tags": original_json["data"]["y_tags"],
-            "start_time": original_json["data"]["query_json"]["start_time"],
-            "end_time": original_json["data"]["query_json"]["end_time"],
-            "data_location": original_json["data"]["data_location"],
-            "result_cache_URI": self.get_rc()
-        }
-
-        formatted_params = format_params("/add_component", params)
-
-        resp = requests.post(self.get_tm(formatted_params))
-        self.assertEqual(resp.status_code, 200)
-
-        formatted_params = format_params("/get_status", params)
-
-        time.sleep(20)
-        status = 0
-        while status != 1:
-            resp = requests.get(self.get_rc(formatted_params))
-            self.assertEqual(resp.status_code, 200)
-            status = float(resp.text)
-            time.sleep(1)
-
-        formatted_params = format_params("/get_result", params)
-        
-        resp = requests.get(self.get_rc(formatted_params))
-        self.assertEqual(resp.status_code, 200)
-        
-        mko = json.loads(json.loads(resp.text)['contents'])
-        self.assertTrue("data" in mko)
-        self.assertTrue(mko == original_json)
-
-
-    # def test_add_hp(self):
-    #     self.add_test("hyper_params")
-
-    # def test_add_top(self):
-    #     self.add_test("topology")
+        mko = MKO.from_b64str(mko_data)
+        mko2 = MKO.from_b64str(mko.get_b64())
+        self.assertEqual(mko.get_b64(), mko2.get_b64())
 
 
 if __name__ == "__main__":

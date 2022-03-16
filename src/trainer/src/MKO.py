@@ -1,6 +1,6 @@
 import io
 from typing import Any, Iterable, Tuple, Union
-from src.trainer.src.external_query import post_status
+from trainer.src.external_query import post_status
 from trainer.src.json_parser import parse_json_model_structure
 import json
 import pickle

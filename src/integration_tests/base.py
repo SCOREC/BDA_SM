@@ -7,8 +7,8 @@ import time
 
 class BaseTest(TestCase):
     def setUp(self):
-        self.tm_port = 8080
-        self.rc_port = 9090
+        self.tm_port = 9595
+        self.rc_port = 8383
         log = logging.getLogger('werkzeug')
         log.setLevel(logging.ERROR)
         tm_app.config["TESTING"] = True

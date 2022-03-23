@@ -429,14 +429,11 @@ class MKO:
         if not self.topographic:
             raise MKOTypeException("topographic")
 
+        x = np.array(x, np.float64)
+
         x = self.normalize(x, is_x=True, raise_if_none=True)
 
-        X = tf.transpose(
-                tf.reshape(
-                    tf.repeat(x, repeats=samples), 
-                    (len(x), samples)
-                )
-        )
+        X  = x.repeat(samples, axis=0)
 
         return self.normalize(self._model.predict(X), reverse=True)
 

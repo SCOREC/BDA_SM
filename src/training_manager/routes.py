@@ -37,7 +37,7 @@ def save_file(data):
 def create_MKO():
     model_name = get_input("model_name", request.args)
     URI, username, claim_check = get_post_args(request.args)
-    Popen([*executable_path, username, claim_check, URI, "--create", "--name", "--delete", model_name])
+    Popen([*executable_path, "--create", "--name", model_name, "--delete", username, claim_check, URI])
     return Response("success", 200)
 
 # result_chache_URI: URI of result cache
@@ -99,7 +99,7 @@ def add_data():
     URI, username, claim_check = get_post_args(request.args)
     add_loc = save_file(json_to_add)
     mko_loc = save_file(mko)
-    Popen([*executable_path, username, claim_check, URI, "-f", mko_loc, "--add", "--delete", "data", add_loc])
+    Popen([*executable_path, username, claim_check, URI, "-f", mko_loc, "--add", "data", add_loc, "--delete"])
     return Response("success", 200)
 
 
@@ -146,7 +146,7 @@ def add_hparams():
     URI, username, claim_check = get_post_args(request.args)
     add_loc = save_file(json_to_add)
     mko_loc = save_file(mko)
-    Popen([*executable_path, username, claim_check, URI, "-f", mko_loc, "--add", "--delete", "hparams", add_loc])
+    Popen([*executable_path, username, claim_check, URI, "-f", mko_loc, "--add", "hparams", add_loc, "--delete"])
     return Response("success", 200)
 
 
@@ -190,7 +190,7 @@ def add_topology():
     URI, username, claim_check = get_post_args(request.args)
     add_loc = save_file(json_to_add)
     mko_loc = save_file(mko)
-    Popen([*executable_path, username, claim_check, URI, "-f", mko_loc, "--add", "--delete", "topology", add_loc])
+    Popen([*executable_path, username, claim_check, URI, "-f", mko_loc, "--add", "topology", add_loc, "--delete"])
     return Response("success", 200)
     
 # result_chache_URI: URI of result cache

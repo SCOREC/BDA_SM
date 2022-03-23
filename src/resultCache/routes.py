@@ -149,7 +149,7 @@ def get_result(): # handle the case of get result being called before get status
         data = file_handler.get(username, claim_check)
     except Exception as e:
         app.log_exception(e)
-        abort(Response(e.with_traceback, 500))
+        abort(Response(str(e.with_traceback()), 500))
     
     if data == None:
         return Response("'/{}/{}' not found".format(username, claim_check), 404)
@@ -175,17 +175,15 @@ def get_status():
         abort(Response("file handler not initialized", 500))
 
     try: 
-        data = file_handler.get_status(username, claim_check)
+        data = file_handler.get_most_recent_status(username, claim_check)
     except Exception as e:
         app.log_exception(e)
-        abort(Response(e.with_traceback, 500))
+        abort(Response(str(e.with_traceback()), 500))
     
     if data == None:
         return Response("'/{}/{}' not found".format(username, claim_check), 404)
 
-    data = data[-1][1]
-
-    return Response(data, 200)
+    return Response(str(data), 200)
 
 """
 Description: Gets the current time estimate of request completion
@@ -209,7 +207,7 @@ def get_eta():
         rate = file_handler.get_rate(username, claim_check)
     except Exception as e:
         app.log_exception(e)
-        abort(Response(e.with_traceback, 500))
+        abort(Response(str(e.with_traceback()), 500))
     
     if time == None:
         return Response("'/{}/{}' not found".format(username, claim_check), 404)
@@ -219,7 +217,7 @@ def get_eta():
 
     time = time[-1][1]
 
-    return Response(rate * time, 200)
+    return Response(str(rate * time), 200)
 
 
 """

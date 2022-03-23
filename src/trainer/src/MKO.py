@@ -6,6 +6,7 @@ import json
 import pickle
 import numpy as np
 import base64
+from trainer.src.decode_b64 import decode_base64
 import tensorflow as tf
 from tensorflow.keras import backend as K
 import pandas as pd
@@ -34,7 +35,7 @@ class MKO:
     # generates mko from text
     @staticmethod
     def from_b64str(string: str) -> 'MKO':
-        return MKO._from_json(base64.b64decode(string).decode("utf-8"))
+        return MKO._from_json(decode_base64(bytes(string, "utf-8")).decode("utf-8"))
 
 
     # json_text: string representing mko as json
@@ -474,6 +475,11 @@ class MKO:
                     Fields.OPTIONAL_SUB_FIELDS[field_enum].MANDATORY_FIELDS,
                     to_save[field_enum]
                 )
+
+        if self.augmented and self._data_type == Fields.Data.FETCHER:
+            self.save_fields(Fields.Data.MANDATORY_FETCHER_FIELDS,
+                to_save[Fields.DATA]
+            )
 
         self.save_fields(Fields.OPTIONAL_FIELDS, to_save)            
 

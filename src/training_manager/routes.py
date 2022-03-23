@@ -1,5 +1,6 @@
 from tempfile import NamedTemporaryFile
 from flask import request, abort, Response
+from pandas import date_range
 from training_manager import app
 from subprocess import Popen
 import json
@@ -15,6 +16,13 @@ def get_input(field, args, return_none=False):
             return None
 
     return args[field]
+
+def cast(var, type, name):
+    if var != None:
+        try:
+            return type(var)
+        except:
+            abort(Response("'{}' not of type '{}'".format(name, type), 400))
 
 def get_post_args(args):
     URI = get_input("result_cache_URI", args)
@@ -130,6 +138,17 @@ def add_hparams():
     loss_function = get_input("loss_function", request.args, True)
     train_percent = get_input("train_percent", request.args, True)
 
+    try:
+        data_shape = json.loads(data_shape)
+    except Exception:
+        abort(Response("'data_shape' not of type list", 400))
+
+    epochs = cast(epochs, int, "epochs")
+    batch_size = cast(batch_size, int, "batch_size")
+    learning_rate = cast(learning_rate, float, "learning_rate")
+    train_percent = cast(train_percent, float, "train_percent")
+
+
     json_to_add = json.dumps(
         Defaults.get_hparams_json(
             loss_function,
@@ -173,7 +192,12 @@ def add_topology():
     layers = get_input("layers", request.args, True)
     activation_funct = get_input("activation_funct", request.args, True)
     units = get_input("units", request.args, True)
-    dropout_rate = get_input("modedropout_ratel_MKO", request.args, True)
+    dropout_rate = get_input("dropout_rate", request.args, True)
+
+    output_shape = cast(output_shape, int, "output_shape")
+    layers = cast(layers, int, "layers")
+    units = cast(units, int, "units")
+    dropout_rate = cast(dropout_rate, float, "dropout_rate")
 
     json_to_add = json.dumps(
         Defaults.get_topology_json(

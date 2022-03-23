@@ -64,7 +64,11 @@ def load_file(file_loc: str) -> dict:
 # args: command line parser
 # trains model according to args
 def train(args: argparse.Namespace):
-    train_mko(args.file_loc[0], get_post_args(args), False if args.delete == 'false' else True)
+    train_mko(
+        args.file_loc[0], 
+        get_post_args(args), 
+        False if args.delete.lower() == 'false' else True
+    )
 
 # mko: file location of mko
 # post_args: (URI, usernae, claim_check)
@@ -98,7 +102,12 @@ def create_mko(model_name: str, post_args: tuple):
 # args: command line parser
 # adds a json object to the mko
 def add(args: argparse.Namespace):
-    add_mko(args.file_loc[0], args.add[0].lower(), args.add[1], get_post_args(args), False if args.delete == 'false' else True)
+    add_mko(
+        args.file_loc[0], 
+        args.add[0].lower(), 
+        args.add[1], get_post_args(args), 
+        False if args.delete.lower() == 'false' else True
+    )
 
 # mko: file location of mko
 # add_type: portion of mko to append to (data, hyperparams, etc.)

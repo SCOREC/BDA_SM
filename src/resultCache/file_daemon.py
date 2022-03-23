@@ -4,7 +4,6 @@ from typing import Optional, List
 import time
 import json
 import os
-import shutil
 
 
 class PurgeDaemon(Thread):
@@ -183,8 +182,12 @@ class FileHandler:
         if status_history == None:
             status_history = []
 
-        status_history.append((time.time(), status))
-        self._put_file(self, username, claim_check, generation_time, data, status_history, errors)
+        try:
+            status_history.append((time.time(), status))
+        except Exception as e:
+            print("Status History:", status_history)
+            raise e
+        self._put_file(username, claim_check, generation_time, data, status_history, errors)
 
     def _put_file(self, username: str, claim_check: str, generation_time: int, data: Optional[str], status_history: List[tuple], errors: Optional[str] = None):
         expiry_time = self.get_expiry_time(generation_time) + time.time()
@@ -239,7 +242,14 @@ class FileHandler:
         if file_contents == None:
             return None
 
-        return str(file_contents["status"])
+        return file_contents["status"]
+
+    def get_most_recent_status(self, username: str, claim_check: str) -> float:
+        status_history = self.get_status(username, claim_check)
+        if status_history == None:
+            return None
+
+        return status_history[-1][1]
 
 
     def get(self, username: str, claim_check: str, remove: bool = True) -> Optional[str]:
@@ -261,7 +271,7 @@ class FileHandler:
 
     def delete_all(self, delete_schedule=False):
         if delete_schedule:
-            shutil.rmtree(self._directory, ignore_errors=True)
+            self._purge_daemon.delete_all(True)
         else:
             self._purge_daemon.delete_all(False)
         

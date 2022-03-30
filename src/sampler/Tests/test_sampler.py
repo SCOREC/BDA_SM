@@ -17,28 +17,6 @@ class SamplerTests(TestCase):
         parsed = parsed._replace(query=encoded_params)
         return parse.urlunparse(parsed)
 
-    def test_upload_delete(self):
-        with open("trainer/test.mko", "r") as file:
-            mko_data = file.read()
-
-        params = {
-            "model_mko": mko_data
-        }
-
-        resp = self.client.post(self.format_params("/upload_mko", params))
-        self.assert200(resp)
-        mko_id = json.loads(resp.data.decode('utf-8'))["mko_id"]
-
-        params = {
-            "mko_id": mko_id
-        }
-
-        resp = self.client.post(self.format_params("/remove_mko", params))
-        self.assert200(resp)
-
-        resp = self.client.post(self.format_params("/remove_mko", params))
-        self.assert400(resp)
-
     def test_sample(self):
         with open("trainer/test.mko", "r") as file:
             mko_data = file.read()
@@ -53,16 +31,7 @@ class SamplerTests(TestCase):
         gt = mko.make_inference(xs, SAMPLES)
 
         params = {
-            "model_mko": str(mko)
-        }
-
-
-        resp = self.client.post(self.format_params("/upload_mko", params))
-        self.assert200(resp)
-        mko_id = json.loads(resp.data.decode('utf-8'))["mko_id"]
-
-        params = {
-            "mko_id": mko_id,
+            "model_mko": str(mko),
             "x": xs,
             "samples": SAMPLES
         }

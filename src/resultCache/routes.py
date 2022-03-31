@@ -1,8 +1,9 @@
-from os import stat
+from os import getenv
 from flask import request, abort, Response
 from resultCache import app
 from resultCache.file_daemon import FileHandler
 from resultCache.config import config
+from uuid import uuid4
 
 file_handler: FileHandler = None
 
@@ -13,7 +14,11 @@ def set_config(new_config):
 @app.before_first_request
 def on_start():
     global file_handler
-    file_handler = FileHandler(config.min_expiry_time, config.max_expiry_time, config.directory)
+
+    min_expiry_time = getenv("RC_MIN_EXP_TIME") if getenv("RC_MIN_EXP_TIME") else config.min_expiry_time
+    max_expiry_time = getenv("RC_MAX_EXP_TIME") if getenv("RC_MAX_EXP_TIME") else config.max_expiry_time
+
+    file_handler = FileHandler(min_expiry_time, max_expiry_time, config.rate_average_window, config.directory)
 
 
 def check_input(field, args):
@@ -144,7 +149,7 @@ def get_result(): # handle the case of get result being called before get status
         data = file_handler.get(username, claim_check)
     except Exception as e:
         app.log_exception(e)
-        abort(Response(e.with_traceback, 500))
+        abort(Response(str(e.with_traceback()), 500))
     
     if data == None:
         return Response("'/{}/{}' not found".format(username, claim_check), 404)
@@ -152,6 +157,12 @@ def get_result(): # handle the case of get result being called before get status
     return Response(data, 200)
     
 
+"""
+Description: Gets the current status of result as percentage
+Arguments:
+    username: str   
+    claim_check: str
+"""
 @app.route("/get_status", methods=["GET"])
 def get_status():
     check_input('username', request.args)
@@ -164,13 +175,55 @@ def get_status():
         abort(Response("file handler not initialized", 500))
 
     try: 
-        data = file_handler.get_status(username, claim_check)
+        data = file_handler.get_most_recent_status(username, claim_check)
     except Exception as e:
         app.log_exception(e)
-        abort(Response(e.with_traceback, 500))
+        abort(Response(str(e.with_traceback()), 500))
     
     if data == None:
         return Response("'/{}/{}' not found".format(username, claim_check), 404)
 
-    return Response(data, 200)
+    return Response(str(data), 200)
+
+"""
+Description: Gets the current time estimate of request completion
+Arguments:
+    username: str   
+    claim_check: str
+"""
+@app.route("/get_eta", methods=["GET"])
+def get_eta():
+    check_input('username', request.args)
+    check_input('claim_check', request.args)
+
+    username = request.args['username']
+    claim_check = request.args["claim_check"]
+
+    if file_handler == None:
+        abort(Response("file handler not initialized", 500))
+
+    try: 
+        time = file_handler.get_status(username, claim_check)
+        rate = file_handler.get_rate(username, claim_check)
+    except Exception as e:
+        app.log_exception(e)
+        abort(Response(str(e.with_traceback()), 500))
     
+    if time == None:
+        return Response("'/{}/{}' not found".format(username, claim_check), 404)
+
+    if rate == None:
+        return Response("updates < 2", 500)
+
+    time = time[-1][1]
+
+    return Response(str(rate * time), 200)
+
+
+"""
+Description: Gets the current time estimate of request completion
+"""
+@app.route("/get_claim_check", methods=["GET"])
+def get_claim_check():
+    data = str(uuid4())
+    return Response(data, 200)

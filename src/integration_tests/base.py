@@ -3,6 +3,7 @@ from multiprocessing import Process
 from training_manager import app as tm_app
 from resultCache import app as rc_app
 import logging
+import time
 
 class BaseTest(TestCase):
     def setUp(self):
@@ -16,6 +17,7 @@ class BaseTest(TestCase):
         self.tm_process.start()
         self.rc_process = Process(target=rc_app.run, kwargs={"host": "127.0.0.1", "port": self.rc_port, "debug": False})
         self.rc_process.start()
+        time.sleep(1)
 
     
     def get_tm(self, formatted_params=""):

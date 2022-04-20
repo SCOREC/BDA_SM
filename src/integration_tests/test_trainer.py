@@ -1,5 +1,5 @@
 from base64 import b64encode
-from integration_tests.base import BaseTest
+from integration_tests.base_tm_rc import BaseTest
 from integration_tests.helpers import format_params
 import unittest
 import json

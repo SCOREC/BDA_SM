@@ -18,7 +18,6 @@ def get_arg(field, args, dtype=None, json_loads=False):
     if dtype == None:
         return result
 
-
     try:
         if not json_loads:
             return dtype(result)

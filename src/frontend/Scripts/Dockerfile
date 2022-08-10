@@ -1,8 +1,8 @@
 FROM alpine:latest
 
-RUN adduser -D authServer
+RUN adduser -D frontend
 
-WORKDIR /home/authServer
+WORKDIR /home/frontend
 
 COPY requirements.txt requirements.txt
 RUN apk add --no-cache python3 py3-numpy 
@@ -12,18 +12,18 @@ RUN venv/bin/pip install --upgrade pip setuptools wheel
 RUN venv/bin/pip install --upgrade -r requirements.txt
 RUN apk del .build-deps
 
-COPY app app
-COPY errors errors
-#COPY migrations migrations
+COPY server server
+COPY __init__.py __init__.py 
+COPY frontend.py frontend.py
 
-COPY authServer.py config.py boot.sh testingscript.py .flaskenv ./
+COPY Scripts/boot.sh   boot.sh
 RUN chmod +x boot.sh
 
 
-ENV FLASK_APP authServer.py
+ENV FLASK_APP frontend.py
 
-RUN chown -R authServer:authServer ./
+RUN chown -R frontend:frontend ./
 
-USER authServer
+USER frontend
 EXPOSE 5000
-ENTRYPOINT ["/home/authServer/boot.sh"]
+ENTRYPOINT ["/home/frontend/boot.sh"]

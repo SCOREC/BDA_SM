@@ -60,11 +60,11 @@ def test_getTS(client, trainer_str):
     assert b'215' in response.get_data()
     assert response.status_code == 200
 
-# def test_getData(client, trainer_str):
-#     url = '/api/getdata'
-#     response = client.get(url, query_string = {'query': trainer_str})
-#     print(response.get_data())
-#     assert response.status_code == 200
+def test_getData(client, trainer_str):
+    url = '/api/getdata'
+    response = client.get(url, query_string = {'query': trainer_str})
+    print(response.get_data())
+    assert response.status_code == 200
 
 def test_getET(client, trainer_str):
     url = '/api/getEquipmentTypes'

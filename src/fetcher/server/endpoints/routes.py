@@ -1,4 +1,4 @@
-from api.endpoints import api
+from server.endpoints import api
 from flask import request
 from .get_time_series import perform_get_time_series
 from .get_data import get_data
@@ -7,9 +7,15 @@ from .get_equipments import Perform_getEquipments
 import json
 from werkzeug.exceptions import BadRequest
 
+@api.route('/echo', methods = ['GET'])
+def echo():
+    request_data = request.args.get('query')  # type: ignore
+    return request_data
+
 @api.route('/getdata', methods = ['GET'])
 def getdata():
-    request_data = json.loads(request.args.get('query'))
+    request_data = json.loads(request.args.get('query'))  # type: ignore
+    print(request_data)
     auth_json = None
     query_json = None
     if request_data:
@@ -17,45 +23,58 @@ def getdata():
             auth_json = request_data['auth_json']
             query_json = request_data['get_data']
 
-            if not query_json: raise BadRequest('No input in the query')
-            elif not 'Equipment' in query_json: raise BadRequest('No Equipment name found in the query')
-            elif not 'Attribute' in query_json: raise BadRequest('No Attribute found in the query')
+            if not query_json:
+                raise BadRequest('No input in the query')
+            elif not 'Equipment' in query_json:
+                raise BadRequest('No Equipment name found in the query')
+            elif not 'Attribute' in query_json:
+                raise BadRequest('No Attribute found in the query')
 
             return_json = get_data(auth_json, query_json)
 
-        else: raise BadRequest("no auth and query data in request")
-    else: raise BadRequest("Invalid Trader Json")
-    if not return_json: raise(' No JSON returned from CESMII')
+        else:
+            raise BadRequest("no auth and query data in request")
+
+    else:
+        raise BadRequest("Invalid Trainer Json")
+
+    if not return_json:
+        raise ValueError(' No JSON returned from CESMII')
     return return_json
 
 @api.route('/getEquipment', methods = ['GET'])
 def getEquipment():
-    request_data = json.loads(request.args.get('query'))
+    request_data = json.loads(request.args.get('query'))  # type: ignore
     auth_json = None
     if request_data:
         if 'auth_json' not in request_data: raise BadRequest("no auth and query data in request")
         auth_json = request_data['auth_json']
         return_json = Perform_getEquipmentTypes(auth_json)
-    else: raise BadRequest("Invalid Trader Json")
-    if not return_json: raise(' No JSON returned from CESMII')
+    else:
+        raise BadRequest("Invalid Trainer Json")
+    if not return_json:
+        raise ValueError(' No JSON returned from CESMII')
     return return_json
 
 @api.route('/getEquipmentTypes', methods = ['GET'])
 def getEquipmentTypes():
-    request_data = json.loads(request.args.get('query'))
+    request_data = json.loads(request.args.get('query'))  # type: ignore
     auth_json = None
     if request_data:
-        if 'auth_json' not in request_data: raise BadRequest("no auth and query data in request")
+        if 'auth_json' not in request_data:
+            raise BadRequest("no auth and query data in request")
         auth_json = request_data['auth_json']
         return_json = Perform_getEquipmentTypes(auth_json)
-    else: raise BadRequest("Invalid Trader Json")
-    if not return_json: raise(' No JSON returned from CESMII')
+    else:
+        raise BadRequest("Invalid Trainer Json")
+    if not return_json:
+        raise ValueError(' No JSON returned from CESMII')
     return return_json
 
 @api.route('/gettimeseries', methods=['GET'])
 def gettimeseries():
     
-    request_data = json.loads(request.args.get('query'))
+    request_data = json.loads(request.args.get('query'))  # type: ignore
     auth_json = None
     query_json = None
     # return request_data 
@@ -110,6 +129,8 @@ def get_matching_dates(item_dict, query_json, debug=False, opt=0):
             data_type = "floatvalue"
         elif content_type == "INT":
             data_type = "intvalue"
+        else:
+            raise ValueError('content_type "{}" unsupported'.format(content_type))
         value = inner_dict[i][data_type]
         ts = inner_dict[i]["ts"]
 

@@ -17,6 +17,9 @@ class No_Request(Exception):
     self.reason = reason
 
 def perform_graphql_request(content, url=None, headers=None):
+  print("-----")
+  print(content)
+  print("-----")
   r = requests.post(url=url, headers=headers, data={"query": content})
   r.raise_for_status()
   if r.ok:
@@ -43,7 +46,8 @@ def get_bearer_token (auth_json):
     }}
   """, url = url) 
   jwt_request = response['data']['authenticationRequest']['jwtRequest']
-  if jwt_request['challenge'] is None: raise Exception(jwt_request['message'])
+  if jwt_request['challenge'] is None:
+    raise Exception(jwt_request['message'])
   else:
       print("Challenge received: " + jwt_request['challenge'])
       response=perform_graphql_request(f"""
@@ -55,6 +59,8 @@ def get_bearer_token (auth_json):
           }}
         }}
     """, url = url)
+
+  print("RESPONSE: {}".format(response))
   jwt_claim = response['data']['authenticationValidation']['jwtClaim']
   return f"Bearer {jwt_claim}"
   #TODO: Handle Errors!

@@ -1,7 +1,9 @@
 import os
 from flask import Flask
-from config import Config
-from api.endpoints import api as api_bp
+from server.endpoints import api as api_bp
+
+Config = os.getenv('APP_SETTINGS',
+                   'server.config.DevelopmentConfig')
 
 def configure_app(app):
     @app.route('/fetcher_home')
@@ -10,8 +12,6 @@ def configure_app(app):
 
     app.register_blueprint(api_bp, url_prefix='/api')
     
-    from  . import auth
-    app.register_blueprint(auth.bp)
     return fetcher_home
 
 def create_app(test_config=None):

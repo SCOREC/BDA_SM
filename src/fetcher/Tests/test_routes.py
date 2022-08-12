@@ -34,8 +34,8 @@ class ContentTestCase(BaseTestCase):
       self.assertTrue(b'215' in response.get_data())
 
 
-  def test_getdata(self):
-    url = '/api/getdata'
+  def test_getEquipmentData(self):
+    url = '/api/getEquipmentData'
     with self.client:
       response = self.client.get(url, query_string={'query':trainer_str})
       self.assertEqual(response.status_code, 200)

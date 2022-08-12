@@ -11,12 +11,9 @@ json_from_trainer = {
                 "start_time": "2020-01-23T20:51:40.071032+00:00",
                 "end_time": "now",
                 "GMT_prefix_sign":"plus",
-                "max_samples": 0
-                },
-
-    "get_data" : {
-                    "Attribute": "Electric Potential",
-                    "Equipment": "Motor"
+                "max_samples": 0,
+                "Attribute": "Electric Potential",
+                "Equipment": "Motor"
                  }
 }
 

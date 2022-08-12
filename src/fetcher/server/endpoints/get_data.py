@@ -7,13 +7,14 @@ def get_data(auth_json, query_json, check_auth = True):
     if query_json:
         equipment_name = query_json['Equipment']
         attribute_name = query_json['Attribute']
-    else: raise  BadRequest(' No data in query_json')
+    else:
+        raise  BadRequest(' No data in query_json')
     print("Requesting Data from CESMII Smart Manufacturing Platform...")
     print()
 
     smp_query = f'''
         query {{
-                    typeToAttributeTypes(filter: {{displayName: {{equalTo: {attribute_name}}}}}) {{
+                    typeToAttributeTypes(filter: {{displayName: {{equalTo: "{attribute_name}"}}}}) {{
                         id
                         dataType
                         maxValue
@@ -22,11 +23,11 @@ def get_data(auth_json, query_json, check_auth = True):
                         partOf {{
                         description
                         id
-                            thingsByTypeId(filter:  {{displayName: {{equalTo: {equipment_name}}}}}) {{
+                            thingsByTypeId(filter:  {{displayName: {{equalTo: "{equipment_name}"}}}}) {{
                                 displayName
                                 id
                                 updatedTimestamp
-                                attributesByPartOfId(filter: {{displayName: {{equalTo: {attribute_name}}}}}) {{
+                                attributesByPartOfId(filter: {{displayName: {{equalTo: "{attribute_name}"}}}}) {{
                                     floatValue
                                     intValue
                                     id
@@ -47,14 +48,17 @@ def get_data(auth_json, query_json, check_auth = True):
     try:
         # Try to request data with the current bearer token
         smp_response = perform_graphql_request(smp_query, auth_json["url"],  headers={"Authorization": current_bearer_token})
+        print("SMP_RESPONSE: {}".format(smp_response))
     except Exception as e:
+        print("get_data exception: {}".format(e))
         if "forbidden" in str(e).lower() or "unauthorized" in str(e).lower():
             print("Bearer Token expired!")
-            print("Attempting to retreive a new GraphQL Bearer Token...")
+            print("Attempting to retrieve a new GraphQL Bearer Token...")
             print()
 
             # Authenticate
             current_bearer_token = get_bearer_token(auth_json)
+            print("Got a token: '{}'".format(current_bearer_token))
 
             print("New Token received: " + current_bearer_token)
             print()

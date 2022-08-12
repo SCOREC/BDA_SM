@@ -3,6 +3,7 @@
 ''' Dependenices to install via pip
       pip install requests '''
 
+from multiprocessing import AuthenticationError
 import requests
 import json
 
@@ -16,11 +17,11 @@ class No_Request(Exception):
     self.http_status_code = http_status_code
     self.reason = reason
 
-def perform_graphql_request(content, url=None, headers=None):
-  print("-----")
-  print(content)
-  print("-----")
-  r = requests.post(url=url, headers=headers, data={"query": content})
+def perform_graphql_request(content, url, headers=None):
+  try:
+    r = requests.post(url=url, headers=headers, data={"query": content})
+  except requests.RequestException as err:
+    raise No_Request(-1,err)
   r.raise_for_status()
   if r.ok:
     return r.json()
@@ -47,7 +48,7 @@ def get_bearer_token (auth_json):
   """, url = url) 
   jwt_request = response['data']['authenticationRequest']['jwtRequest']
   if jwt_request['challenge'] is None:
-    raise Exception(jwt_request['message'])
+    raise AuthenticationError(jwt_request['message'])
   else:
       print("Challenge received: " + jwt_request['challenge'])
       response=perform_graphql_request(f"""
@@ -60,7 +61,10 @@ def get_bearer_token (auth_json):
         }}
     """, url = url)
 
-  print("RESPONSE: {}".format(response))
-  jwt_claim = response['data']['authenticationValidation']['jwtClaim']
+  try:
+    jwt_claim = response['data']['authenticationValidation']['jwtClaim']
+  except KeyError as err:
+    raise AuthenticationError('Error getting JWT. Platform responded {}'.format(response))
+
+
   return f"Bearer {jwt_claim}"
-  #TODO: Handle Errors!

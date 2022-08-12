@@ -1,7 +1,7 @@
 from server.endpoints import api
 from flask import request
 from .get_time_series import perform_get_time_series
-from .get_data import get_data
+from .get_equipment import perform_get_equipment_data
 from .get_equipment_types import Perform_getEquipmentTypes
 from .get_equipments import Perform_getEquipments
 import json
@@ -10,36 +10,39 @@ from werkzeug.exceptions import BadRequest
 @api.route('/echo', methods = ['GET'])
 def echo():
     request_data = request.args.get('query')  # type: ignore
-    return request_data
+    return "Hello World"
 
-@api.route('/getdata', methods = ['GET'])
-def getdata():
+@api.route('/getEquipmentData', methods = ['GET'])
+def get_equipment_data():
     request_data = json.loads(request.args.get('query'))  # type: ignore
-    auth_json = None
-    query_json = None
     if request_data:
-        if 'auth_json' in request_data and 'get_data' in request_data:
-            auth_json = request_data['auth_json']
-            query_json = request_data['get_data']
+        auth_json = request_data.get('auth_json')
+        query_json = request_data.get('query_json')
 
-            if not query_json:
-                raise BadRequest('No input in the query')
-            elif not 'Equipment' in query_json:
-                raise BadRequest('No Equipment name found in the query')
-            elif not 'Attribute' in query_json:
-                raise BadRequest('No Attribute found in the query')
-
-            return_json = get_data(auth_json, query_json)
-
+        missing = []
+        if not isinstance(auth_json, dict):
+            missing.append('auth_json')
+        if isinstance(query_json, dict):
+            if 'Equipment' not in query_json:
+                missing.append('Equipment')
+            if 'Attribute' not in query_json:
+                missing.append('Attribute')
         else:
-            raise BadRequest("no auth and query data in request")
+            missing.append('query_json')
+
+        if len(missing) > 10:
+            print("auth_json: {}".format(json.dumps(auth_json)))
+            print("---------")
+            print("query_json: {}".format(json.dumps(query_json)))
+            raise BadRequest('Bad query, missing: {}'.format(missing))
 
     else:
-        raise BadRequest("Invalid Trainer Json")
+        raise BadRequest("Invalid query - must be valid JSON")
 
-    if not return_json:
-        raise ValueError(' No JSON returned from CESMII')
-    return return_json
+    cesmii_json = perform_get_equipment_data(auth_json, query_json)
+    if not cesmii_json:
+        raise ValueError('No JSON returned from CESMII')
+    return cesmii_json
 
 @api.route('/getEquipment', methods = ['GET'])
 def getEquipment():

@@ -12,8 +12,6 @@ def configure_app(app):
 
     app.register_blueprint(api_bp, url_prefix='/api')
     
-    from  . import auth
-    app.register_blueprint(auth.bp)
     return fetcher_home
 
 def create_app(test_config=None):

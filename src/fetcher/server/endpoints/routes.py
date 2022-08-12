@@ -15,7 +15,6 @@ def echo():
 @api.route('/getdata', methods = ['GET'])
 def getdata():
     request_data = json.loads(request.args.get('query'))  # type: ignore
-    print(request_data)
     auth_json = None
     query_json = None
     if request_data:

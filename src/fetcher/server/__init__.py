@@ -1,33 +1,14 @@
 import os
-from flask import Flask
-from server.endpoints import api as api_bp
+from flask import Flask, Blueprint, request
 
-Config = os.getenv('APP_SETTINGS',
-                   'server.config.DevelopmentConfig')
+app = Flask(__name__)
+app_settings = os.getenv('APP_SETTINGS', 'server.config.DevelopmentConfig')
+app.config.from_object(app_settings)
 
-def configure_app(app):
-    @app.route('/fetcher_home')
-    def fetcher_home():
-        return 'This is fetcher home!'
+import server.resources.api
+app.register_blueprint(server.resources.api.bp, url_prefix='/api')
 
-    app.register_blueprint(api_bp, url_prefix='/api')
-    
-    return fetcher_home
-
-def create_app(test_config=None):
-    app = Flask(__name__, instance_relative_config=True)
-    if test_config is None:
-        app.config.from_object(Config)
-    else:
-        app.config.from_mapping(test_config)
-    
-    try:
-        os.makedirs(app.instance_path)
-    except OSError:
-        pass
-
-    configure_app(app)
-
-    return app
-
-app = create_app()
+@app.route('/helloWorld', methods = ['GET'])
+def imAlive():
+    request_data = request.args.get('query')  # type: ignore
+    return "Hello World!"

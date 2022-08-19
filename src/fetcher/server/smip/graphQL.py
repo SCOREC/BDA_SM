@@ -102,9 +102,10 @@ def get_timeseries(url, token, attrib_id, start_time, end_time, max_samples):
   return dataframe.to_csv(index=False)
 
 def get_timeseries_array(url, token, attrib_id_list,
-  start_time, end_time, period, max_samples=0 ) -> pd.DataFrame:
+  start_time, end_time, period, max_samples=0 ):
   dataframes = []
   for attrib_id in attrib_id_list:
     dataframes.append(get_timeseries(url, token, attrib_id, start_time, end_time, max_samples))
   
-  return fm.combine_dataframes(dataframes, period).to_csv(index=False)
+  csv = fm.combine_dataframes(dataframes, period).to_csv(index=False)
+  return csv

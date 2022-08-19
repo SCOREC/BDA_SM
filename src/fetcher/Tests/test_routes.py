@@ -1,78 +1,81 @@
 import json
 from flask import Flask
+from Tests import testdata
 
 from server import app
 from Tests.base import BaseTestCase
-from testdata import trainer_str as trainer_str
+import testdata
+from testdata import trainer_str
 
 class HeartbeatTestCase(BaseTestCase):
   """Various 'am i alive' type tests"""
 
-  def test_client(self):
-    url = '/api/echo'
-    with self.client:
-      response = self.client.get(url,query_string={'query':trainer_str})
-      self.assertEqual(response.status_code, 200)
-
   def test_home_route(self):
-    url = '/fetcher_home'
+    url = '/helloWorld'
     with self.client:
       response = self.client.get(url)
       self.assertEqual(response.status_code, 200)
-      self.assertTrue(b'This is fetcher home!' in response.get_data())
+      self.assertTrue(b'Hello World!' in response.get_data())
 
 class ContentTestCase(BaseTestCase):
   """ Actual information from the CESMII server"""
 
-  def test_gettimeseries(self):
-    url = '/api/gettimeseries'
+
+  def test_validateAttributeById(self):
+    url = '/api/validateAttributeById'
     with self.client:
-      response = self.client.get(url, query_string={'query':trainer_str})
-      self.assertEqual(response.content_type, 'application/json') 
+      attribute = testdata.attribute1
+      query_json = json.dumps(
+        {
+          "url": testdata.smip_auth['url'],
+          "smip_token": self.smip_token,
+          "attrib_id": attribute['attrib_id']
+        }
+      )
+      response = self.client.get(url, query_string={'query':query_json})
       self.assertEqual(response.status_code, 200)
-      self.assertTrue(b'ts' or b'data' in response.get_data())
-      self.assertTrue(b'215' in response.get_data())
+      self.assertTrue(b"Successfully validated attribute id" in response.get_data())
+
+      query_json = json.dumps(
+        {
+          "url": testdata.smip_auth['url'],
+          "smip_token": self.smip_token,
+          "attrib_id": "9999999"
+        }
+      )
+      response = self.client.get(url, query_string={'query':query_json})
+      self.assertEqual(response.status_code, 422)
+      self.assertTrue(b"No such attribute" in response.get_data())
 
 
-  def test_getdata(self):
-    url = '/api/getdata'
+  def test_rawDataById(self):
+    url = '/api/rawDataById'
     with self.client:
-      response = self.client.get(url, query_string={'query':trainer_str})
+      attribute = testdata.attribute1
+      query_json = json.dumps(
+        {
+          "url": testdata.smip_auth['url'],
+          "smip_token": self.smip_token,
+          "attrib_id": attribute['attrib_id']
+        }
+      )
+      response = self.client.get(url, query_string={'query':query_json})
+      self.assertEqual(response.content_type, 'text/html; charset=utf-8')
       self.assertEqual(response.status_code, 200)
+      self.assertEqual(attribute['result'], response.get_data())
 
-  def test_getEquipmentTypes(self):
-    url = '/api/getEquipmentTypes'
+  def test_timeseriesById(self):
+    url = '/api/timeseriesById'
     with self.client:
-      response = self.client.get(url, query_string={'query':trainer_str})
+      attribute = testdata.attribute1
+      query_json = json.dumps(
+        {
+          "url": testdata.smip_auth['url'],
+          "smip_token": self.smip_token,
+          "attrib_id": attribute['attrib_id']
+        }
+      )
+      response = self.client.get(url, query_string={'query':query_json})
+      self.assertEqual(response.content_type, 'text/html; charset=utf-8')
       self.assertEqual(response.status_code, 200)
-      self.assertTrue(b'data' in response.get_data())
-
-  def test_getEquipment(self):
-    url = '/api/getEquipment'
-    with self.client:
-      response = self.client.get(url, query_string={'query':trainer_str})
-      self.assertEqual(response.status_code, 200)
-      self.assertTrue(b'data' in response.get_data())
-
-
-def test_fetcher_no_auth(self):
-    url = '/api/gettimeseries'
-    with self.client:
-      no_auth_json = json.loads(trainer_str)
-      no_auth_json['auth_json'] = {}
-      no_auth_str = json.dumps(no_auth_json)
-
-      response = self.client.get(url, query_string={'query':no_auth_str})
-      self.assertTrue(b'Bad Request' in response.get_data())
-      self.assertEqual(response.status_code, 400)
-
-def test_fetcher_no_query(self):
-    url = '/api/gettimeseries'
-    with self.client:
-      no_query_json = json.loads(trainer_str)
-      no_query_json['query_json'] = {}
-      no_query_str = json.dumps(no_query_json)
-
-      response = self.client.get(url, query_string={'query':no_query_str})
-      self.assertTrue(b'Bad Request' in response.get_data())
-      self.assertEqual(response.status_code, 400)
+      self.assertEqual(attribute['result'], response.get_data())

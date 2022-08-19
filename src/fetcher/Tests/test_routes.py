@@ -59,11 +59,9 @@ class ContentTestCase(BaseTestCase):
           "attrib_id": attribute['attrib_id']
         }
       )
-      print("query_json:\n", query_json)
       response = self.client.get(url, query_string={'query':query_json})
       self.assertEqual(response.content_type, 'text/html; charset=utf-8')
       self.assertEqual(response.status_code, 200)
-      print("rawDataById:\n", response.get_data())
       self.assertEqual(attribute['result'], response.get_data())
 
   def test_timeseriesById(self):
@@ -77,7 +75,6 @@ class ContentTestCase(BaseTestCase):
           "attrib_id": attribute['attrib_id']
         }
       )
-      print("query_json:\n", query_json)
       response = self.client.get(url, query_string={'query':query_json})
       self.assertEqual(response.content_type, 'text/html; charset=utf-8')
       self.assertEqual(response.status_code, 200)

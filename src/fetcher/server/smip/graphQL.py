@@ -74,8 +74,7 @@ def get_raw_attribute_data( url, token, attrib_id):
     else:
       raise(err)
 
-  df = pd.DataFrame.from_dict(smp_response['data']['attribute']['getTimeSeries'])
-  df['ts'] = pd.to_datetime(df['ts'], dayfirst=True)
+  df = fm.json_timeseries_to_table(smp_response['data']['attribute']['getTimeSeries'], attrib_id=attrib_id)
   return df.to_csv(index=False)
 
 def get_timeseries(url, token, attrib_id, start_time, end_time, max_samples):

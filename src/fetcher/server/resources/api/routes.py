@@ -35,7 +35,7 @@ def raw_data_by_id():
     smip_url = request_data.get('url')
     smip_token = request_data.get('smip_token')
     attrib_id = request_data.get('attrib_id')
-    csv_data = smip.get_equipment_description(smip_url, smip_token, attrib_id)
+    csv_data = smip.get_raw_attribute_data(smip_url, smip_token, attrib_id)
     return Response(csv_data, status=200)
   except smip.GraphQLAuthenticationError as err:
     return Response("Authorization failed", 500)

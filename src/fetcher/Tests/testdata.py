@@ -1,20 +1,32 @@
 import json
+import Tests.passwords
 
-json_from_trainer = {
-    "auth_json" : {"authenticator": "kaushp",
-                "password": "welcome001",
-                "name": "kaushp",
-                "role": "rpi_ro_group",
-                "url": "https://rpi.cesmii.net/graphql"
-                },
-   "query_json" : {"tag_ids": ["984"],
-                "start_time": "2020-01-23T20:51:40.071032+00:00",
-                "end_time": "now",
-                "GMT_prefix_sign":"plus",
-                "max_samples": 0,
-                "Attribute": "Electric Potential",
-                "Equipment": "Motor"
-                 }
+smip_auth = {
+  "authenticator": "maxdemo",
+  "password": "{smip_password}".format(smip_password=Tests.passwords.smip_password),
+  "username": "maxdemo",
+  "role": "rpi_ro_group",
+  "url": "https://rpi.cesmii.net/graphql",
 }
 
-trainer_str = json.dumps(json_from_trainer)
+attribute1 = {
+  "attrib_id": "27084",
+  "displayName": "Temperature - Equipment",
+  "dataType": "FLOAT",
+  "start_time": "2019-01-02:00:00.000+00:00",
+  "end_time":   "2019-01-08:00:00.000+00:00",
+  "max_samples": 0,
+  "result": b'ts,27084\n2019-01-02 00:00:00+00:00,10.0\n2019-01-03 00:00:00+00:00,20.0\n2019-01-04 00:00:00+00:00,30.0\n2019-01-05 00:00:00+00:00,40.0\n2019-01-06 00:00:00+00:00,50.0\n2019-01-07 00:00:00+00:00,60.0\n2019-01-08 00:00:00+00:00,\n'
+}
+
+attribute2 = {
+  "attrib_id": "27077",
+  "displayName": "Flow Rate - Mass- In",
+  "dataType": "FLOAT",
+  "start_time": "2019-01-02:00:00.000+00:00",
+  "end_time":   "2019-01-09:00:00.000+00:00",
+  "max_samples": 0,
+}
+
+trainer_str = ""
+

@@ -1,0 +1,3 @@
+#
+
+smip_password = "CatCowDogHorse"

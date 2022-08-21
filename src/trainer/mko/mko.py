@@ -1,24 +1,24 @@
 import io
 from typing import Any, Iterable, Tuple, Union
-from trainer.src.external_query import post_status
-from trainer.src.json_parser import parse_json_model_structure
+from src.external_query import post_status
+from src.json_parser import parse_json_model_structure
 import json
 import pickle
 import numpy as np
 import base64
-from trainer.src.decode_b64 import decode_base64
+from src.decode_b64 import decode_base64
 import tensorflow as tf
 from tensorflow.keras import backend as K
 import pandas as pd
-from trainer.src.training_callback import StatusCallback
-from trainer.src.exceptions import (
+from src.training_callback import StatusCallback
+from src.exceptions import (
     InputException, 
     VersionException, 
     MKOTypeException, 
     InvalidArgument
 )
-from trainer.src.MKO_fields import Fields
-from trainer.src.external_query import get_http, query_fetcher
+from src.MKO_fields import Fields
+from src.external_query import get_http, query_fetcher
 import os
 
 version = "1.0"

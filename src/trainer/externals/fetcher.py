@@ -1,5 +1,5 @@
 import requests
-from trainer.src.exceptions import ConnectionException
+from src.exceptions import ConnectionException
 
 # valid input json to the fetcher should contain these fields
 # json_from_trainer = {
@@ -25,7 +25,7 @@ def query_fetcher(URI: str, args: str) -> str:
     params = {
         "query": args
     }
-
+    print(params)
     resp = requests.get("{}/api/gettimeseries".format(URI), params=params)
     check_connection(resp, URI)
     return resp.text

@@ -1,12 +1,12 @@
 import unittest
-from trainer.src.MKO import MKO
+from src.MKO import MKO
 import json
 import os
 import pandas as pd
 import requests
 import io
 import numpy as np
-from trainer.src.Tests.data_2_saver import data_2
+from src.Tests.data_2_saver import data_2
 
 class TestTrainer(unittest.TestCase):
     def __init__(self, *args):

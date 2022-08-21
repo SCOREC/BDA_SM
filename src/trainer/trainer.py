@@ -1,8 +1,8 @@
 import argparse
 import os
-from trainer.src.external_query import post_result_cache, post_error
-from trainer.src.MKO import MKO
-from trainer.src.exceptions import InputException, InvalidArgument
+from src.external_query import post_result_cache, post_error
+from src.MKO import MKO
+from src.exceptions import InputException, InvalidArgument
 from tempfile import NamedTemporaryFile as TempFile
 import time
 

@@ -9,6 +9,8 @@ class Config:
     min_expiry_time = None
     directory = None
     rate_average_window = None
+    JWT_SALT = ""
+    JWT_ALGORITHM = "HS256"
 
 class ProductionConfig(Config):
     max_expiry_time = Constants.one_day_seconds

@@ -11,11 +11,13 @@ class AddTypes:
     HYPER_PARAMS = "hyper_params"
     HYPER_PARAMS_ABBREV = "hparams"
     TOPOLOGY = "topology"
+    ALL = "ALL"
     types = {
         DATA,
         HYPER_PARAMS,
         HYPER_PARAMS_ABBREV,
-        TOPOLOGY
+        TOPOLOGY,
+        ALL
     }
 
 # command line arguments
@@ -127,6 +129,10 @@ def add_mko(mko_filename: str, add_type: str, add_loc: str, post_args: tuple, de
     elif add_type == AddTypes.HYPER_PARAMS or add_type == AddTypes.HYPER_PARAMS_ABBREV:
         mko.add_hyper_params(to_add)
     elif add_type == AddTypes.TOPOLOGY:
+        mko.add_topology(to_add)
+    elif add_type == AddTypes.ALL:
+        mko.add_data(to_add)
+        mko.add_hyper_params(to_add)
         mko.add_topology(to_add)
 
     mko_data = str(mko)

@@ -1,8 +1,8 @@
 import argparse
 import os
-from src.external_query import post_result_cache, post_error
-from src.MKO import MKO
-from src.exceptions import InputException, InvalidArgument
+from externals.results_cache import post_result_cache, post_error
+from mko.dan_mko import MKO
+from mko.exceptions import InputException, InvalidArgument
 from tempfile import NamedTemporaryFile as TempFile
 import time
 
@@ -72,9 +72,9 @@ def train(args: argparse.Namespace):
 
 # mko: file location of mko
 # post_args: (URI, usernae, claim_check)
-def train_mko(mko: str, post_args: tuple, delete: bool):
+def train_mko(mko_filename: str, post_args: tuple, delete: bool):
     prev_time = time.time()
-    mko = MKO.from_b64str(load_file(mko))
+    mko = MKO.from_b64str(load_file(mko_filename))
     mko.compile()
     mko.load_data()
     mko.train(push_update_args=post_args)
@@ -114,9 +114,10 @@ def add(args: argparse.Namespace):
 # to_add: location of new json file to merge with mko
 # post_args: (URI, usernae, claim_check)
 # combines to_add as a sub field of mko under the to_add tag
-def add_mko(mko: str, add_type: str, add_loc: str, post_args: tuple, delete: bool):
+def add_mko(mko_filename: str, add_type: str, add_loc: str, post_args: tuple, delete: bool):
     prev_time = time.time()
-    mko = MKO.from_b64str(load_file(mko))
+    mko = MKO.from_b64str(load_file(mko_filename))
+    print("Loaded MKO from ", mko_filename)
     to_add = load_file(add_loc)
     if add_type not in AddTypes.types:
         raise InvalidArgument("add type", AddTypes.types)

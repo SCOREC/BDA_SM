@@ -1,4 +1,4 @@
-from src.external_query import post_status
+from externals.results_cache import post_status
 from tensorflow.keras.callbacks import Callback
 
 class StatusCallback(Callback):

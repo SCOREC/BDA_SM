@@ -18,4 +18,5 @@ archival/*
 databases/*
 .data/
 .test_data/
+passwords.py
 

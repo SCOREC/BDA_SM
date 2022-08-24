@@ -1,6 +1,5 @@
 from flask import request
 from flask.wrappers import Response
-from werkzeug.exceptions import BadRequest
 import json
 
 from server.resources.api import bp
@@ -40,7 +39,7 @@ def raw_data_by_id():
   except smip.GraphQLAuthenticationError as err:
     return Response("Authorization failed", 500)
   except Exception as err:
-    raise BadRequest("SMIP returned {}".format(err))
+    raise Response("SMIP returned {}".format(err), 400)
 
 @bp.route("/timeseriesById")
 def timeseries_by_id():
@@ -75,4 +74,4 @@ def timeseries_array_by_id():
   except smip.GraphQLAuthenticationError as err:
     return Response("Authorization failed", 500)
   except Exception as err:
-    raise BadRequest("SMIP returned {}".format(err))
+    raise Response("SMIP returned {}".format(err), 400)

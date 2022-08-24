@@ -1,8 +1,8 @@
 from typing import Any
-from keras import Input, Model
-from keras.layers import Dense, Conv2D, Layer
-from trainer.src.layers import VariationalDropout
-from trainer.src.exceptions import InputException, InvalidArgument
+from tensorflow.keras import Input, Model
+from tensorflow.keras.layers import Dense, Conv2D, Layer
+from ml.layers import VariationalDropout
+from ml.exceptions import InputException, InvalidArgument
 
 class Defaults:
     rate = 0.95

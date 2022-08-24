@@ -1,11 +1,15 @@
-from os import getenv
+from os import getenv, getpid
 from flask import request, abort, Response
 from resultCache import app
 from resultCache.file_daemon import FileHandler
 from resultCache.config import config
 from uuid import uuid4
+from datetime import datetime, timedelta
+import jwt
+
 
 file_handler: FileHandler = None
+JWT_SECRET = ""
 
 def set_config(new_config):
     global config
@@ -13,10 +17,11 @@ def set_config(new_config):
 
 @app.before_first_request
 def on_start():
-    global file_handler
+    global file_handler, JWT_SECRET
 
     min_expiry_time = getenv("RC_MIN_EXP_TIME") if getenv("RC_MIN_EXP_TIME") else config.min_expiry_time
     max_expiry_time = getenv("RC_MAX_EXP_TIME") if getenv("RC_MAX_EXP_TIME") else config.max_expiry_time
+    JWT_SECRET = str(datetime.now().timestamp) + str(getpid()) + getenv("RC_JWTSALT", config.JWT_SALT)
 
     file_handler = FileHandler(min_expiry_time, max_expiry_time, config.rate_average_window, config.directory)
 
@@ -25,6 +30,20 @@ def check_input(field, args):
     if field not in args:
         abort(Response("'{}' not in args".format(field), 400))
 
+
+
+@app.route ('/new_claim_check', methods =['GET'])
+def new_claim_check():
+  try:
+    username = request.values['username']
+    offset = int(request.values.get('offset', 0))
+    dtoffset = timedelta(seconds=offset)
+    now = str((datetime.now() + dtoffset).timestamp())
+    payload = {"username": username, "exp": now}
+    claim_check = jwt.encode(payload=payload, key=JWT_SECRET, algorithm=config.JWT_ALGORITHM)
+    return Response(claim_check, 200)
+  except Exception as err:
+    return Response("Bad request", 400)
 
 """
 Descrption: Stores input data for later use

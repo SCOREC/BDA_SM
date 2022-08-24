@@ -1,0 +1,21 @@
+{
+  "x_mu": null,
+  "x_std": null,
+  "y_mu": null,
+  "y_std": null,
+  "x_tags": ["27084"],
+  "y_tags": ["27077"],
+  "auth_json": {
+    "smip_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoicnBpX3JvX2dyb3VwIiwiZXhwIjoxNjYxMTk5NDc5LCJ1c2VyX25hbWUiOiJtYXhkZW1vIiwiYXV0aGVudGljYXRvciI6Im1heGRlbW8iLCJhdXRoZW50aWNhdGlvbl9pZCI6IjEzNDMzMiIsImlhdCI6MTY2MTExMzA3OSwiYXVkIjoicG9zdGdyYXBoaWxlIiwiaXNzIjoicG9zdGdyYXBoaWxlIn0.5sxyxuF8CEQ8S7RJgevdmlC-85i2r6aPn0NIMlqMk5c",
+    "url": "https://rpi.cesmii.net/graphql"
+  },
+  "data_type": "fetcher",
+  "data_location": "http://127.0.0.1:5000",
+  "query_json": {
+    "start_time": "2019-01-01:51:40.071032+00:00",
+    "end_time": "now",
+    "GMT_prefix_sign": "plus",
+    "period": "3600",
+    "max_samples": 0
+  }
+}

@@ -1,24 +1,22 @@
 import io
 from typing import Any, Iterable, Tuple, Union
-from trainer.src.external_query import post_status
-from trainer.src.json_parser import parse_json_model_structure
+from externals.results_cache import post_status
+from ml.json_parser import parse_json_model_structure
 import json
-import pickle
 import numpy as np
-import base64
-from trainer.src.decode_b64 import decode_base64
+import mko.encodings as encodings
 import tensorflow as tf
 from tensorflow.keras import backend as K
 import pandas as pd
-from trainer.src.training_callback import StatusCallback
-from trainer.src.exceptions import (
+from ml.training_callback import StatusCallback
+from mko.exceptions import (
     InputException, 
     VersionException, 
     MKOTypeException, 
     InvalidArgument
 )
-from trainer.src.MKO_fields import Fields
-from trainer.src.external_query import get_http, query_fetcher
+from mko.fields import Fields
+from externals.fetcher import get_http, query_fetcher
 import os
 
 version = "1.0"
@@ -35,7 +33,7 @@ class MKO:
     # generates mko from text
     @staticmethod
     def from_b64str(string: str) -> 'MKO':
-        return MKO._from_json(decode_base64(bytes(string, "utf-8")).decode("utf-8"))
+        return MKO._from_json(encodings.decode_base64(bytes(string, "utf-8")).decode("utf-8"))
 
 
     # json_text: string representing mko as json
@@ -55,6 +53,39 @@ class MKO:
         }
         return MKO(empty)
 
+    ########## Properties ###############
+    # does the mko have a model layout described
+    @property
+    def topographic(self) -> bool:
+        return self._topology != None
+
+    # does the mko have a data definition
+    @property
+    def augmented(self) -> bool:
+        return self._data
+
+    @property
+    def json(self):
+        return self._get_json()
+
+    @property
+    def b64(self):
+        return self._get_b64()
+
+    ########## accessors #############
+    def _get_json(self) -> str:
+        return json.dumps(self.get_dict())
+    
+    def _get_b64(self) -> str:
+        json_str = self._get_json()
+        return encodings.b64encode(bytes(json_str, "utf-8")).decode("utf-8")
+
+    def __str__(self) -> str:
+        return self.b64
+        
+    def __repr__(self) -> str:
+        return self.b64
+        
     # data: data of type to check
     # field: name representing the data
     # data_type: type that the data must be
@@ -81,18 +112,6 @@ class MKO:
             MKO.enforce_type(input_params[field], field, dict)
 
 
-    # does the mko have a model layout described
-    @property
-    def topographic(self) -> bool:
-        return self._topology != None
-
-
-    # does the mko have a data definition
-    @property
-    def augmented(self) -> bool:
-        return self._data
-
-
     # fields: set of fields to parse
     # input_params: dict object to parse from
     # for each field in fields add the name of the field
@@ -107,6 +126,7 @@ class MKO:
     # data: data descriptor
     # ensures that data descriptor for fetcher is correct
     def validate_fetcher_format(self, data: dict):
+        print("validating fetcher format")
         if self._data_type == Fields.Data.FETCHER:
             self.parse_fields(Fields.Data.MANDATORY_FETCHER_FIELDS, data)
 
@@ -150,7 +170,7 @@ class MKO:
         if Fields.WEIGHTS in input_params:
             MKO.enforce(Fields.WEIGHTS, input_params)
             self._model.set_weights(
-                [MKO.b64decode_array(w) for w in input_params[Fields.WEIGHTS]]
+                [encodings.b64decode_array(w) for w in input_params[Fields.WEIGHTS]]
             )
 
         if version != self._version:
@@ -198,7 +218,8 @@ class MKO:
     # merges data with mko
     def add_data(self, data: Union[dict, str]):
         if type(data) == str:
-            self.add_data(json.loads(data))
+            json_data = json.loads(data)
+            self.add_data(json_data)
             return
 
         self._data = True
@@ -438,20 +459,6 @@ class MKO:
         return self.normalize(self._model.predict(X), reverse=True)
 
 
-    # return unpickled version of string
-    @staticmethod
-    def b64decode_array(string: str) -> np.array:
-        return pickle.loads(base64.b64decode(string))
-
-
-    # return pickled version of array
-    @staticmethod
-    def b64encode_array(array: np.array) -> str:
-        return base64.b64encode(
-            pickle.dumps(array, protocol=pickle.HIGHEST_PROTOCOL)
-        ).decode('ascii')
-
-
     # fields: fields to save
     # to_save: json object
     # for each filed in fields save in json object
@@ -490,22 +497,3 @@ class MKO:
             to_save[Fields.TOPOLOGY] = self._topology
 
         return to_save
-
-
-    # get string json string representation of mko
-    def _get_json(self) -> str:
-        return json.dumps(self.get_dict())
-    
-    def get_b64(self) -> str:
-        json_str = self._get_json()
-        return base64.b64encode(bytes(json_str, "utf-8")).decode("utf-8")
-
-    # returns b64 encoded string
-    def __str__(self) -> str:
-        return self.get_b64()
-        
-        
-    # returns b64 encoded string
-    def __repr__(self) -> str:
-        return self.get_b64()
-        

@@ -1,4 +1,3 @@
-from re import A
 import subprocess
 import requests
 import tempfile 
@@ -36,12 +35,12 @@ def create_mko(model_name: str, username: str) -> str:
     cfg.RESULTS_CACHE_URI,
     "--create",
     "--name", model_name,
-    "--cleanup",
+    "--delete",
     ]
   )
   return claim_check
 
-def fill_mko(username: str, model_name: str, dataspec_r: dict, topology_r: list=[], hypers_r= dict={} ) -> str:
+def fill_mko(username: str, model_name: str, mko: str, dataspec_r: dict, topology_r: list=[], hypers_r:dict={} ) -> str:
 
   dataspec = defaults.dataspec
   for key in dataspec_r.keys():
@@ -85,4 +84,22 @@ def fill_mko(username: str, model_name: str, dataspec_r: dict, topology_r: list=
     "ALL",
     add_loc
   ])
+  return claim_check
+
+
+def train_mko(model_name: str, username: str, mko: str) -> str:
+  claim_check = get_new_claim_check(username)
+  mko_loc = save_file(mko)
+  subprocess.Popen([
+    *cfg.EXECUTABLE_PATH,
+    username,
+    claim_check,
+    cfg.RESULTS_CACHE_URI,
+    "--train",
+    "--name", model_name,
+    "--delete",
+    "--file",
+    mko_loc
+    ]
+  )
   return claim_check

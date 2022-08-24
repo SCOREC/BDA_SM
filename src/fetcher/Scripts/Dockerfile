@@ -1,26 +1,23 @@
-FROM python:3.9.13-alpine3.16
+FROM continuumio/miniconda3
 
-RUN adduser -D fetcher
+RUN adduser --disabled-password fetcher
 
 WORKDIR /home/fetcher
 
 COPY requirements.txt requirements.txt
-RUN apk add --no-cache py3-numpy 
-RUN python3 -m venv venv
-RUN venv/bin/pip install --upgrade pip setuptools wheel
-RUN venv/bin/pip install --upgrade -r requirements.txt
+RUN conda init zsh
+RUN conda create --name venv python=3.9
+RUN conda install -c conda-forge -n venv --file requirements.txt  \
+    && /opt/conda/bin/conda clean -afy \
+    && find /opt/conda/ -follow -type f -name '*.a' -delete \
+    && find /opt/conda/ -follow -type f -name '*.pyc' -delete \
+    && find /opt/conda/ -follow -type f -name '*.js.map' -delete 
 
-COPY server server
+COPY --chown=fetcher:fetcher server server
+COPY --chown=fetcher:fetcher fetcher.py Scripts/boot.sh ./
 
-COPY fetcher.py ./
-COPY Scripts/boot.sh ./
-RUN chmod +x boot.sh
-
-
-ENV FLASK_APP fetcher.py
-
-RUN chown -R fetcher:fetcher ./
 
 USER fetcher
+RUN conda init --all
 EXPOSE 5000
 ENTRYPOINT ["/home/fetcher/boot.sh"]

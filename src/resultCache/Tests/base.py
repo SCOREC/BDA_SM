@@ -1,16 +1,21 @@
 # frontend/Tests/base.py
 from flask_testing import TestCase
-from resultCache import app
-from resultCache import routes
-from resultCache.config import TestConfig as config
+from server import app
+from server.config import TestingConfiguration as Config
+import Tests.helpers
 
 class BaseTestCase(TestCase):
-    def create_app(self):
-        routes.set_config(config)
-        app.config['TESTING'] = True
-        return app
+  def create_app(self):
+    app.config.from_object(Config)
+    app.config['TESTING'] = True
+    return app
 
-    def tearDownClass():
-        if routes.file_handler != None:
-            routes.file_handler.end()
-            routes.file_handler.delete_all(True)
+  @staticmethod
+  def setUpModule():
+    Tests.helpers.shut_down_file_handler()
+
+  def setUp(self):
+    Tests.helpers.bring_up_file_handler()
+
+  def tearDown(self):
+    Tests.helpers.shut_down_file_handler()

@@ -1,16 +1,27 @@
 import unittest
-from resultCache.file_daemon import FileHandler
-from resultCache.config import TestConfig as config
-from resultCache.Tests.helpers import get_test_set
+from server.file_daemon import FileHandler
+from server.config import TestingConfiguration as config
+from Tests.helpers import get_test_set, shut_down_file_handler
+from server.claim_check import ClaimCheck
 import json
 import time
 
 
+shut_down_file_handler()
 class TestFileHandler(unittest.TestCase):
+
+    @staticmethod
+    def setUpModule():
+        shut_down_file_handler()
+
+    def tearDown(self):
+        shut_down_file_handler()
+
     def test_basic_store_and_retrieve(self):
-        fh = FileHandler(config.min_expiry_time, config.max_expiry_time, config.directory)
+        fh = FileHandler(config.MIN_EXPIRY_TIME, config.MAX_EXPIRY_TIME, config.RATE_AVERAGE_WINDOW, config.DIRECTORY)
         username = "user"
-        cc = "test_str"
+        claim_check = ClaimCheck(username)
+        cc = claim_check.shortname
         str_data = "test_data\ntesttest"
         fh.put(username, cc, 0, str_data)
         out_data = json.loads(fh.get(username, cc))['contents']
@@ -31,7 +42,7 @@ class TestFileHandler(unittest.TestCase):
 
     def get_fh(self, fh, user, cc, should_delete=True):
         c = fh.get(user, cc, should_delete)
-        if c == None:
+        if len(c) == 0:
             return c
 
         return json.loads(c)['contents']
@@ -48,7 +59,7 @@ class TestFileHandler(unittest.TestCase):
         return cases
 
     def test_large_volume(self):
-        fh = FileHandler(config.min_expiry_time, config.max_expiry_time, config.directory)
+        fh = FileHandler(config.MIN_EXPIRY_TIME, config.MAX_EXPIRY_TIME, config.RATE_AVERAGE_WINDOW, config.DIRECTORY)
 
         usernames, ccs, data = get_test_set()
 
@@ -72,14 +83,14 @@ class TestFileHandler(unittest.TestCase):
                 fh.put(user, cc, 0, datum)
 
     def test_purge_test(self):
-        fh = FileHandler(config.min_expiry_time, config.max_expiry_time, config.directory)
+        fh = FileHandler(config.MIN_EXPIRY_TIME, config.MAX_EXPIRY_TIME, config.RATE_AVERAGE_WINDOW, config.DIRECTORY)
 
         usernames, ccs, data = get_test_set()
         datum = data[0]
 
         self.put_datum(fh, usernames, ccs, datum)
 
-        time.sleep(2 * config.min_expiry_time)
+        time.sleep(2 * config.MIN_EXPIRY_TIME)
 
         cases = self.check_eq(fh, usernames, ccs, None, single_expectation=True)
 
@@ -91,7 +102,7 @@ class TestFileHandler(unittest.TestCase):
 
 
     def test_multi_session_purge_test(self):
-        fh = FileHandler(config.min_expiry_time, config.max_expiry_time, config.directory)
+        fh = FileHandler(config.MIN_EXPIRY_TIME, config.MAX_EXPIRY_TIME, config.RATE_AVERAGE_WINDOW, config.DIRECTORY)
 
         usernames, ccs, data = get_test_set()
         datum = data[0]
@@ -100,9 +111,9 @@ class TestFileHandler(unittest.TestCase):
 
         fh.end()
 
-        fh = FileHandler(config.min_expiry_time, config.max_expiry_time, config.directory)
+        fh = FileHandler(config.MIN_EXPIRY_TIME, config.MAX_EXPIRY_TIME, config.RATE_AVERAGE_WINDOW, config.DIRECTORY)
 
-        time.sleep(2 * config.min_expiry_time)
+        time.sleep(2 * config.MIN_EXPIRY_TIME)
 
         cases = self.check_eq(fh, usernames, ccs, None, single_expectation=True)
 

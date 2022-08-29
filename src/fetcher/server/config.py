@@ -16,19 +16,19 @@ class DevelopmentConfig(BaseConfig):
     DEVELOPMENTCONFIG = True
     TESTINGCONFIG = False
     PRODUCTIONCONFIG = False
-    FLASK_ENV = 'development'
+    ENV = 'development'
     FLASK_RUN_PORT = environ.get('FLASK_RUN_PORT')
     FLASK_APP = environ.get('FLASK_APP')
     SECRET_KEY = environ.get('SECRET_KEY')
     STATIC_FOLDER = 'static'
 
 class TestingConfiguration(BaseConfig):
-    """Testing configuration"""
+    """ Only for automated tests """
     DEBUG = True
     TESTINGCONFIG = True
     DEVELOPMENTCONFIG = False
     PRODUCTIONCONFIG = False
-    FLASK_ENV = 'testing'
+    ENV = 'development'
     FLASK_RUN_PORT = environ.get('FLASK_RUN_PORT')
     FLASK_APP = environ.get('FLASK_APP')
     SECRET_KEY = environ.get('SECRET_KEY')
@@ -40,6 +40,7 @@ class ProductionConfiguration(BaseConfig):
     TESTINGCONFIG = False
     DEVELOPMENTCONFIG = False
     PRODUCTIONCONFIG = True
+    ENV = 'production'
     FLASK_RUN_PORT = environ.get('FLASK_RUN_PORT')
     FLASK_APP = environ.get('FLASK_APP')
     SECRET_KEY = environ.get('SECRET_KEY')

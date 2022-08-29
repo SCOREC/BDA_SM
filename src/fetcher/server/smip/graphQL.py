@@ -83,6 +83,8 @@ def get_timeseries(url, token, attrib_id, start_time, end_time, max_samples):
   if start_time == None: start_time = start_time_long_ago
   if end_time == None: end_time = end_time_far_future
   if start_time.lower() == "now": start_time = fm.now()
+  start_time = fm.standardize_timestamp(start_time)
+  end_time = fm.standardize_timestamp(end_time)
 
   query_template = queries.get_timeseries
   query = query_template.format(index=1, attrib_id=attrib_id,
@@ -99,7 +101,7 @@ def get_timeseries(url, token, attrib_id, start_time, end_time, max_samples):
     print(smp_response)
   
   dataframe = fm.json_timeseries_to_table(smp_response['data']['getRawHistoryDataWithSampling'], attrib_id=attrib_id)
-  return dataframe.to_csv(index=False)
+  return dataframe
 
 def get_timeseries_array(url, token, attrib_id_list,
   start_time, end_time, period, max_samples=0 ):

@@ -4,6 +4,10 @@ import dateutil.parser
 from datetime import datetime
 import numpy as np
 
+
+def standardize_timestamp(time_in):
+  return dateutil.parser.parse(time_in).strftime("%Y-%m-%dT%H:%M:%SZ")
+
 def max_time_range():
   start_time = dateutil.parser.parse("1900-01-01").strftime("%Y-%m-%dT%H:%M:%SZ")
   end_time = dateutil.parser.parse("2200-01-01").strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -20,13 +24,14 @@ def format_time_series_stamped(datafile, index, max_timerange=False):
     end_time = df['ts'].max().strftime("%Y-%m-%dT%H:%M:%SZ")
   else:
     (start_time, end_time) = max_time_range()
+  start_time = standardize_timestamp(start_time)
+  end_time = standardize_timestamp(end_time)
 
   stamped_data = ""
   for _, row in df.iterrows(): 
     ts = row['ts'].strftime("%Y-%m-%dT%H:%M:%SZ")
     line = ' {{timestamp: "{}", value: "{}", status: "0" }}\n'.format(ts, row['data'])
     stamped_data = stamped_data + line
-  print (start_time, end_time, stamped_data)
   return (start_time, end_time, stamped_data)
 
 def json_timeseries_to_table(jd, attrib_id="floatvalue"):

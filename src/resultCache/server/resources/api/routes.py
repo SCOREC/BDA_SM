@@ -79,9 +79,9 @@ Arguments:
 def get_result(): # handle the case of get result being called before get status
 
     try:
-      username = request.args['username']
-      token = request.args["claim_check"]
-      remove = request.values.get("please_retain", "False") != "True"
+      username = request.args.get('username')
+      token = request.args.get("claim_check")
+      remove = request.args.get("please_retain", "False") != "True"
     except ValueError as err:
       abort(Response("Badly formed request: {}".format(err), 400))
 
@@ -102,7 +102,7 @@ def get_result(): # handle the case of get result being called before get status
     if len(data) == 0:
         return Response("'/{}/{}' not found".format(username, claim_check), 204)
 
-    return Response(data, 200)
+    return Response(str(data), 200)
     
 
 """

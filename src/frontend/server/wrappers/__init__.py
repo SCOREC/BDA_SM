@@ -6,7 +6,7 @@ from flask import request, redirect
 from server.errors import AuthenticationError
 from server import app
 
-def require_access(access):
+def require_access(required_access):
   def inner_function(f):
     @wraps(f)
     def access_checker(*args, **kwargs):
@@ -27,10 +27,10 @@ def require_access(access):
       except AuthenticationError:
         return Response("Access denied", 403)
 
-      if access not in access_list:
-        return Response("Access denied", 403)
-      else:
-        return f(*args, **kwargs)
+      for access in list(required_access):
+        if access in access_list:
+          return f(*args, **kwargs)
+      return Response("Access denied", 403)
 
     return access_checker
       

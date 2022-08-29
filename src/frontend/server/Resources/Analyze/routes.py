@@ -9,14 +9,14 @@ inference_manager_host = str(app.config.get('INFERENCE_MANAGER_HOST'))
 
 @AnalyzeResource.route('/stat', methods=['POST'])
 @initialized(True)
-@require_access('Analyze')
+@require_access(['Analyze'])
 def Analyze_sample():
     return forward_request(target_url=inference_manager_host +
       "/stat")
 
 @AnalyzeResource.route('/integrate', methods=['POST'])
 @initialized(True)
-@require_access('Analyze')
+@require_access(['Analyze'])
 def Analyze_integrate():
     return forward_request(target_url=inference_manager_host +
       "/integrate")

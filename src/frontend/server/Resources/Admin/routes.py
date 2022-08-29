@@ -37,7 +37,7 @@ def admin_server_init():
 
 @AdminResource.route('/create_user', methods=['POST'])
 @initialized(True)
-@require_access('admin')
+@require_access(['admin'])
 def admin_create_user():
     
   username = request.form.get('username')
@@ -65,7 +65,7 @@ def admin_create_user():
 
 @AdminResource.route('/delete_user', methods=['POST'])
 @initialized(True)
-@require_access('admin')
+@require_access(['admin'])
 def delete_user():
   username = request.values.get('username')
   u = User.query.filter_by(username=username).first()
@@ -79,7 +79,7 @@ def delete_user():
 
 @AdminResource.route('/set_password', methods=['POST'])
 @initialized(True)
-@require_access('admin')
+@require_access(['admin'])
 def admin_set_password():
   username = request.values.get('username')
   password = request.values.get('password')
@@ -95,7 +95,7 @@ def admin_set_password():
 
 @AdminResource.route('/set_access_list', methods=['POST'])
 @initialized(True)
-@require_access('admin')
+@require_access(['admin'])
 def admin_set_access_list():
   username = request.values.get('username')
   password = request.values.get('password')

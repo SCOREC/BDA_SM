@@ -21,7 +21,7 @@ def login():
 
 @UserResource.route('/logout')
 @initialized(True)
-@require_access('user')
+@require_access(['user'])
 def logout():
   pass
   return "<b>logout</b>"
@@ -29,7 +29,7 @@ def logout():
 
 @UserResource.route('/set_password', methods=['POST'])
 @initialized(True)
-@require_access('user')
+@require_access(['user'])
 def set_password():
   (bearer, token) = request.headers.get('Authorization').split()
   assert(bearer == "Bearer")
@@ -92,7 +92,7 @@ def getToken():
     
 @UserResource.route('/refreshToken', methods=['POST', 'GET'])
 @initialized(True)
-@require_access('user')
+@require_access(['user'])
 def refreshToken():
     refresh_token_key = request.cookies.get('refresh_token')
 

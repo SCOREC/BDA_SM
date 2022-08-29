@@ -11,7 +11,7 @@ LoggingResource = Blueprint('Logging', __name__, url_prefix='/Logging', template
 
 @LoggingResource.route('/viewall', methods=['POST'])
 @initialized(True)
-@require_access('logs')
+@require_access(['logs'])
 def viewall():
   events = Event.query.all()
 

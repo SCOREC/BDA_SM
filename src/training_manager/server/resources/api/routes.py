@@ -17,8 +17,10 @@ def imAlive():
 @bp.route("/create_MKO", methods=["POST"])
 def create_MKO():
   try:
-    model_name = request.values["model_name"]
-    username = request.values["username"]
+    data = request.data
+    data = json.loads(data)['data']
+    model_name = data.get('model_name')
+    username =  data.get('username')
     claim_check = server.trainer.create_mko(model_name, username)
   except Exception as err:
     return Response("Badly formed request: {}".format(err), 400)
@@ -35,13 +37,31 @@ def create_MKO():
 @bp.route("/fill_mko", methods=["POST"])
 def fill_data():
   try:
-    username = request.values.get("username")
-    model_name = request.values.get("model_name")
-    query = json.loads(request.values.get("query"))
-    dataspec = query['data']
-    topology = query.get('topology', list([]))
-    hypers = query.get('hyper_parameters', {})
-    claim_check = server.trainer.fill_mko(username, model_name, dataspec, topology, hypers)
+    data = request.data
+    data = json.loads(data)['data']
+    username = data.get("username")
+    model_name = data.get("model_name")
+    dataspec = data.get('dataspec')
+    topology = data.get("topology", list([]))
+    hypers = data.get('hyper_parameters', {})
+    mko = data.get('mkodata')
+    claim_check = server.trainer.fill_mko(username, model_name, mko, dataspec, topology, hypers)
+  except Exception as err:
+    return Response("Badly formed request: {}".format(err), 400)
+
+  return ({"claim_check": claim_check}, 200)
+
+@bp.route("/train", methods=["POST"])
+def train():
+  try:
+    data = request.data
+    data = json.loads(data)['data']
+    username = data.get("username")
+    model_name = data.get("model_name")
+    mko = data.get('mkodata')
+    smip_token = data.get('smip_auth').get('token')
+    smip_url = data.get('smip_auth').get('url')
+    claim_check = server.trainer.train_mko(username, model_name, mko, smip_token, smip_url)
   except Exception as err:
     return Response("Badly formed request: {}".format(err), 400)
 

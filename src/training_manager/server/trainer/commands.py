@@ -3,14 +3,15 @@ import requests
 import tempfile 
 from server.config import TrainerConfig as cfg
 import server.trainer.defaults as defaults
+import json
 
 from server.trainer import errors
 
 def get_new_claim_check(username: str, offset: int=0) -> str:
   new_claim_check_request = {"username": username}
   try:
-    rc_response = requests.post(cfg.RESULTS_CACHE_URI + "/new_claim_check",
-      data={"query": new_claim_check_request})
+    rc_response = requests.get(cfg.RESULTS_CACHE_URI + "/api/new_claim_check",
+      params=new_claim_check_request)
     if rc_response.status_code != 200:
       raise errors.RCException("Result cache did not issue claim check")
     claim_check = rc_response.json()['claim_check']
@@ -36,8 +37,7 @@ def create_mko(model_name: str, username: str) -> str:
     "--create",
     "--name", model_name,
     "--delete",
-    ]
-  )
+    ])
   return claim_check
 
 def fill_mko(username: str, model_name: str, mko: str, dataspec_r: dict, topology_r: list=[], hypers_r:dict={} ) -> str:
@@ -69,6 +69,7 @@ def fill_mko(username: str, model_name: str, mko: str, dataspec_r: dict, topolog
   params['topology'] = topology  # type: ignore
   params['hyper_params'] = hypers  # type: ignore
 
+  params = json.dumps(params)
   add_loc = save_file(params)
   mko_loc = save_file(mko)
 
@@ -87,7 +88,7 @@ def fill_mko(username: str, model_name: str, mko: str, dataspec_r: dict, topolog
   return claim_check
 
 
-def train_mko(model_name: str, username: str, mko: str) -> str:
+def train_mko(username: str, model_name: str, mko: str, smip_token : str, smip_url : str) -> str:
   claim_check = get_new_claim_check(username)
   mko_loc = save_file(mko)
   subprocess.Popen([
@@ -98,8 +99,12 @@ def train_mko(model_name: str, username: str, mko: str) -> str:
     "--train",
     "--name", model_name,
     "--delete",
-    "--file",
-    mko_loc
+    "-f",
+    mko_loc,
+    "--smip_token",
+    smip_token,
+    "--smip_url",
+    smip_url
     ]
   )
   return claim_check

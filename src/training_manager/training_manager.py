@@ -4,6 +4,6 @@ from server import app
 if __name__ == '__main__':
   app.run(
     host=getenv('IP', '0.0.0.0'),
-    port=int(getenv('FETCHER_PORT', 5000)),
-    debug=(getenv('FETCHER_DEBUG', "False") == "True"),
+    port=int(getenv('TRAINING_MANAGER_PORT', 5001)),
+    debug=(getenv('TRAINING_MANAGER_DEBUG', "False") == "True"),
   )

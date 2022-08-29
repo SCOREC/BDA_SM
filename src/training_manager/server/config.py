@@ -4,10 +4,13 @@ basedir = path.abspath(path.dirname(__file__))
 
 """ Trainer configurations """
 class TrainerConfig(object):
-  EXECUTABLE_PATH = "python -m trainer.src.trainer".split(" ")
-  RESULTS_CACHE_PORT = environ.get('RESULTS_CACHE_PORT', 5001)
+  EXECUTABLE_PATH = "python ../trainer/trainer.py".split(" ")
+  RESULTS_CACHE_PORT = environ.get('RESULTS_CACHE_PORT', 5002)
   RESULTS_CACHE_URI = environ.get('RESULTS_CACHE_URL',
     'http://localhost:{}'.format(RESULTS_CACHE_PORT))
+  FETCHER_PORT = environ.get('FETCHER_PORT', 5004)
+  FETCHER_URI = environ.get('FETCHER_URL',
+    'http://localhost:{}'.format(FETCHER_PORT))
 
 
 """ Flask configurations """

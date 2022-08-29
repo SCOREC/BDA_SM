@@ -4,8 +4,6 @@ from Tests import testdata
 
 from server import app
 from Tests.base import BaseTestCase
-import testdata
-from testdata import trainer_str
 
 class HeartbeatTestCase(BaseTestCase):
   """Various 'am i alive' type tests"""
@@ -70,12 +68,17 @@ class ContentTestCase(BaseTestCase):
       attribute = testdata.attribute1
       query_json = json.dumps(
         {
-          "url": testdata.smip_auth['url'],
-          "smip_token": self.smip_token,
           "attrib_id": attribute['attrib_id']
         }
       )
-      response = self.client.get(url, query_string={'query':query_json})
+      auth_json = json.dumps(
+        {
+          "url": testdata.smip_auth['url'],
+          "smip_token": self.smip_token,
+        }
+      )
+      response = self.client.get(url,
+        query_string={'query':query_json, "auth":auth_json})
       self.assertEqual(response.content_type, 'text/html; charset=utf-8')
       self.assertEqual(response.status_code, 200)
       self.assertEqual(attribute['result'], response.get_data())

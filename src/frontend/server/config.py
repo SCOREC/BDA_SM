@@ -19,26 +19,15 @@ class BaseConfig(object):
   ADMIN_ACL = ['user', 'admin', 'train', 'infer', 'analyze', 'logs']
   TRAINING_MANAGER_HOST = None
   INFERENCE_MANAGER_HOST = None
+  RESULT_CACHE_HOST = None
 
-class DevelopmentConfig(BaseConfig):
-  """Development configuration"""
-  DEBUG = True 
-  DEVELOPMENTCONFIG = True
-  PRODUCTIONCONFIG = False
-  SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'sqlite:///' + os.path.join(basedir, database_name)
-  _index = SQLALCHEMY_DATABASE_URI.find(".db")
-  SQLALCHEMY_BINDS = {'log': SQLALCHEMY_DATABASE_URI[:_index]
-                      + '_log' + SQLALCHEMY_DATABASE_URI[_index:]}
-  SERVER_SECRET = '0123'
-  TRAINING_MANAGER_HOST = 'http://localhost:8100/'
-  INFERENCE_MANAGER_HOST = 'http://localhost:8200/'
   
-class TestingConfiguration(BaseConfig):
+class DevelopmentConfiguration(BaseConfig):
   DEBUG = True
   TESTING = True
   TESTINGCONFIG = True
   PRODUCTIONCONFIG = False
+  ENV = 'development'
   SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
       'sqlite:///' + os.path.join(basedir, database_name) 
   _index = SQLALCHEMY_DATABASE_URI.find(".db")
@@ -50,13 +39,37 @@ class TestingConfiguration(BaseConfig):
   SERVER_SECRET = '0123'
   admin_user = "admin"
   admin_password = "adpass"
-  TRAINING_MANAGER_HOST = 'http://localhost:8100/'
-  INFERENCE_MANAGER_HOST = 'http://localhost:8200/'
+  TRAINING_MANAGER_HOST = 'http://localhost:5001/'
+  INFERENCE_MANAGER_HOST = 'http://localhost:5003/'
+  RESULT_CACHE_HOST = 'http://localhost:5002/'
+  
+class TestingConfiguration(BaseConfig):
+  """ Automated testing only """
+  DEBUG = True
+  TESTING = True
+  TESTINGCONFIG = True
+  PRODUCTIONCONFIG = False
+  ENV = 'testing'
+  SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+      'sqlite:///' + os.path.join(basedir, database_name) 
+  _index = SQLALCHEMY_DATABASE_URI.find(".db")
+  SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI[:_index] + "_test" \
+                            + SQLALCHEMY_DATABASE_URI[_index:]
+  _index = SQLALCHEMY_DATABASE_URI.find(".db")
+  SQLALCHEMY_BINDS = {'log': SQLALCHEMY_DATABASE_URI[:_index]
+                      + '_log' + SQLALCHEMY_DATABASE_URI[_index:]}
+  SERVER_SECRET = '0123'
+  admin_user = "admin"
+  admin_password = "adpass"
+  TRAINING_MANAGER_HOST = 'http://localhost:5001/'
+  INFERENCE_MANAGER_HOST = 'http://localhost:5003/'
+  RESULT_CACHE_HOST = 'http://localhost:5002/'
   
 class ProductionConfiguration(BaseConfig):
   """For deployment"""
   DEBUG = False
   PRODUCTIONCONFIG = True
+  ENV = 'production'
   SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'sqlite:///' + os.path.join(basedir, database_name)
   SQLALCHEMY_BINDS = {'log': SQLALCHEMY_DATABASE_URI + '_log'}

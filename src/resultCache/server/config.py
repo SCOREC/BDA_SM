@@ -15,10 +15,10 @@ class TestingConfiguration(BaseConfig):
     """ Testing Configuration"""
     DEBUG =  True
     TESTCONFIG = True
-    FLASK_ENV = 'development'
+    ENV = 'development'
 
     MAX_EXPIRY_TIME = Constants.one_day_seconds
-    MIN_EXPIRY_TIME = 4
+    MIN_EXPIRY_TIME = 300
 
     DIRECTORY = "/tmp/result_cache"
     RATE_AVERAGE_WINDOW = 10
@@ -33,7 +33,7 @@ class ProductionConfiguration(BaseConfig):
     """ Production Configuration (unwise) """
     DEBUG = False
     TESTCONFIG = True
-    FLASK_ENV = 'Production'
+    ENV = 'Production'
 
     MAX_EXPIRY_TIME = Constants.one_day_seconds
     MIN_EXPIRY_TIME = 300 # seconds

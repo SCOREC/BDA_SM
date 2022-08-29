@@ -39,19 +39,20 @@ def raw_data_by_id():
   except smip.GraphQLAuthenticationError as err:
     return Response("Authorization failed", 500)
   except Exception as err:
-    raise Response("SMIP returned {}".format(err), 400)
+    return Response("SMIP returned {}".format(err), 400)
 
 @bp.route("/timeseriesById")
 def timeseries_by_id():
-  request_data = json.loads(request.args.get('query'))  # type: ignore
   try:
-    smip_url = request_data.get('url')
-    smip_token = request_data.get('smip_token')
+    auth_data = json.loads(request.args.get('auth')) # type: ignore
+    smip_url = auth_data.get('url')
+    smip_token = auth_data.get('smip_token')
+    request_data = json.loads(request.args.get('query'))  # type: ignore
     attrib_id = request_data.get('attrib_id')
     start_time = request_data.get('start_time', None)
     end_time = request_data.get('end_time', None)
     csv_data = smip.get_timeseries(smip_url, smip_token,
-      attrib_id, start_time, end_time, max_samples=0)
+      attrib_id, start_time, end_time, max_samples=0).to_csv(index=False)
     return Response(csv_data, status=200)
   except smip.GraphQLAuthenticationError as err:
     return Response("Authorization failed", 500)
@@ -60,10 +61,11 @@ def timeseries_by_id():
 
 @bp.route("/timeseriesArrayById")
 def timeseries_array_by_id():
-  request_data = json.loads(request.args.get('query'))  # type: ignore
   try:
-    smip_url = request_data.get('url')
-    smip_token = request_data.get('smip_token')
+    auth_data = json.loads(request.args.get('auth')) # type: ignore
+    smip_url = auth_data.get('smip_url')
+    smip_token = auth_data.get('smip_token')
+    request_data = json.loads(request.args.get('query'))  # type: ignore
     attrib_id_list = request_data.get('attrib_id_list')
     period = request_data.get('period')
     start_time = request_data.get('start_time', None)
@@ -74,4 +76,4 @@ def timeseries_array_by_id():
   except smip.GraphQLAuthenticationError as err:
     return Response("Authorization failed", 500)
   except Exception as err:
-    raise Response("SMIP returned {}".format(err), 400)
+    return Response("SMIP returned {}".format(err), 400)

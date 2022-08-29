@@ -3,11 +3,17 @@ import requests
 
 def forward_request(target_url,*args, **kwargs):
 
+   if len(request.args) > 0:
+      params = request.args
+   else:
+      params = {}
+
    try:
       resp = requests.request(
          method=request.method,
-         url=request.url.replace(request.host_url, target_url),
+         url=target_url,
          headers={key: value for (key, value) in request.headers if key != 'Host'},
+         params=params,
          data=request.get_data(),
          cookies=request.cookies,
          allow_redirects=False)

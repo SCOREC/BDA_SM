@@ -11,7 +11,7 @@ class AddTypes:
     HYPER_PARAMS = "hyper_params"
     HYPER_PARAMS_ABBREV = "hparams"
     TOPOLOGY = "topology"
-    ALL = "ALL"
+    ALL = "all"
     types = {
         DATA,
         HYPER_PARAMS,
@@ -32,6 +32,8 @@ def parse_args():
     parser.add_argument('claim_check', metavar='claim_check', type=str, help='claim_check to store in result_cache')
     parser.add_argument('URI', metavar='rc_URI', type=str, help='URI of the result cache')
     parser.add_argument('--delete', dest='delete', action='store_const', const='false', default='false', help='should delete file after usage')
+    parser.add_argument('--smip_token', nargs=1, dest='smip_token', const=None, default=None, type=str, help='Bearer token for SMIP - required for training')
+    parser.add_argument('--smip_url', nargs=1, dest='smip_url', const=None, default=None, type=str, help='URL of SMIP - required for training')
     return parser.parse_args()
 
 def delete_file(file_loc: str):
@@ -69,19 +71,21 @@ def train(args: argparse.Namespace):
     train_mko(
         args.file_loc[0], 
         get_post_args(args), 
-        False if args.delete.lower() == 'false' else True
+        False if args.delete.lower() == 'false' else True,
+        args.smip_token[0],
+        args.smip_url[0]
     )
 
 # mko: file location of mko
 # post_args: (URI, usernae, claim_check)
-def train_mko(mko_filename: str, post_args: tuple, delete: bool):
+def train_mko(mko_filename: str, post_args: tuple, delete: bool, smip_token : str, smip_url : str):
     prev_time = time.time()
     mko = MKO.from_b64str(load_file(mko_filename))
     mko.compile()
-    mko.load_data()
+    mko.load_data(smip_token, smip_url)
     mko.train(push_update_args=post_args)
     mko_data = str(mko)
-    generation_time = time.time() - prev_time
+    generation_time = int(time.time() - prev_time)
     post(post_args, generation_time, mko_data)
 
     if delete:
@@ -131,13 +135,13 @@ def add_mko(mko_filename: str, add_type: str, add_loc: str, post_args: tuple, de
     elif add_type == AddTypes.TOPOLOGY:
         mko.add_topology(to_add)
     elif add_type == AddTypes.ALL:
-        mko.add_data(to_add)
-        mko.add_hyper_params(to_add)
+        mko.add_data(to_add, subset='data')
+        mko.add_hyper_params(to_add, subset='hyper_params')
         mko.add_topology(to_add)
 
     mko_data = str(mko)
     generation_time = time.time() - prev_time
-    post(post_args, generation_time, mko_data)
+    post(post_args, int(generation_time), mko_data)
     
     if delete:
         delete_file(mko)

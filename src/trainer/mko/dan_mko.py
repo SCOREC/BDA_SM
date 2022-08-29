@@ -179,29 +179,37 @@ class MKO:
 
     # hyper_params: hyperparams to add
     # merges hyperparams with mko
-    def add_hyper_params(self, hyper_params: Union[dict, str]):
+    def add_hyper_params(self, hyper_params: Union[dict, str], subset = None):
         if type(hyper_params) == str:
-            self.add_hyper_params(json.loads(hyper_params))
+            self.add_hyper_params(json.loads(hyper_params), subset)
             return
 
+        if subset != None:
+            hyper_params_to_add = hyper_params[subset]
+        else:
+            hyper_params_to_add = hyper_params
         MKO.enforce_type(hyper_params, "hyper_params", dict)
 
         self._hyper_params = True
         self.parse_fields(
             Fields.OPTIONAL_SUB_FIELDS[Fields.HYPER_PARAMS].MANDATORY_FIELDS, 
-            hyper_params
+            hyper_params_to_add
         )
 
 
     # topology: topology to add
     # merges topology with mko
     # must have data defined before
-    def add_topology(self, topology: Union[list, str]):
+    def add_topology(self, topology: Union[dict, list, str]):
         if self._hyper_params == False:
             raise Exception("hyper_parameters not defined, use 'add_hyper_params' before 'add_topology'")
 
         if type(topology) == str:
             self.add_topology(json.loads(topology))
+            return
+
+        if type(topology) == dict:
+            self.add_topology(topology['topology'])
             return
 
         MKO.enforce_type(topology, "topology", list)
@@ -216,18 +224,22 @@ class MKO:
 
     # data: data descriptor to add
     # merges data with mko
-    def add_data(self, data: Union[dict, str]):
+    def add_data(self, data: Union[dict, str], subset=None):
         if type(data) == str:
             json_data = json.loads(data)
-            self.add_data(json_data)
+            self.add_data(json_data, subset)
             return
 
+        if subset != None:
+            data_to_add = data[subset]
+        else:
+            data_to_add = data
         self._data = True
         self.parse_fields(
             Fields.OPTIONAL_SUB_FIELDS[Fields.DATA].MANDATORY_FIELDS, 
-            data
+            data_to_add
         )
-        self.validate_fetcher_format(data)
+        self.validate_fetcher_format(data_to_add)
 
 
     # compiles the model
@@ -276,16 +288,17 @@ class MKO:
 
     # location: fetcher server location
     # requests data from fetcher and parses
-    def get_data_from_fetcher(self, location: str) -> pd.DataFrame:
+    def get_data_from_fetcher(self, location, smip_url: str, smip_token : str) -> pd.DataFrame:
         ids = self._x_tags + self._y_tags
         query = self._query_json
-        query["tag_ids"] = ids
-        args = {
-            Fields.Data.QUERY: query, 
-            Fields.Data.AUTH: self._auth_json,
+        query["attrib_id_list"] = ids
+
+        auth = {
+            'smip_token' : smip_token,
+            'smip_url'   : smip_url
         }
         
-        fetcher_data = query_fetcher(location, json.dumps(args))
+        fetcher_data = query_fetcher(location, json.dumps(query), json.dumps(auth))
         fetcher_json = json.loads(fetcher_data)
         data = np.array(fetcher_json["data"])
         df = pd.DataFrame(data=data, columns=fetcher_json["x_labels"], index=fetcher_json["y_labels"])
@@ -343,7 +356,7 @@ class MKO:
         return self.normalize(data, is_x)
 
     # loads data according to data descriptor
-    def load_data(self):
+    def load_data(self, smip_token, smip_url):
         if not self.augmented:
             raise MKOTypeException("augmented")
 
@@ -352,7 +365,7 @@ class MKO:
         elif self._data_type == Fields.Data.HTTP:
             x, y = self.get_data_from_http(self._data_location)
         elif self._data_type == Fields.Data.FETCHER:
-            x, y = self.get_data_from_fetcher(self._data_location)
+            x, y = self.get_data_from_fetcher(self._data_location, smip_url, smip_token)
         else:
             raise InvalidArgument(self._data_type, list(Fields.Data.DATA_TYPES))
 
@@ -491,7 +504,7 @@ class MKO:
             np_weights = self._model.get_weights()
             b64_encoded_w = []
             for w in np_weights:
-                b64_encoded_w.append(MKO.b64encode_array(w))
+                b64_encoded_w.append(encodings.b64encode_array(w))
 
             to_save[Fields.WEIGHTS] = b64_encoded_w
             to_save[Fields.TOPOLOGY] = self._topology

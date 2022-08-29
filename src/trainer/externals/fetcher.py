@@ -19,12 +19,13 @@ from externals.exceptions import ConnectionException
 # }
 
 
-def query_fetcher(URI: str, args: str) -> str:
+def query_fetcher(URI: str, query: str, auth : str) -> str:
     params = {
-        "query": args
+        "query": query,
+        "auth" : auth
     }
     print(params)
-    resp = requests.get("{}/api/gettimeseries".format(URI), params=params)
+    resp = requests.get("{}/api/timeseriesArrayById".format(URI.rstrip('/ ')), params=params)
     check_connection(resp, URI)
     return resp.text
 

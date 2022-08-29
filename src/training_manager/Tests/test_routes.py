@@ -20,21 +20,19 @@ class HeartbeatTestCase(BaseTestCase):
 class ContentTestCase(BaseTestCase):
   """ Actual information from the CESMII server"""
 
-
-  def test_validateAttributeById(self):
-    url = '/api/validateAttributeById'
+  def test_create_MKO(self):
+    url = '/api/create_MKO'
     with self.client:
-      attribute = testdata.attribute1
       query_json = json.dumps(
         {
-          "url": testdata.smip_auth['url'],
-          "smip_token": self.smip_token,
-          "attrib_id": attribute['attrib_id']
+          "username": testdata.good_username,
+          "model_name": testdata.good_modelname
         }
       )
-      response = self.client.get(url, query_string={'query':query_json})
+      response = self.client.post(url, query_string={'query':query_json})
       self.assertEqual(response.status_code, 200)
-      self.assertTrue(b"Successfully validated attribute id" in response.get_data())
+      token = response.get_data()
+      
 
       query_json = json.dumps(
         {

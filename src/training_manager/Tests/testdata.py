@@ -1,6 +1,11 @@
 import json
 import Tests.passwords
 
+good_username = "good_username"
+bad_username = "bad_username"
+good_modelname = "good_modelname"
+bad_modelname = "bad_modelname"
+
 smip_auth = {
   "authenticator": "maxdemo",
   "password": "{smip_password}".format(smip_password=Tests.passwords.smip_password),

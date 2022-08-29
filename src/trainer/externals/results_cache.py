@@ -1,6 +1,5 @@
 import requests
 from externals.utilities import check_connection
-from externals.exceptions import ConnectionException
 
 
 def post_result_cache(URI: str, username: str, claim_check: str, generation_time: float, mko_json: str):
@@ -15,7 +14,7 @@ def post_result_cache(URI: str, username: str, claim_check: str, generation_time
         "username": username
     }
 
-    resp = requests.post(URI + "/store_result", params=params, data=mko_json)
+    resp = requests.post(URI + "/api/store_result", params=params, data=mko_json)
     check_connection(resp, URI)
 
 def post_status(URI: str, username: str, claim_check: str, status: float):

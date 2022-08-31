@@ -1,3 +1,5 @@
+from operator import sub
+import sys
 import subprocess
 import requests
 import tempfile 
@@ -30,14 +32,15 @@ def save_file(data):
 def create_mko(model_name: str, username: str) -> str:
   claim_check = get_new_claim_check(username)
   subprocess.Popen([
-    *cfg.EXECUTABLE_PATH,
+    *cfg.EXECUTABLE_NAME,
     username,
     claim_check,
     cfg.RESULTS_CACHE_URI,
     "--create",
     "--name", model_name,
     "--delete",
-    ])
+    ],
+    cwd=cfg.EXECUTABLE_WORKING_DIRECTORY)
   return claim_check
 
 def fill_mko(username: str, model_name: str, mko: str, dataspec_r: dict, topology_r: list=[], hypers_r:dict={} ) -> str:
@@ -75,7 +78,7 @@ def fill_mko(username: str, model_name: str, mko: str, dataspec_r: dict, topolog
 
   claim_check = get_new_claim_check(username, 10)
   subprocess.Popen([
-    *cfg.EXECUTABLE_PATH,
+    *cfg.EXECUTABLE_NAME,
     username,
     claim_check,
     cfg.RESULTS_CACHE_URI,
@@ -84,15 +87,17 @@ def fill_mko(username: str, model_name: str, mko: str, dataspec_r: dict, topolog
     "--add",
     "ALL",
     add_loc
-  ])
+    ],
+    cwd=cfg.EXECUTABLE_WORKING_DIRECTORY
+  )
   return claim_check
 
 
 def train_mko(username: str, model_name: str, mko: str, smip_token : str, smip_url : str) -> str:
   claim_check = get_new_claim_check(username)
   mko_loc = save_file(mko)
-  subprocess.Popen([
-    *cfg.EXECUTABLE_PATH,
+  EXECUTABLE_STRING_LIST = [
+    *cfg.EXECUTABLE_NAME,
     username,
     claim_check,
     cfg.RESULTS_CACHE_URI,
@@ -106,5 +111,7 @@ def train_mko(username: str, model_name: str, mko: str, smip_token : str, smip_u
     "--smip_url",
     smip_url
     ]
-  )
+  print(EXECUTABLE_STRING_LIST)
+  subprocess.Popen(EXECUTABLE_STRING_LIST, cwd=cfg.EXECUTABLE_WORKING_DIRECTORY)
+  
   return claim_check

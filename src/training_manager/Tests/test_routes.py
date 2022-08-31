@@ -4,8 +4,6 @@ from Tests import testdata
 
 from server import app
 from Tests.base import BaseTestCase
-import testdata
-from testdata import trainer_str
 
 class HeartbeatTestCase(BaseTestCase):
   """Various 'am i alive' type tests"""

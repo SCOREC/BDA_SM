@@ -299,9 +299,11 @@ class MKO:
         }
         
         fetcher_data = query_fetcher(location, json.dumps(query), json.dumps(auth))
-        fetcher_json = json.loads(fetcher_data)
-        data = np.array(fetcher_json["data"])
-        df = pd.DataFrame(data=data, columns=fetcher_json["x_labels"], index=fetcher_json["y_labels"])
+        print("Fetcher data:\n", fetcher_data)
+        #fetcher_json = json.loads(fetcher_data)
+        #data = np.array(fetcher_json["data"])
+        df = pd.read_json(fetcher_data)
+        #df = pd.DataFrame(data=data, columns=fetcher_json["x_labels"], index=fetcher_json["y_labels"])
         return df[self._x_tags].to_numpy(), df[self._y_tags].to_numpy()
 
     # data: dataset

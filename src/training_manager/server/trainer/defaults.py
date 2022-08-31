@@ -1,3 +1,4 @@
+from server.config import TrainerConfig
 
 stub = {
   "model_name": "REQUIRED",
@@ -39,13 +40,9 @@ dataspec = {
   "query_json" : {
     "start_time": "REQUIRED",
     "end_time": "REQUIRED",
-    "period": "3600",
+    "period": "36000",
     "max_samples": 0
   },
-  "data_location": "REQUIRED",
   "data_type": "fetcher",
-  "auth_json" : {
-    "smip_token": "REQUIRED",
-    "url": "REQUIRED"
-  },
+  "data_location" : TrainerConfig.FETCHER_URI
 }

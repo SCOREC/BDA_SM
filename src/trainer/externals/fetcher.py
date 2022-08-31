@@ -21,12 +21,14 @@ from externals.exceptions import ConnectionException
 
 def query_fetcher(URI: str, query: str, auth : str) -> str:
     params = {
+        "as_csv" : "False",
+        "as_json": "True",
         "query": query,
         "auth" : auth
     }
-    print(params)
-    resp = requests.get("{}/api/timeseriesArrayById".format(URI.rstrip('/ ')), params=params)
-    check_connection(resp, URI)
+    full_url = "{}/api/timeseriesArrayById".format(URI.rstrip('/ '))
+    resp = requests.get(full_url, params=params)
+    check_connection(resp, full_url)
     return resp.text
 
 def get_http(URI: str) -> str:

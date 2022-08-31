@@ -77,7 +77,7 @@ def get_raw_attribute_data( url, token, attrib_id):
   df = fm.json_timeseries_to_table(smp_response['data']['attribute']['getTimeSeries'], attrib_id=attrib_id)
   return df.to_csv(index=False)
 
-def get_timeseries(url, token, attrib_id, start_time, end_time, max_samples):
+def get_timeseries(url, token, attrib_id, start_time, end_time, max_samples=0):
 
   start_time_long_ago, end_time_far_future = fm.max_time_range()
   if start_time == None: start_time = start_time_long_ago
@@ -104,10 +104,10 @@ def get_timeseries(url, token, attrib_id, start_time, end_time, max_samples):
   return dataframe
 
 def get_timeseries_array(url, token, attrib_id_list,
-  start_time, end_time, period, max_samples=0 ):
+  start_time, end_time, period, max_samples=0, as_csv=False):
   dataframes = []
   for attrib_id in attrib_id_list:
     dataframes.append(get_timeseries(url, token, attrib_id, start_time, end_time, max_samples))
   
-  csv = fm.combine_dataframes(dataframes, period).to_csv(index=False)
-  return csv
+  df = fm.combine_dataframes(dataframes, period)
+  return df

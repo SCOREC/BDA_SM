@@ -23,7 +23,7 @@ def post_status(URI: str, username: str, claim_check: str, status: float):
         "username": username
     }
 
-    resp = requests.post(URI + "/update_status", params=params, data=str(status))
+    resp = requests.post(URI + "/api/update_status", params=params, data=str(status))
     check_connection(resp, URI)
 
 def post_error(URI: str, username: str, claim_check: str, error: str):
@@ -35,5 +35,5 @@ def post_error(URI: str, username: str, claim_check: str, error: str):
     if URI.find('FILE') == 0:
       print(" post error:", params, error)
       return
-    resp = requests.post(URI + "/put_error", params=params, data=error)
+    resp = requests.post(URI + "/api/put_error", params=params, data=error)
     check_connection(resp, URI)

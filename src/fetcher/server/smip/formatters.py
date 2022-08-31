@@ -113,7 +113,7 @@ def combine_dataframes(df_list, period):
     return (d - epoch).total_seconds()
 
   for (start_time, end_time) in zip(range_starts, range_stops):
-    n_points = int((end_time - start_time) / period)
+    n_points = int((end_time.timestamp() - start_time.timestamp()) / float(period))
     timegrid = list(pd.date_range(start_time, end_time, n_points))
     if 'interpolation_ts_list' not in locals():
       interpolation_ts_list = timegrid

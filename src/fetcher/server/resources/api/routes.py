@@ -59,7 +59,7 @@ def timeseries_by_id():
   except Exception as err:
     return("Bad Request. SMIP returned {}".format(err), 400)
 
-@bp.route("/timeseriesArrayById")
+@bp.route("/timeseriesArrayById", methods=['GET'])
 def timeseries_array_by_id():
   try:
     auth_data = json.loads(request.args.get('auth')) # type: ignore
@@ -70,9 +70,16 @@ def timeseries_array_by_id():
     period = request_data.get('period')
     start_time = request_data.get('start_time', None)
     end_time = request_data.get('end_time', None)
-    csv_data = smip.get_timeseries_array(smip_url, smip_token,
+    as_csv = (request_data.get('as_csv', "False") == "True")
+    as_json = (request_data.get('as_json', "True").upper() == "True".upper())
+    df = smip.get_timeseries_array(smip_url, smip_token,
       attrib_id_list, start_time, end_time, period)
-    return Response(csv_data, status=200)
+    if as_csv:
+      return Response(df.to_csv(index=False), status=200)
+    if as_json:
+      return Response(df.to_json(), status=200)
+    else:
+      return Response(df, status=200)
   except smip.GraphQLAuthenticationError as err:
     return Response("Authorization failed", 500)
   except Exception as err:

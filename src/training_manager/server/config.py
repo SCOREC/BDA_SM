@@ -1,10 +1,13 @@
 
 from os import environ, path
+import sys
 basedir = path.abspath(path.dirname(__file__))
 
 """ Trainer configurations """
 class TrainerConfig(object):
-  EXECUTABLE_PATH = "python ../trainer/trainer.py".split(" ")
+  EXECUTABLE_WORKING_DIRECTORY = "../trainer"
+  PYTHON_EXECUTABLE = sys.executable
+  EXECUTABLE_NAME = [PYTHON_EXECUTABLE,  "trainer.py"]
   RESULTS_CACHE_PORT = environ.get('RESULTS_CACHE_PORT', 5002)
   RESULTS_CACHE_URI = environ.get('RESULTS_CACHE_URL',
     'http://localhost:{}'.format(RESULTS_CACHE_PORT))

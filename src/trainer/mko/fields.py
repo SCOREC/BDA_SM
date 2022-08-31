@@ -14,7 +14,6 @@ class Fields:
             FETCHER = "fetcher"
             LOCAL = "local"
             HTTP = "http"
-            AUTH = "auth_json"
             QUERY = "query_json"
             X_TAGS = "x_tags"
             Y_TAGS = "y_tags"
@@ -39,7 +38,6 @@ class Fields:
             }
 
             MANDATORY_FETCHER_FIELDS = {
-                AUTH,
                 QUERY,
                 X_TAGS,
                 Y_TAGS
@@ -78,7 +76,6 @@ class Fields:
         DICT_FIELDS = {
             HYPER_PARAMS,
             DATA,
-            Data.AUTH,
             Data.QUERY
         }
 

@@ -5,7 +5,7 @@ basedir = path.abspath(path.dirname(__file__))
 
 """ Trainer configurations """
 class TrainerConfig(object):
-  EXECUTABLE_WORKING_DIRECTORY = "../trainer"
+  EXECUTABLE_WORKING_DIRECTORY = environ.get("TRAINER_WORKING_DIRECTORY", "../trainer")
   PYTHON_EXECUTABLE = sys.executable
   EXECUTABLE_NAME = [PYTHON_EXECUTABLE,  "trainer.py"]
   RESULTS_CACHE_PORT = environ.get('RESULTS_CACHE_PORT', 5002)

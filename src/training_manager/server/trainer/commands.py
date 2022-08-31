@@ -12,8 +12,8 @@ from server.trainer import errors
 def get_new_claim_check(username: str, offset: int=0) -> str:
   new_claim_check_request = {"username": username}
   try:
-    rc_response = requests.get(cfg.RESULTS_CACHE_URI + "/api/new_claim_check",
-      params=new_claim_check_request)
+    claim_check_URL = cfg.RESULTS_CACHE_URI+"/api/new_claim_check"
+    rc_response = requests.get(claim_check_URL, params=new_claim_check_request)
     if rc_response.status_code != 200:
       raise errors.RCException("Result cache did not issue claim check")
     claim_check = rc_response.json()['claim_check']

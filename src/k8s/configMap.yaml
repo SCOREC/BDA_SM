@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bda-configmap
+data:
+  RESULTS_CACHE_URL: results-cache-service
+  FETCHER_URL: fetcher-service
+  TRAINING_MANAGER_URL: training-manager-service

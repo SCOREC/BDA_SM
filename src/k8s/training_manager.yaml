@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: training-manager-deployment
+  labels:
+    app: training-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: training-manager
+  template:
+    metadata:
+      labels:
+        app: training-manager
+    spec:
+      containers:
+      - name: training-manager
+        image: mk/training_manager
+        imagePullPolicy: Never
+        ports:
+         - containerPort: 5000
+        env: 
+          - name: RESULTS_CACHE_URL
+            value: http://results-cache-service:5000/
+          - name: FETCHER_URL
+            value: http://fetcher-service:5000/
+      restartPolicy: Always
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: training-manager-service
+spec:
+  selector:
+    app: training-manager
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000

@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: results-cache-deployment
+  labels:
+    app: results-cache
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: results-cache
+  template:
+    metadata:
+      labels:
+        app: results-cache
+    spec:
+      containers:
+      - name: results-cache
+        image: mk/results_cache
+        ports:
+         - containerPort: 5000
+        imagePullPolicy: Never
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: results-cache-service
+spec:
+  selector:
+    app: results-cache
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000

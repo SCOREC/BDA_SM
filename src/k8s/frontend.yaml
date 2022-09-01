@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  labels:
+    app: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: mk/frontend
+        ports:
+         - containerPort: 5000
+        imagePullPolicy: Never
+        env: 
+          - name: RESULTS_CACHE_URL
+            valueFrom:
+              configMapKeyRef:
+                name: bda-configmap
+                key: RESULTS_CACHE_URL
+          - name: TRAINING_MANAGER_URL
+            valueFrom:
+              configMapKeyRef:
+                name: bda-configmap
+                key: TRAINING_MANAGER_URL
+          - name: SERVER_SECRET
+            valueFrom:
+              secretKeyRef: 
+                name: bda-secrets
+                key: SERVER_SECRET
+      restartPolicy: Always
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+spec:
+  selector:
+    app: frontend
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+      nodePort: 30000

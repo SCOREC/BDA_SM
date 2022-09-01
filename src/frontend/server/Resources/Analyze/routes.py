@@ -5,7 +5,7 @@ from server.wrappers import require_access, initialized
 from server.Resources.util import forward_request
 
 AnalyzeResource = Blueprint('Analyze', __name__, url_prefix='/Analyze')
-inference_manager_host = str(app.config.get('INFERENCE_MANAGER_HOST'))
+inference_manager_host = str(app.config.get('INFERENCE_MANAGER_BASE_URL'))
 
 @AnalyzeResource.route('/stat', methods=['POST'])
 @initialized(True)

@@ -5,7 +5,7 @@ from server.wrappers import require_access, initialized
 from server.Resources.util import forward_request
 
 RCResource = Blueprint('ResultCache', __name__, url_prefix='/Results')
-result_cache_host = str(app.config.get('RESULT_CACHE_HOST')).rstrip('/ ')
+result_cache_host = str(app.config.get('RESULT_CACHE_BASE_URL')).rstrip('/ ')
 
 @RCResource.route('/get_result', methods=['GET'])
 @initialized(True)

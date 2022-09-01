@@ -9,10 +9,10 @@ class TrainerConfig(object):
   PYTHON_EXECUTABLE = sys.executable
   EXECUTABLE_NAME = [PYTHON_EXECUTABLE,  "trainer.py"]
   RESULTS_CACHE_PORT = environ.get('RESULTS_CACHE_PORT', 5002)
-  RESULTS_CACHE_URI = environ.get('RESULTS_CACHE_URL',
+  RESULTS_CACHE_URL = environ.get('RESULTS_CACHE_URL',
     'http://localhost:{}'.format(RESULTS_CACHE_PORT))
   FETCHER_PORT = environ.get('FETCHER_PORT', 5004)
-  FETCHER_URI = environ.get('FETCHER_URL',
+  FETCHER_URL = environ.get('FETCHER_URL',
     'http://localhost:{}'.format(FETCHER_PORT))
 
 

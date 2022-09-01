@@ -44,5 +44,5 @@ dataspec = {
     "max_samples": 0
   },
   "data_type": "fetcher",
-  "data_location" : TrainerConfig.FETCHER_URI
+  "data_location" : TrainerConfig.FETCHER_URL
 }

@@ -19,7 +19,7 @@ class BaseConfig(object):
   ADMIN_ACL = ['user', 'admin', 'train', 'infer', 'analyze', 'logs']
   TRAINING_MANAGER_BASE_URL = None
   INFERENCE_MANAGER_BASE_URL = None
-  RESULT_CACHE_BASE_URL = None
+  RESULTS_CACHE_BASE_URL = None
 
   
 class DevelopmentConfiguration(BaseConfig):
@@ -38,7 +38,7 @@ class DevelopmentConfiguration(BaseConfig):
                       + '_log' + SQLALCHEMY_DATABASE_URI[_index:]}
   SERVER_SECRET = os.environ.get('server_secret', '0123')
   TRAINING_MANAGER_BASE_URL = os.environ.get("TRAINING_MANAGER_BASE_URL",'http://localhost:5001/')
-  RESULT_CACHE_BASE_URL = os.environ.get("RESULT_CACHE_BASE_URL",'http://localhost:5002/')
+  RESULTS_CACHE_BASE_URL = os.environ.get("RESULTS_CACHE_BASE_URL",'http://localhost:5002/')
   INFERENCE_MANAGER_BASE_URL = os.environ.get("INFERENCE_MANAGER_BASE_URL",'http://localhost:5003/')
   
 class TestingConfiguration(BaseConfig):
@@ -60,7 +60,7 @@ class TestingConfiguration(BaseConfig):
   admin_user = "admin"
   admin_password = "adpass"
   TRAINING_MANAGER_BASE_URL = os.environ.get("TRAINING_MANAGER_BASE_URL",'http://localhost:5001/')
-  RESULT_CACHE_BASE_URL = os.environ.get("RESULT_CACHE_BASE_URL",'http://localhost:5002/')
+  RESULTS_CACHE_BASE_URL = os.environ.get("RESULTS_CACHE_BASE_URL",'http://localhost:5002/')
   INFERENCE_MANAGER_BASE_URL = os.environ.get("INFERENCE_MANAGER_BASE_URL",'http://localhost:5003/')
   
 class ProductionConfiguration(BaseConfig):

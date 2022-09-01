@@ -12,7 +12,7 @@ from server.trainer import errors
 def get_new_claim_check(username: str, offset: int=0) -> str:
   new_claim_check_request = {"username": username}
   try:
-    claim_check_URL = cfg.RESULTS_CACHE_URI+"/api/new_claim_check"
+    claim_check_URL = cfg.RESULTS_CACHE_URL+"/api/new_claim_check"
     rc_response = requests.get(claim_check_URL, params=new_claim_check_request)
     if rc_response.status_code != 200:
       raise errors.RCException("Result cache did not issue claim check")
@@ -35,7 +35,7 @@ def create_mko(model_name: str, username: str) -> str:
     *cfg.EXECUTABLE_NAME,
     username,
     claim_check,
-    cfg.RESULTS_CACHE_URI,
+    cfg.RESULTS_CACHE_URL,
     "--create",
     "--name", model_name,
     "--delete",
@@ -81,7 +81,7 @@ def fill_mko(username: str, model_name: str, mko: str, dataspec_r: dict, topolog
     *cfg.EXECUTABLE_NAME,
     username,
     claim_check,
-    cfg.RESULTS_CACHE_URI,
+    cfg.RESULTS_CACHE_URL,
     "-f",
     mko_loc,
     "--add",
@@ -100,7 +100,7 @@ def train_mko(username: str, model_name: str, mko: str, smip_token : str, smip_u
     *cfg.EXECUTABLE_NAME,
     username,
     claim_check,
-    cfg.RESULTS_CACHE_URI,
+    cfg.RESULTS_CACHE_URL,
     "--train",
     "--name", model_name,
     "--delete",

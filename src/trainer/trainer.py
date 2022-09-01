@@ -1,6 +1,6 @@
 import argparse
 import os
-from externals.results_cache import post_result_cache, post_error
+from externals.results_cache import post_results_cache, post_error
 from mko.dan_mko import MKO
 from mko.exceptions import InputException, InvalidArgument
 from tempfile import NamedTemporaryFile as TempFile
@@ -29,7 +29,7 @@ def parse_args():
     parser.add_argument('--add', nargs=2, dest='add', help='add to MKO file, first args is type second is location')
     parser.add_argument('--train', dest='function', action='store_const', const='train', help='train MKO object')
     parser.add_argument('username', metavar='username', type=str, help='username of user')
-    parser.add_argument('claim_check', metavar='claim_check', type=str, help='claim_check to store in result_cache')
+    parser.add_argument('claim_check', metavar='claim_check', type=str, help='claim_check to store in results_cache')
     parser.add_argument('URI', metavar='rc_URI', type=str, help='URI of the result cache')
     parser.add_argument('--delete', dest='delete', action='store_const', const='false', default='false', help='should delete file after usage')
     parser.add_argument('--smip_token', nargs=1, dest='smip_token', const=None, default=None, type=str, help='Bearer token for SMIP - required for training')
@@ -48,7 +48,7 @@ def delete_file(file_loc: str):
 # mko_data: data to send to resultCache
 def post(post_args: tuple, generation_time: int, mko_data: str):
     URI, username, claim_check = post_args
-    post_result_cache(URI, username, claim_check, generation_time, mko_data)
+    post_results_cache(URI, username, claim_check, generation_time, mko_data)
 
 # converts command line parser to tuple
 def get_post_args(args: argparse.Namespace):

@@ -20,7 +20,7 @@ class TestingConfiguration(BaseConfig):
     MAX_EXPIRY_TIME = Constants.one_day_seconds
     MIN_EXPIRY_TIME = 300
 
-    DIRECTORY = "/tmp/result_cache"
+    DIRECTORY = "/tmp/results_cache"
     RATE_AVERAGE_WINDOW = 10
 
     STRING_LEN_TEST = 20
@@ -37,5 +37,5 @@ class ProductionConfiguration(BaseConfig):
 
     MAX_EXPIRY_TIME = Constants.one_day_seconds
     MIN_EXPIRY_TIME = 300 # seconds
-    DIRECTORY = "/tmp/result_cache"
+    DIRECTORY = "/tmp/results_cache"
     RATE_AVERAGE_WINDOW = 1

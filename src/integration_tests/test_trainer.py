@@ -14,7 +14,7 @@ class TrainerTests(BaseTest):
             "username": "person",
             "claim_check": "check1",
             "model_name": "models_name",
-            "result_cache_URI": self.get_rc()
+            "results_cache_URI": self.get_rc()
         }
 
         formatted_params = format_params("/create_MKO", params)
@@ -65,7 +65,7 @@ class TrainerTests(BaseTest):
             "username": "person",
             "claim_check": "check3",
             "model_MKO": test_mko,
-            "result_cache_URI": self.get_rc()
+            "results_cache_URI": self.get_rc()
         }
 
         formatted_params = format_params("/train", params)
@@ -74,7 +74,7 @@ class TrainerTests(BaseTest):
         self.assertEqual(resp.status_code, 200)
 
         del params["model_MKO"]
-        del params["result_cache_URI"]
+        del params["results_cache_URI"]
 
         formatted_params = format_params("/get_status", params)
 
@@ -121,7 +121,7 @@ class TrainerTests(BaseTest):
             "start_time": original_json["data"]["query_json"]["start_time"],
             "end_time": original_json["data"]["query_json"]["end_time"],
             "data_location": original_json["data"]["data_location"],
-            "result_cache_URI": self.get_rc()
+            "results_cache_URI": self.get_rc()
         }
 
         formatted_params = format_params("/add_data", params)
@@ -174,7 +174,7 @@ class TrainerTests(BaseTest):
             "learning_rate": original_json["hyper_params"]["learning_rate"],
             "loss_function": original_json["hyper_params"]["loss_function"],
             "train_percent": original_json["hyper_params"]["train_percent"],
-            "result_cache_URI": self.get_rc()
+            "results_cache_URI": self.get_rc()
         }
 
         formatted_params = format_params("/add_hparams", params)
@@ -223,7 +223,7 @@ class TrainerTests(BaseTest):
             "layers": 1,
             "units": 512,
             "dropout_rate": 0.95,
-            "result_cache_URI": self.get_rc()
+            "results_cache_URI": self.get_rc()
         }
 
         formatted_params = format_params("/add_topology", params)

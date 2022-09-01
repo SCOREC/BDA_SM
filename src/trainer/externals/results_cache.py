@@ -2,7 +2,7 @@ import requests
 from externals.utilities import check_connection
 
 
-def post_result_cache(URI: str, username: str, claim_check: str, generation_time: float, mko_json: str):
+def post_results_cache(URI: str, username: str, claim_check: str, generation_time: float, mko_json: str):
     if URI.find('FILE') == 0:
       _, filename = URI.split(":")
       with open(filename, "w") as fd:

@@ -1,7 +1,7 @@
 from unittest import TestCase
 from multiprocessing import Process
 from training_manager import app as tm_app
-from resultCache import app as rc_app
+from results_cache import app as rc_app
 import logging
 import time
 

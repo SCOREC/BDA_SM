@@ -1,7 +1,7 @@
 FROM ubuntu:latest
 #FROM python:3.9.13-alpine3.16
 #FROM tensorflow/build:2.11-python3.9
-RUN adduser --disabled-password training_manager
+RUN useradd -ms /bin/bash training_manager
 
 WORKDIR /home/training_manager
 

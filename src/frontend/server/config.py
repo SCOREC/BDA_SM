@@ -17,9 +17,9 @@ class BaseConfig(object):
   JWT_SECRET = os.environ.get('JWTSECRET') or SECRET_KEY
   JWT_SECRET = JWT_SECRET + jwt_salt
   ADMIN_ACL = ['user', 'admin', 'train', 'infer', 'analyze', 'logs']
-  TRAINING_MANAGER_HOST = None
-  INFERENCE_MANAGER_HOST = None
-  RESULT_CACHE_HOST = None
+  TRAINING_MANAGER_BASE_URL = None
+  INFERENCE_MANAGER_BASE_URL = None
+  RESULT_CACHE_BASE_URL = None
 
   
 class DevelopmentConfiguration(BaseConfig):
@@ -36,12 +36,10 @@ class DevelopmentConfiguration(BaseConfig):
   _index = SQLALCHEMY_DATABASE_URI.find(".db")
   SQLALCHEMY_BINDS = {'log': SQLALCHEMY_DATABASE_URI[:_index]
                       + '_log' + SQLALCHEMY_DATABASE_URI[_index:]}
-  SERVER_SECRET = '0123'
-  admin_user = "admin"
-  admin_password = "adpass"
-  TRAINING_MANAGER_HOST = 'http://localhost:5001/'
-  INFERENCE_MANAGER_HOST = 'http://localhost:5003/'
-  RESULT_CACHE_HOST = 'http://localhost:5002/'
+  SERVER_SECRET = os.environ.get('server_secret', '0123')
+  TRAINING_MANAGER_BASE_URL = os.environ.get("TRAINING_MANAGER_BASE_URL",'http://localhost:5001/')
+  RESULT_CACHE_BASE_URL = os.environ.get("RESULT_CACHE_BASE_URL",'http://localhost:5002/')
+  INFERENCE_MANAGER_BASE_URL = os.environ.get("INFERENCE_MANAGER_BASE_URL",'http://localhost:5003/')
   
 class TestingConfiguration(BaseConfig):
   """ Automated testing only """
@@ -61,9 +59,9 @@ class TestingConfiguration(BaseConfig):
   SERVER_SECRET = '0123'
   admin_user = "admin"
   admin_password = "adpass"
-  TRAINING_MANAGER_HOST = 'http://localhost:5001/'
-  INFERENCE_MANAGER_HOST = 'http://localhost:5003/'
-  RESULT_CACHE_HOST = 'http://localhost:5002/'
+  TRAINING_MANAGER_BASE_URL = os.environ.get("TRAINING_MANAGER_BASE_URL",'http://localhost:5001/')
+  RESULT_CACHE_BASE_URL = os.environ.get("RESULT_CACHE_BASE_URL",'http://localhost:5002/')
+  INFERENCE_MANAGER_BASE_URL = os.environ.get("INFERENCE_MANAGER_BASE_URL",'http://localhost:5003/')
   
 class ProductionConfiguration(BaseConfig):
   """For deployment"""

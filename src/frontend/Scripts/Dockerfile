@@ -5,7 +5,6 @@ RUN adduser -D frontend
 WORKDIR /home/frontend
 
 COPY requirements.txt requirements.txt
-RUN apk add --no-cache py3-numpy
 RUN python3 -m venv venv
 RUN venv/bin/pip install --upgrade pip setuptools wheel
 RUN venv/bin/pip install --upgrade -r requirements.txt

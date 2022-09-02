@@ -7,6 +7,7 @@ while getopts "m" options; do
   case "${options}" in
     m)
       eval $(minikube docker-env)  
+      roottag="mk/"
       ;;
   esac
 done

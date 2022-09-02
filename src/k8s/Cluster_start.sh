@@ -27,6 +27,7 @@ while getopts "mds:" options; do
 done
 
 if [ "${mode}" = "delete" ]; then
+  kubectl delete -f fetcher.yaml
   kubectl delete -f frontend.yaml
   kubectl delete -f training_manager.yaml
   kubectl delete -f results_cache.yaml
@@ -46,4 +47,5 @@ elif [ ${mode} = "add" ]; then
   kubectl apply -f frontend.yaml
   kubectl apply -f training_manager.yaml
   kubectl apply -f results_cache.yaml
+  kubectl apply -f fetcher.yaml
 fi

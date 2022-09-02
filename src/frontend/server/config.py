@@ -14,7 +14,7 @@ class BaseConfig(object):
   SQLALCHEMY_TRACK_MODIFICATIONS = False
   JWT_LIFETIME = int(os.environ.get('JWTLIFETIME') or  1800) # Lifetime in seconds
   JWT_ALGORITHM = 'HS256'
-  JWT_SECRET = os.environ.get('JWTSECRET') or SECRET_KEY
+  JWT_SECRET = os.environ.get('JWTSECRET', 'c29tZSBlbnRyb3B5')
   JWT_SECRET = JWT_SECRET + jwt_salt
   ADMIN_ACL = ['user', 'admin', 'train', 'infer', 'analyze', 'logs']
   TRAINING_MANAGER_BASE_URL = None

@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fetcher-deployment
+  labels:
+    app: fetcher
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fetcher
+  template:
+    metadata:
+      labels:
+        app: fetcher
+    spec:
+      containers:
+      - name: fetcher
+        image: mk/fetcher
+        ports:
+         - containerPort: 5000
+        imagePullPolicy: Never
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fetcher-service
+spec:
+  selector:
+    app: fetcher
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000

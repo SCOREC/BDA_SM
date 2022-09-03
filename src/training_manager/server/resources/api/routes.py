@@ -23,6 +23,7 @@ def create_MKO():
     username =  data.get('username')
     claim_check = server.trainer.create_mko(model_name, username)
   except Exception as err:
+    print("Bad request: ",request.data)
     return Response("Badly formed request: {}".format(err), 400)
 
   return ({"claim_check": claim_check}, 200)

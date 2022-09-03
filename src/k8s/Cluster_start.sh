@@ -7,6 +7,7 @@ else
    cd ${SCRIPT_DIR}/.
 fi
 
+KUBECTL=kubectl
 mode="add"
 secret_mode="file"
 while getopts "mds:" options; do
@@ -27,25 +28,25 @@ while getopts "mds:" options; do
 done
 
 if [ "${mode}" = "delete" ]; then
-  kubectl delete -f fetcher.yaml
-  kubectl delete -f frontend.yaml
-  kubectl delete -f training_manager.yaml
-  kubectl delete -f results_cache.yaml
-  kubectl delete -f configMap.yaml
-  kubectl delete -f secrets.yaml
+  ${KUBECTL} delete -f fetcher.yaml
+  ${KUBECTL} delete -f frontend.yaml
+  ${KUBECTL} delete -f training_manager.yaml
+  ${KUBECTL} delete -f results_cache.yaml
+  ${KUBECTL} delete -f configMap.yaml
+  ${KUBECTL} delete -f secrets.yaml
 elif [ ${mode} = "add" ]; then
   if [ ${secret_mode} = "cli" ]; then
-    kubectl create secret generic bda-secrets \
+    ${KUBECTL} create secret generic bda-secrets \
       --from-literal=SERVER_SECRET=server_secret \
       --from-literal=SECRET_KEY="${s1}" \
       --from-literal=JWT_SECRET="${s2}" 
   else
     echo "Creating secrets from yaml file"
-    kubectl apply -f secrets.yaml
+    ${KUBECTL} apply -f secrets.yaml
   fi 
-  kubectl apply -f configMap.yaml
-  kubectl apply -f frontend.yaml
-  kubectl apply -f training_manager.yaml
-  kubectl apply -f results_cache.yaml
-  kubectl apply -f fetcher.yaml
+  ${KUBECTL} apply -f configMap.yaml
+  ${KUBECTL} apply -f frontend.yaml
+  ${KUBECTL} apply -f training_manager.yaml
+  ${KUBECTL} apply -f results_cache.yaml
+  ${KUBECTL} apply -f fetcher.yaml
 fi

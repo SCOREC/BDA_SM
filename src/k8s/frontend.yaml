@@ -21,16 +21,16 @@ spec:
          - containerPort: 5000
         imagePullPolicy: Never
         env: 
-          - name: RESULTS_CACHE_URL
+          - name: RESULTS_CACHE_BASE_URL
             valueFrom:
               configMapKeyRef:
                 name: bda-configmap
-                key: RESULTS_CACHE_URL
-          - name: TRAINING_MANAGER_URL
+                key: RESULTS_CACHE_BASE_URL
+          - name: TRAINING_MANAGER_BASE_URL
             valueFrom:
               configMapKeyRef:
                 name: bda-configmap
-                key: TRAINING_MANAGER_URL
+                key: TRAINING_MANAGER_BASE_URL
           - name: SERVER_SECRET
             valueFrom:
               secretKeyRef: 

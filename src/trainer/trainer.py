@@ -1,7 +1,7 @@
 import argparse
 import os
 from externals.results_cache import post_results_cache, post_error
-from mko.dan_mko import MKO
+from trainer.mko import MKO
 from mko.exceptions import InputException, InvalidArgument
 from tempfile import NamedTemporaryFile as TempFile
 import time

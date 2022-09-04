@@ -17,7 +17,7 @@ COPY server server
 COPY __init__.py __init__.py 
 COPY fetcher.py fetcher.py
 
-COPY Scripts/boot.sh  ./
+COPY Scripts/boot.sh  .
 RUN chmod +x boot.sh 
 
 

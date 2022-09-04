@@ -1,10 +1,13 @@
-from flask import request, abort, Response
-from trainer.src.exceptions import InputException, MKOTypeException
-from sampler import app
+from flask import request, abort
+from flask.wrappers import Response
+from trainer.mko.exceptions import InputException, MKOTypeException
+from sampler.server import app
 from uuid import uuid4
-from trainer.src.MKO import MKO
+from trainer.mko import MKO
 import json
 import traceback
+import sys
+
 
 def get_input(field, args, return_none=False):
     if field not in args:

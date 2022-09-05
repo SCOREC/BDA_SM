@@ -17,14 +17,20 @@ spec:
       containers:
       - name: training-manager
         image: mk/training_manager
+        command: [venv/bin/python]
+        args: ["training_manager.py"]
         imagePullPolicy: Never
         ports:
          - containerPort: 5000
         env: 
-          - name: RESULTS_CACHE_URL
+          - name: RESULTS_CACHE_BASE_URL
             value: http://results-cache-service:5000/
-          - name: FETCHER_URL
+          - name: FETCHER_BASE_URL
             value: http://fetcher-service:5000/
+          - name: TRAINER_WORKING_DIRECTORY
+            value: ./trainer
+          - name: TRAINING_MANAGER_PORT
+            value: "5000"
       restartPolicy: Always
 
 ---

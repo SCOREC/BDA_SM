@@ -1,7 +1,9 @@
 from typing import Optional, Tuple
 
 class UserError(Exception):
-    pass
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
+        pass
 
 class InputException(UserError):
     def __init__(self, field: str, type_error: Optional[Tuple[type, type]] = None):
@@ -17,10 +19,6 @@ class InvalidArgument(UserError):
 class VersionException(UserError):
     def __init__(self, source_version: str, json_version: str):
         super().__init__("source version {} != json version {}".format(source_version, json_version))
-
-class ConnectionException(Exception):
-    def __init__(self, URI: str, err_msg: str):
-        super().__init__("unable to connect to URI: '{}', error message: '{}'".format(URI, err_msg))
 
 class MKOTypeException(UserError):
     def __init__(self, expected_type: str):

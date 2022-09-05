@@ -5,14 +5,14 @@ import requests
 from base64 import b64decode, b64encode
 
 def redeem_claim_check(username : str, claim_check : str):
-  url = TrainerConfig.RESULTS_CACHE_URL.rstrip("/ ") + "/api/get_result"
+  url = TrainerConfig.RESULTS_CACHE_BASE_URL.rstrip("/ ") + "/api/get_result"
   data = {"username" : username}
   data['claim_check'] = claim_check
   response = requests.get(url, params=data)
   return json.loads(response.content)['contents']
 
 def get_claim_check_status(username : str, claim_check : str):
-  url = TrainerConfig.RESULTS_CACHE_URL.rstrip("/ ") + "/api/get_status"
+  url = TrainerConfig.RESULTS_CACHE_BASE_URL.rstrip("/ ") + "/api/get_status"
   data = {"username" : username}
   data['claim_check'] = claim_check
   response = requests.get(url, params=data)

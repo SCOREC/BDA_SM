@@ -9,6 +9,7 @@ def forward_request(target_url,*args, **kwargs):
       params = {}
 
    try:
+      print("Forwarding Request to : {}".format(target_url))
       resp = requests.request(
          method=request.method,
          url=target_url,

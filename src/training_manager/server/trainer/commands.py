@@ -4,10 +4,10 @@ import subprocess
 import requests
 import tempfile 
 from server.config import TrainerConfig as cfg
-import server.trainer.defaults as defaults
+import training_manager.server.curator.defaults as defaults
 import json
 
-from server.trainer import errors
+from training_manager.exceptions import exceptions
 
 def get_new_claim_check(username: str, offset: int=0) -> str:
   new_claim_check_request = {"username": username}
@@ -15,10 +15,10 @@ def get_new_claim_check(username: str, offset: int=0) -> str:
     claim_check_URL = cfg.RESULTS_CACHE_BASE_URL+"/api/new_claim_check"
     rc_response = requests.get(claim_check_URL, params=new_claim_check_request)
     if rc_response.status_code != 200:
-      raise errors.RCException("Result cache did not issue claim check")
+      raise exceptions.RCException("Result cache did not issue claim check")
     claim_check = rc_response.json()['claim_check']
   except Exception as err:
-    raise errors.RCException(err)
+    raise exceptions.RCException(err)
 
   return claim_check
 
@@ -49,7 +49,7 @@ def fill_mko(username: str, model_name: str, mko: str, dataspec_r: dict, topolog
   for key in dataspec_r.keys():
     dataspec[key] = dataspec_r[key]
   if "REQUIRED" in dataspec.values():
-    raise errors.InputException("Required value not in data specification")
+    raise exceptions.InputException("Required value not in data specification")
   if 'n_outputs' in dataspec:
     n_outputs = dataspec['n_outputs']
   else:
@@ -65,7 +65,7 @@ def fill_mko(username: str, model_name: str, mko: str, dataspec_r: dict, topolog
   for key in hypers_r.keys():
     hypers[key] = hypers_r[key]
   if "REQUIRED" in hypers.values():
-    raise errors.InputException("Required value not in hyper parameter specification")
+    raise exceptions.InputException("Required value not in hyper parameter specification")
 
   params = defaults.stub
   params['data'] = dataspec  # type: ignore

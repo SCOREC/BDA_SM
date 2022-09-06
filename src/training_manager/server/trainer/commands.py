@@ -3,11 +3,11 @@ import sys
 import subprocess
 import requests
 import tempfile 
-from server.config import TrainerConfig as cfg
-import training_manager.server.curator.defaults as defaults
+from server.config import ExternalsConfig as cfg
+import server.curator.defaults as defaults
 import json
 
-from training_manager.exceptions import exceptions
+import server.exceptions as exceptions
 
 def get_new_claim_check(username: str, offset: int=0) -> str:
   new_claim_check_request = {"username": username}
@@ -98,18 +98,16 @@ def train_mko(username: str, model_name: str, mko: str, smip_token : str, smip_u
   mko_loc = save_file(mko)
   EXECUTABLE_STRING_LIST = [
     *cfg.EXECUTABLE_NAME,
+    "-u",
     username,
+    "--cc",
     claim_check,
+    "--rc",
     cfg.RESULTS_CACHE_BASE_URL,
-    "--train",
-    "--name", model_name,
-    "--delete",
-    "-f",
+    "-i",
     mko_loc,
-    "--smip_token",
+    "--token",
     smip_token,
-    "--smip_url",
-    smip_url
     ]
   print(EXECUTABLE_STRING_LIST)
   subprocess.Popen(EXECUTABLE_STRING_LIST, cwd=cfg.EXECUTABLE_WORKING_DIRECTORY)

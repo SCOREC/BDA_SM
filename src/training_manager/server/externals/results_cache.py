@@ -1,6 +1,6 @@
 import requests
-from config.externals import Config as cfg
-from exceptions import RCException
+from server.config import ExternalsConfig as cfg
+from server.exceptions import RCException
 
 def get_new_claim_check(username: str, offset: int=0) -> str:
   new_claim_check_request = {"username": username}

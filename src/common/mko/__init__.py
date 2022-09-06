@@ -1,2 +1,2 @@
 #mko/__init__.py
-from mko.mko import MKO
+from common.mko.mko import MKO

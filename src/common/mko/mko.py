@@ -1,5 +1,5 @@
 import json
-import mko.encodings
+import common.mko.encodings as encodings
 
 version = 1.0
 
@@ -11,7 +11,9 @@ class MKO(object):
     self._augmented = False
     self._has_hypers = False
     self._has_model = False
+    self._has_weights = False
     self._compiled = False
+    self._trained = False
 
     self._topology = { }
     self._hypers = {}
@@ -19,6 +21,7 @@ class MKO(object):
       "query_json" : {}
     }
     self._model = None
+    self._weights = None
 
   def _to_dict(self):
     data = {}
@@ -26,7 +29,14 @@ class MKO(object):
     data['topology'] = self._topology
     data['hypers'] = self._hypers
     data['dataspec'] = self._dataspec
-    data['model'] = self._model
+    
+    if self._has_model and self._trained:   
+      np_weights = self._model.get_weights()
+      b64_encoded_w = []
+      for w in np_weights:
+        b64_encoded_w.append(encodings.b64encode_array(w))
+      data['WEIGHTS'] = b64_encoded_w
+    return data
   
   @staticmethod
   def from_dict(data: dict) -> 'MKO':
@@ -40,11 +50,17 @@ class MKO(object):
     if 'dataspec' in data:
       mko._dataspec = data['dataspec']
       mko._augmented = True
-    if 'model' in data:
-      mko._model = data['model']
-      mko._has_model = True
-
+    if 'WEIGHTS' in data:
+      mko._has_weights = True
+      mko._weights = data['WEIGHTS']
     return mko
+
+  def parameterize_model(self):
+    if self._has_model and self._has_weights:
+      self._model.set_weights(
+        [ encodings.b64decode_array(w) for w in self._weights ]
+      )
+    self._trained = True
 
   @staticmethod
   def from_json(j_str: str) -> 'MKO':
@@ -53,7 +69,7 @@ class MKO(object):
 
   @staticmethod
   def from_base64(b64_str: str) -> 'MKO':
-    j_str = mko.encodings.decode_base64(b64_str)
+    j_str = encodings.decode_base64(bytes(b64_str, "utf-8")).decode("utf-8")
     return MKO.from_json(j_str)
     
   ##### SETTERS #####
@@ -65,10 +81,11 @@ class MKO(object):
 
   def _get_b64(self) -> str:
     j_str = self._get_json()
-    return mko.encodings.b64encode(bytes(j_str, "utf-8")).decode("utf-8")
+    return encodings.b64encode(bytes(j_str, "utf-8")).decode("utf-8")
   
   def _get_json(self) -> str:
-    return json.dumps(self._to_dict())
+    as_dict = self._to_dict()
+    return json.dumps(as_dict)
 
   ##### PROPERTIES #####
   @property

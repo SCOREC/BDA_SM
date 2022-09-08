@@ -45,9 +45,8 @@ def prepare_mko_model(mko):
   n_outputs = mko.dataspec['n_outputs']
   model = parse_json_model_structure((n_inputs,), mko._model_name, mko.topology, n_outputs)
   mko._model = compile_model(model, mko.hypers)
-  mko._compiled = True
-  if mko._has_weights:
-    mko.parameterize_model()
+  mko.set_compiled(True)
+  mko.parameterize_model()
   return mko
 
 def same_shuffle(a, b, axis=0):
@@ -88,6 +87,9 @@ def trainer(mko_filename, username, claim_check, rc_url, smip_token):
   nx = inputs.shape[0]
   ny = outputs.shape[0]
   inputs, outputs = same_shuffle(inputs, outputs, axis=0)
+  inputs = mko.normalize_training_inputs(inputs)
+  outputs = mko.normalize_training_outputs(outputs)
+
   p = int( float(nx) * mko.hypers['train_percent'] )
   X_train = inputs [ :p, :]
   Y_train = outputs[ :p, :]
@@ -102,6 +104,7 @@ def trainer(mko_filename, username, claim_check, rc_url, smip_token):
       mko.hypers,
       status_poster
       )
+    mko.set_trained()
   except Exception as err:
     externals.post_error(rc_url, username, claim_check, str(err))
     raise err

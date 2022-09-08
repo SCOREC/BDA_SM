@@ -1,7 +1,22 @@
-
-from os import environ, path
 import sys
+from os import environ, path
 basedir = path.abspath(path.dirname(__file__))
+
+class AnalyzersConfig(object):
+  EXECUTABLE_WORKING_DIRECTORY = environ.get("ANALYZERS_WORKING_DIRECTORY", "./analyzers")
+  PYTHON_EXECUTABLE = sys.executable
+  EXECUTABLE_NAME = [PYTHON_EXECUTABLE]
+
+  RESULTS_CACHE_PORT = environ.get('RESULTS_CACHE_PORT', 5002)
+  RESULTS_CACHE_BASE_URL = environ.get('RESULTS_CACHE_BASE_URL',
+    'http://localhost:{}'.format(RESULTS_CACHE_PORT))
+  FETCHER_PORT = environ.get('FETCHER_PORT', 5004)
+  FETCHER_URL = environ.get('FETCHER_BASE_URL',
+    'http://localhost:{}'.format(FETCHER_PORT))
+  SAMPLER_PORT = environ.get('SAMPLER_PORT', 5005)
+  SAMPLER_BASE_URL = environ.get('SAMPLER_BASE_URL',
+    'http://localhost:{}'.format(SAMPLER_PORT))
+  
 
 
 """ Flask configurations """

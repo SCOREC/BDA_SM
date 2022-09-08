@@ -28,7 +28,7 @@ def save_file(data):
   f.close()
   return f.name
 
-
+"""
 def create_mko(model_name: str, username: str) -> str:
   claim_check = get_new_claim_check(username)
   subprocess.Popen([
@@ -91,7 +91,7 @@ def fill_mko(username: str, model_name: str, mko: str, dataspec_r: dict, topolog
     cwd=cfg.EXECUTABLE_WORKING_DIRECTORY
   )
   return claim_check
-
+"""
 
 def train_mko(username: str, model_name: str, mko: str, smip_token : str, smip_url : str) -> str:
   claim_check = get_new_claim_check(username)

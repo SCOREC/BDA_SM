@@ -1,4 +1,1 @@
-from flask import Blueprint
-
-bp = Blueprint('api',__name__)
-from server.resources.api import routes
+from server.resources.api.routes import bp

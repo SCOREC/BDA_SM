@@ -2,7 +2,7 @@ from flask import Blueprint
 
 from server import app
 from server.wrappers import require_access, initialized
-from server.Resources.util import forward_request
+from server.util import forward_request
 
 TrainResource = Blueprint('Train', __name__, url_prefix='/Train')
 training_manager_host = str(app.config.get('TRAINING_MANAGER_BASE_URL')).rstrip('/ ')

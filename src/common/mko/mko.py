@@ -10,10 +10,8 @@ class MKO(object):
     self._topological = False
     self._augmented = False
     self._has_hypers = False
-    self._has_model = False
-    self._has_weights = False
     self._compiled = False
-    self._trained = False
+    self._has_weights = False
 
     self._topology = { }
     self._hypers = {}
@@ -30,7 +28,7 @@ class MKO(object):
     data['hypers'] = self._hypers
     data['dataspec'] = self._dataspec
     
-    if self._has_model and self._trained:   
+    if self._has_weights:   
       np_weights = self._model.get_weights()
       b64_encoded_w = []
       for w in np_weights:
@@ -56,11 +54,11 @@ class MKO(object):
     return mko
 
   def parameterize_model(self):
-    if self._has_model and self._has_weights:
+    if self._compiled and self._has_weights:
       self._model.set_weights(
         [ encodings.b64decode_array(w) for w in self._weights ]
       )
-    self._trained = True
+    self._has_weights = True
 
   @staticmethod
   def from_json(j_str: str) -> 'MKO':
@@ -71,11 +69,59 @@ class MKO(object):
   def from_base64(b64_str: str) -> 'MKO':
     j_str = encodings.decode_base64(bytes(b64_str, "utf-8")).decode("utf-8")
     return MKO.from_json(j_str)
+
+  @staticmethod
+  def scale_array(array, interval):
+    return (array - interval[0]) / (interval[1] - interval[0])
+
+  @staticmethod
+  def unscale_array(array, interval):
+    return array * (interval[1] - interval[0]) + interval[0]
+
+  @classmethod
+  def normalize(cls, array):
+    means = array.mean(axis=0)
+    std = array.std(axis=0)
+    ll = means - std
+    ul = means + std
+    normalized_array = cls.scale_array(array, [ll, ul])
+    return normalized_array, [ll, ul]
+
+  @classmethod
+  def denormalize(cls, array, interval):
+    return cls.unscale_array(array, interval)
+  
+  def normalize_training_inputs(self, array):
+    scaled_array, interval = self.normalize(array)
+    self.set_inputs_interval(interval)
+    return scaled_array
+
+  def normalize_training_outputs(self, array):
+    scaled_array, interval = self.normalize(array)
+    self.set_outputs_interval(interval)
+    return scaled_array
     
+  def normalize_inputs(self, array):
+    interval = self.get_inputs_interval()
+    return self.scale_array(array, interval)
+
+  def denormalize_outputs(self, array):
+    interval = self.get_outputs_interval()
+    return self.denormalize(array, interval)
+
   ##### SETTERS #####
 
   def set_compiled(self, state=True):
     self._compiled = state
+
+  def set_trained(self, state=True):
+    self._has_weights = state
+
+  def set_inputs_interval(self, interval):
+    self._dataspec['inputs_interval'] = encodings.b64encode_array(interval)
+
+  def set_outputs_interval(self, interval):
+    self._dataspec['outputs_interval'] = encodings.b64encode_array(interval)
 
   ##### GETTERS #####
 
@@ -86,6 +132,12 @@ class MKO(object):
   def _get_json(self) -> str:
     as_dict = self._to_dict()
     return json.dumps(as_dict)
+
+  def get_inputs_interval(self):
+    return encodings.b64decode_array(self._dataspec['inputs_interval'])
+
+  def get_outputs_interval(self):
+    return encodings.b64decode_array(self._dataspec['outputs_interval'])
 
   ##### PROPERTIES #####
   @property
@@ -111,6 +163,10 @@ class MKO(object):
   @property
   def topology(self):
     return self._topology
+
+  @property
+  def has_weights(self):
+    return self._has_weights
 
   @property
   def trainable(self) -> bool:

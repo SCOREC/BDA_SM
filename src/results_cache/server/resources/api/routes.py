@@ -137,7 +137,7 @@ def store_status(): #should set generation time to max
     except ValueError:
         abort(Response("'{}' not of type 'float'".format(status), 400))
 
-    if status < 0 or status >= 1:
+    if status < 0 or status > 1.000001:
         abort(Response("0 <= status < 1; status was '{}'".format(status), 400))
 
     try:

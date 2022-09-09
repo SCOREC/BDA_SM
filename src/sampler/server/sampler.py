@@ -44,5 +44,5 @@ def sample_inputs(mko_data, inputs, n_samples, as_csv=True, precision=8):
   if as_csv:
     return np2d_to_csv(outputs, precision)
   else:
-    return encodings.b64encode_array(outputs)
+    return encodings.b64encode_datatype(outputs)
 

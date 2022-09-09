@@ -5,7 +5,6 @@ basedir = path.abspath(path.dirname(__file__))
 class AnalyzersConfig(object):
   EXECUTABLE_WORKING_DIRECTORY = environ.get("ANALYZERS_WORKING_DIRECTORY", "./analyzers")
   PYTHON_EXECUTABLE = sys.executable
-  EXECUTABLE_NAME = [PYTHON_EXECUTABLE]
 
   RESULTS_CACHE_PORT = environ.get('RESULTS_CACHE_PORT', 5002)
   RESULTS_CACHE_BASE_URL = environ.get('RESULTS_CACHE_BASE_URL',

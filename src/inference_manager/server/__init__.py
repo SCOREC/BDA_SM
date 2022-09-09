@@ -8,7 +8,7 @@ app.config.from_object(app_settings)
 import server.resources.api
 app.register_blueprint(server.resources.api.bp, url_prefix='/api')
 import server.resources.api.analyzers
-app.register_blueprint(server.resources.api.bp, url_prefix='/api/analyze')
+app.register_blueprint(server.resources.api.analyzers.bp, url_prefix='/api/analyze')
 
 @app.route('/helloWorld', methods = ['GET'])
 def imAlive():

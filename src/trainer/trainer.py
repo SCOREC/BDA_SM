@@ -13,7 +13,7 @@ import time
 
 def parse_args():
   parser = argparse.ArgumentParser(description='Train an MKO')
-  parser.add_argument('-i', nargs=1, dest='mko_filename', type=str, required=True, help='path to file for MKO')
+  parser.add_argument('--mko', nargs=1, dest='mko_filename', type=str, required=True, help='path to file for MKO')
   parser.add_argument('-u', nargs=1, dest='username', type=str, required=True, help='username for result_cache')
   parser.add_argument('--cc', nargs=1, dest='claim_check', type=str, required=True, help='claim_check for result_cache')
   parser.add_argument('--rc', nargs=1, dest="rc_url", type=str, required=True, help='url to result_cache server')
@@ -121,10 +121,10 @@ def trainer(mko_filename, username, claim_check, rc_url, smip_token):
 
 if __name__ == '__main__':
   args = vars(parse_args())
-  mko_filename = args['mko_filename'][0]
-  username = args['username'][0]
-  claim_check = args['claim_check'][0]
-  rc_url = args['rc_url'][0]
-  smip_token = args['smip_token'][0]
+  mko_filename = args.get('mko_filename')[0]
+  username = args.get('username')[0]
+  claim_check = args.get('claim_check')[0]
+  rc_url = args.get('rc_url')[0]
+  smip_token = args.get('smip_token')[0]
 
   trainer(mko_filename, username, claim_check, rc_url, smip_token)

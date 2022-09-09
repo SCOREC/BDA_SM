@@ -1,4 +1,5 @@
 import json
+import numpy as np
 import common.mko.encodings as encodings
 
 version = 1.0
@@ -32,7 +33,7 @@ class MKO(object):
       np_weights = self._model.get_weights()
       b64_encoded_w = []
       for w in np_weights:
-        b64_encoded_w.append(encodings.b64encode_array(w))
+        b64_encoded_w.append(encodings.b64encode_datatype(w))
       data['WEIGHTS'] = b64_encoded_w
     return data
   
@@ -56,7 +57,7 @@ class MKO(object):
   def parameterize_model(self):
     if self._compiled and self._has_weights:
       self._model.set_weights(
-        [ encodings.b64decode_array(w) for w in self._weights ]
+        [ encodings.b64decode_datatype(w) for w in self._weights ]
       )
     self._has_weights = True
 
@@ -67,7 +68,7 @@ class MKO(object):
 
   @staticmethod
   def from_base64(b64_str: str) -> 'MKO':
-    j_str = encodings.decode_base64(bytes(b64_str, "utf-8")).decode("utf-8")
+    j_str = encodings.decode_base64(b64_str).decode("utf-8")
     return MKO.from_json(j_str)
 
   @staticmethod
@@ -80,12 +81,13 @@ class MKO(object):
 
   @classmethod
   def normalize(cls, array):
-    means = array.mean(axis=0)
-    std = array.std(axis=0)
+    tmp = np.array(array)
+    means = tmp.mean(axis=0)
+    std = tmp.std(axis=0)
     ll = means - std
     ul = means + std
-    normalized_array = cls.scale_array(array, [ll, ul])
-    return normalized_array, [ll, ul]
+    normalized_array = cls.scale_array(tmp, [ll, ul])
+    return normalized_array, np.array([ll, ul])
 
   @classmethod
   def denormalize(cls, array, interval):
@@ -118,26 +120,26 @@ class MKO(object):
     self._has_weights = state
 
   def set_inputs_interval(self, interval):
-    self._dataspec['inputs_interval'] = encodings.b64encode_array(interval)
+    self._dataspec['inputs_interval'] = encodings.b64encode_datatype(interval)
 
   def set_outputs_interval(self, interval):
-    self._dataspec['outputs_interval'] = encodings.b64encode_array(interval)
+    self._dataspec['outputs_interval'] = encodings.b64encode_datatype(interval)
 
   ##### GETTERS #####
 
   def _get_b64(self) -> str:
     j_str = self._get_json()
-    return encodings.b64encode(bytes(j_str, "utf-8")).decode("utf-8")
+    return encodings.encode_base64(j_str)
   
   def _get_json(self) -> str:
     as_dict = self._to_dict()
     return json.dumps(as_dict)
 
   def get_inputs_interval(self):
-    return encodings.b64decode_array(self._dataspec['inputs_interval'])
+    return encodings.b64decode_datatype(self._dataspec['inputs_interval'])
 
   def get_outputs_interval(self):
-    return encodings.b64decode_array(self._dataspec['outputs_interval'])
+    return encodings.b64decode_datatype(self._dataspec['outputs_interval'])
 
   ##### PROPERTIES #####
   @property

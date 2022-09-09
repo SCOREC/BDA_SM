@@ -1,11 +1,8 @@
-from operator import sub
-import sys
 import subprocess
 import requests
 import tempfile 
 from server.config import ExternalsConfig as cfg
 import server.curator.defaults as defaults
-import json
 
 import server.exceptions as exceptions
 
@@ -104,7 +101,7 @@ def train_mko(username: str, model_name: str, mko: str, smip_token : str, smip_u
     claim_check,
     "--rc",
     cfg.RESULTS_CACHE_BASE_URL,
-    "-i",
+    "--mko",
     mko_loc,
     "--token",
     smip_token,

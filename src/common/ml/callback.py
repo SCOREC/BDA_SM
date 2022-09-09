@@ -1,10 +1,9 @@
-from externals.results_cache import post_status
 from tensorflow.keras.callbacks import Callback
 
 class StatusCallback(Callback):
-    def __init__(self, post_args: tuple, total_epochs: int):
+    def __init__(self, status_poster, total_epochs: int):
         super().__init__()
-        self.post_args = post_args 
+        self._status_poster = status_poster
         self.total_epochs = total_epochs
         self._last_status = 0.0
 
@@ -14,4 +13,4 @@ class StatusCallback(Callback):
             status -= 1E-6
         if status - self._last_status > 0.05:
             self._last_status = status
-            post_status(*self.post_args, status)
+            self._status_poster(status)

@@ -17,6 +17,9 @@ print("Starting with server_secret: '{}'".format(app.config.get('SERVER_SECRET')
 from server.Resources.Admin.routes import AdminResource
 app.register_blueprint(AdminResource)
 
+from server.Resources.Analyze.routes import AnalyzeResource
+app.register_blueprint(AnalyzeResource)
+
 from server.Resources.Infer.routes import InferResource
 app.register_blueprint(InferResource)
 

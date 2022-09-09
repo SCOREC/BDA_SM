@@ -1,4 +1,4 @@
-from server.config import TrainerConfig
+from server.config import ExternalsConfig as cfg
 
 stub = {
   "model_name": "REQUIRED",
@@ -16,7 +16,7 @@ topology = [
   }, {
     "type": "dense",
     "activation": "relu",
-    "units": "REQUIRED"
+    "units": "50"
   }
 ]
 
@@ -27,7 +27,8 @@ hypers = {
   "optimizer": "adam",
   "learning_rate": 0.001,
   "loss_function": "mse",
-  "train_percent": 0.9
+  "train_percent": 0.9,
+  "trained": 0
 }
 
 dataspec = {
@@ -44,5 +45,5 @@ dataspec = {
     "max_samples": 0
   },
   "data_type": "fetcher",
-  "data_location" : TrainerConfig.FETCHER_URL
+  "data_location" : "REQUIRED_SMIP_URL"
 }

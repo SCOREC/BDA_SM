@@ -1,166 +1,130 @@
 import argparse
 import os
-from externals.results_cache import post_results_cache, post_error
-from trainer.mko import MKO
-from mko.exceptions import InputException, InvalidArgument
-from tempfile import NamedTemporaryFile as TempFile
+import pandas as pd
+import numpy as np
+import json
 import time
 
-class AddTypes:
-    DATA = "data"
-    HYPER_PARAMS = "hyper_params"
-    HYPER_PARAMS_ABBREV = "hparams"
-    TOPOLOGY = "topology"
-    ALL = "all"
-    types = {
-        DATA,
-        HYPER_PARAMS,
-        HYPER_PARAMS_ABBREV,
-        TOPOLOGY,
-        ALL
-    }
+import externals
+from common.mko import MKO
+from common.ml import parse_json_model_structure, compile_model, fit_model
 
-# command line arguments
+import time
+
 def parse_args():
-    parser = argparse.ArgumentParser(description='Trains an MKO')
-    parser.add_argument('-f', nargs=1, dest='file_loc', const=None, default=None, type=str, help='path to file for MKO')
-    parser.add_argument('--create', dest='function', action='store_const', const='create', default='create', help='create MKO')
-    parser.add_argument('--name', nargs=1, dest='name', default=['model'], help='name of model')
-    parser.add_argument('--add', nargs=2, dest='add', help='add to MKO file, first args is type second is location')
-    parser.add_argument('--train', dest='function', action='store_const', const='train', help='train MKO object')
-    parser.add_argument('username', metavar='username', type=str, help='username of user')
-    parser.add_argument('claim_check', metavar='claim_check', type=str, help='claim_check to store in results_cache')
-    parser.add_argument('URI', metavar='rc_URI', type=str, help='URI of the result cache')
-    parser.add_argument('--delete', dest='delete', action='store_const', const='false', default='false', help='should delete file after usage')
-    parser.add_argument('--smip_token', nargs=1, dest='smip_token', const=None, default=None, type=str, help='Bearer token for SMIP - required for training')
-    parser.add_argument('--smip_url', nargs=1, dest='smip_url', const=None, default=None, type=str, help='URL of SMIP - required for training')
-    return parser.parse_args()
+  parser = argparse.ArgumentParser(description='Train an MKO')
+  parser.add_argument('--mko', nargs=1, dest='mko_filename', type=str, required=True, help='path to file for MKO')
+  parser.add_argument('-u', nargs=1, dest='username', type=str, required=True, help='username for result_cache')
+  parser.add_argument('--cc', nargs=1, dest='claim_check', type=str, required=True, help='claim_check for result_cache')
+  parser.add_argument('--rc', nargs=1, dest="rc_url", type=str, required=True, help='url to result_cache server')
+  parser.add_argument('--token', nargs=1, dest="smip_token", type=str, required=True, help='token for smip server')
+  return parser.parse_args()
 
 def delete_file(file_loc: str):
     if not os.path.exists(file_loc):
         return
-
     os.unlink(file_loc)
 
+def get_data_from_fetcher(mko : 'MKO', smip_token : str):
+    ids = mko.dataspec['x_tags'] + mko.dataspec['y_tags']
+    query = mko.dataspec['query_json']
+    query["attrib_id_list"] = ids
+    smip_url = mko.dataspec['data_location']
 
-# post_args: tuple of command line arguments (URI, username, claim_check)
-# generation_time: seconds to generate
-# mko_data: data to send to resultCache
-def post(post_args: tuple, generation_time: int, mko_data: str):
-    URI, username, claim_check = post_args
-    post_results_cache(URI, username, claim_check, generation_time, mko_data)
+    auth = {
+        'smip_token' : smip_token,
+        'smip_url'   : smip_url
+    }
 
-# converts command line parser to tuple
-def get_post_args(args: argparse.Namespace):
-    return (args.URI, args.username, args.claim_check)
+    fetcher_data = externals.query_fetcher(json.dumps(query), json.dumps(auth))
+    df = pd.read_json(fetcher_data)
+    return df[mko.dataspec['x_tags']].to_numpy(), df[mko.dataspec['y_tags']].to_numpy()
+  
+def prepare_mko_model(mko):
+  n_inputs = mko.dataspec['n_inputs']
+  n_outputs = mko.dataspec['n_outputs']
+  model = parse_json_model_structure((n_inputs,), mko._model_name, mko.topology, n_outputs)
+  mko._model = compile_model(model, mko.hypers)
+  mko.set_compiled(True)
+  mko.parameterize_model()
+  return mko
 
-# loads file
-def load_file(file_loc: str) -> dict:
-    if file_loc == None:
-        raise InputException("file_loc")
-
-    if not os.path.exists(file_loc):
-        raise FileNotFoundError('file "{}" not found'.format(file_loc))
-
-    with open(file_loc, 'r') as file:
-        return file.read()
-
-# args: command line parser
-# trains model according to args
-def train(args: argparse.Namespace):
-    train_mko(
-        args.file_loc[0], 
-        get_post_args(args), 
-        False if args.delete.lower() == 'false' else True,
-        args.smip_token[0],
-        args.smip_url[0]
-    )
-
-# mko: file location of mko
-# post_args: (URI, usernae, claim_check)
-def train_mko(mko_filename: str, post_args: tuple, delete: bool, smip_token : str, smip_url : str):
-    prev_time = time.time()
-    mko = MKO.from_b64str(load_file(mko_filename))
-    mko.compile()
-    mko.load_data(smip_token, smip_url)
-    mko.train(push_update_args=post_args)
-    mko_data = str(mko)
-    generation_time = int(time.time() - prev_time)
-    post(post_args, generation_time, mko_data)
-
-    if delete:
-        delete_file(mko)
-
-# args: command line parser
-# creates new mko given the name
-def create(args: argparse.Namespace):
-    create_mko(args.name[0], get_post_args(args))
-
-# model_name: name of the new model
-# post_args: (URI, usernae, claim_check)
-# creates new mko and posts to resultCache
-def create_mko(model_name: str, post_args: tuple):
-    prev_time = time.time()
-    mko_data = str(MKO.from_empty(model_name))
-    generation_time = time.time() - prev_time
-    post(post_args, generation_time, mko_data)
-
-# args: command line parser
-# adds a json object to the mko
-def add(args: argparse.Namespace):
-    add_mko(
-        args.file_loc[0], 
-        args.add[0].lower(), 
-        args.add[1], get_post_args(args), 
-        False if args.delete.lower() == 'false' else True
-    )
-
-# mko: file location of mko
-# add_type: portion of mko to append to (data, hyperparams, etc.)
-# to_add: location of new json file to merge with mko
-# post_args: (URI, usernae, claim_check)
-# combines to_add as a sub field of mko under the to_add tag
-def add_mko(mko_filename: str, add_type: str, add_loc: str, post_args: tuple, delete: bool):
-    prev_time = time.time()
-    mko = MKO.from_b64str(load_file(mko_filename))
-    print("Loaded MKO from ", mko_filename)
-    to_add = load_file(add_loc)
-    if add_type not in AddTypes.types:
-        raise InvalidArgument("add type", AddTypes.types)
-
-    if add_type == AddTypes.DATA:
-        mko.add_data(to_add)
-    elif add_type == AddTypes.HYPER_PARAMS or add_type == AddTypes.HYPER_PARAMS_ABBREV:
-        mko.add_hyper_params(to_add)
-    elif add_type == AddTypes.TOPOLOGY:
-        mko.add_topology(to_add)
-    elif add_type == AddTypes.ALL:
-        mko.add_data(to_add, subset='data')
-        mko.add_hyper_params(to_add, subset='hyper_params')
-        mko.add_topology(to_add)
-
-    mko_data = str(mko)
-    generation_time = time.time() - prev_time
-    post(post_args, int(generation_time), mko_data)
-    
-    if delete:
-        delete_file(mko)
-        delete_file(add_loc)
+def same_shuffle(a, b, axis=0):
+  seed = int(1000000*np.random.uniform())
+  rng = np.random.default_rng(seed)
+  rng.shuffle(a, axis=axis)
+  rng = np.random.default_rng(seed)
+  rng.shuffle(b, axis=axis)
+  return a, b
 
 
-def main():
-    args = parse_args()
+def trainer(mko_filename, username, claim_check, rc_url, smip_token):
 
-    try:    
-        if args.add != None:
-            add(args)
-        elif args.function == "create":
-            create(args)
-        elif args.function == "train":
-            train(args)
-    except Exception as e:
-        post_error(*get_post_args(args), str(e))
-        raise e
+  def get_post_status_closure(rc_url, username, claim_check):
+    def post_status_closure(status):
+      externals.post_status(rc_url, username, claim_check, status)
+    return post_status_closure
+  status_poster = get_post_status_closure(rc_url, username, claim_check)
+  
+
+  start_time = time.time()
+  status_poster(0.0)
+
+  with open(mko_filename, 'r') as fd:
+    mko_data = fd.read()
+    fd.close()
+  delete_file(mko_filename)
+
+  mko = MKO.from_base64(mko_data)
+  
+  try:
+    inputs, outputs = get_data_from_fetcher(mko, smip_token)
+    mko = prepare_mko_model(mko)
+  except Exception as err:
+    externals.post_error(rc_url, username, claim_check, str(err))
+    raise err
+
+  nx = inputs.shape[0]
+  ny = outputs.shape[0]
+  inputs, outputs = same_shuffle(inputs, outputs, axis=0)
+  inputs = mko.normalize_training_inputs(inputs)
+  outputs = mko.normalize_training_outputs(outputs)
+
+  p = int( float(nx) * mko.hypers['train_percent'] )
+  X_train = inputs [ :p, :]
+  Y_train = outputs[ :p, :]
+  X_test  = inputs [p: , :]
+  Y_test  = outputs[p: , :]
+
+  try:
+    mko._model, mko._hypers['loss'] = fit_model(
+      mko._model,
+      X_train, Y_train,
+      X_test, Y_test,
+      mko.hypers,
+      status_poster
+      )
+    mko.set_trained()
+  except Exception as err:
+    externals.post_error(rc_url, username, claim_check, str(err))
+    raise err
+
+  end_time = time.time()
+  generation_time = max(1, int(end_time - start_time))
+
+  try:
+    externals.post_results_cache(rc_url, username, claim_check, generation_time, mko.b64)
+  except Exception as err:
+    externals.post_error(rc_url, username, claim_check, str(err))
+    raise err
+  
 
 if __name__ == '__main__':
-    main()
+  args = vars(parse_args())
+  mko_filename = args.get('mko_filename')[0]
+  username = args.get('username')[0]
+  claim_check = args.get('claim_check')[0]
+  rc_url = args.get('rc_url')[0]
+  smip_token = args.get('smip_token')[0]
+
+  trainer(mko_filename, username, claim_check, rc_url, smip_token)

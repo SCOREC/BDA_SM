@@ -1,7 +1,5 @@
 import requests
 from externals.config import ExternalsConfig as config
-from externals.exceptions import ConnectionException
-
 
 def query_fetcher(query: str, auth : str) -> str:
   params = {

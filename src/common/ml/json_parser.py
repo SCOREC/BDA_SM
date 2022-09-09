@@ -1,8 +1,8 @@
 from typing import Any
 from tensorflow.keras import Input, Model
 from tensorflow.keras.layers import Dense, Conv2D, Layer
-from ml.layers import VariationalDropout
-from ml.exceptions import InputException, InvalidArgument
+from common.ml.layers import VariationalDropout
+from common.ml.exceptions import InputException, InvalidArgument
 
 class Defaults:
     rate = 0.95
@@ -87,11 +87,15 @@ def get_layer(layer_params: dict, index: int) -> Layer:
     return layers[layer_type](layer_params, name)
 
 
-def parse_json_model_structure(data_input_shape: tuple, name: str, model_topology: list) -> Model:
+def parse_json_model_structure(data_input_shape: tuple, name: str, model_topology: list, n_outputs) -> Model:
     input_layer = Input(data_input_shape)
     x = input_layer
     for index, layer_params in enumerate(model_topology):
         layer_type = get_layer(layer_params, index)
         x = layer_type(x)
+    output_layer_params = {
+        'type': "dense", "activation": "linear", "units": n_outputs
+    }
+    x = get_layer(output_layer_params, len(model_topology))(x)
 
     return Model(inputs=input_layer, outputs=x, name=name)

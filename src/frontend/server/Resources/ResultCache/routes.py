@@ -2,7 +2,7 @@ from flask import Blueprint
 
 from server import app
 from server.wrappers import require_access, initialized
-from server.Resources.util import forward_request
+from server.util import forward_request
 
 RCResource = Blueprint('ResultCache', __name__, url_prefix='/Results')
 results_cache_host = str(app.config.get('RESULTS_CACHE_BASE_URL')).rstrip('/ ')

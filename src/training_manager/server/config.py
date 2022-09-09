@@ -3,11 +3,11 @@ from os import environ, path
 import sys
 basedir = path.abspath(path.dirname(__file__))
 
-""" Trainer configurations """
-class TrainerConfig(object):
-  EXECUTABLE_WORKING_DIRECTORY = environ.get("TRAINER_WORKING_DIRECTORY", "../trainer")
+""" External services configurations """
+class ExternalsConfig(object):
+  EXECUTABLE_WORKING_DIRECTORY = environ.get("TRAINER_WORKING_DIRECTORY", "./trainer/")
   PYTHON_EXECUTABLE = sys.executable
-  EXECUTABLE_NAME = [PYTHON_EXECUTABLE,  "trainer.py"]
+  EXECUTABLE_NAME = [PYTHON_EXECUTABLE, "trainer.py"]
   RESULTS_CACHE_PORT = environ.get('RESULTS_CACHE_PORT', 5002)
   RESULTS_CACHE_BASE_URL = environ.get('RESULTS_CACHE_BASE_URL',
     'http://localhost:{}'.format(RESULTS_CACHE_PORT))

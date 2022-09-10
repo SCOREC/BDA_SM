@@ -1,8 +1,6 @@
 import argparse
 import os
-import pandas as pd
 import numpy as np
-import json
 import time
 from io import BytesIO
 import matplotlib

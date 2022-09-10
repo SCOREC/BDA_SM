@@ -17,8 +17,6 @@ spec:
       containers:
       - name: inference-manager
         image: mk/inference_manager
-        command: [venv/bin/python]
-        args: ["inference_manager.py"]
         imagePullPolicy: Never
         ports:
          - containerPort: 5000

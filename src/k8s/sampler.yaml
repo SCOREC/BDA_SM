@@ -17,8 +17,6 @@ spec:
       containers:
       - name: sampler
         image: mk/sampler
-        command: [venv/bin/python]
-        args: ["sampler.py"]
         imagePullPolicy: Never
         ports:
          - containerPort: 5000

@@ -17,8 +17,6 @@ spec:
       containers:
       - name: training-manager
         image: mk/training_manager
-        command: [venv/bin/python]
-        args: ["training_manager.py"]
         imagePullPolicy: Never
         ports:
          - containerPort: 5000

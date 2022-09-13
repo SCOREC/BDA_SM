@@ -32,10 +32,7 @@ hypers = {
 }
 
 dataspec = {
-  "x_mu": None,
-  "x_std": None,
-  "y_mu": None,
-  "y_std": None,
+  "time_as_input" : False,
   "x_tags": "REQUIRED",
   "y_tags": "REQUIRED",
   "query_json" : {

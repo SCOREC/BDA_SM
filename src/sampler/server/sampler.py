@@ -4,8 +4,9 @@ from common.mko import MKO, encodings
 from common.ml import parse_json_model_structure, compile_model
 
 def prepare_mko_model(mko):
-  n_inputs = mko.dataspec['n_inputs']
-  n_outputs = mko.dataspec['n_outputs']
+  n_inputs = len(mko.dataspec['x_tags'])
+  if mko.dataspec["time_as_input"]: n_inputs += 1
+  n_outputs = len(mko.dataspec['y_tags'])
   model = parse_json_model_structure((n_inputs,), mko._model_name, mko.topology, n_outputs)
   mko._model = compile_model(model, mko.hypers)
   mko._compiled = True

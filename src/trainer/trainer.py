@@ -38,11 +38,17 @@ def get_data_from_fetcher(mko : 'MKO', smip_token : str):
 
     fetcher_data = externals.query_fetcher(json.dumps(query), json.dumps(auth))
     df = pd.read_json(fetcher_data)
-    return df[mko.dataspec['x_tags']].to_numpy(), df[mko.dataspec['y_tags']].to_numpy()
+    if mko.dataspec['time_as_input']:
+      input_indices = ['ts'] + mko.dataspec['x_tags']
+    else:
+      input_indices = mko.dataspec['x_tags']
+    output_indices = mko.dataspec['y_tags']
+    return df[input_indices].to_numpy(), df[output_indices].to_numpy()
   
 def prepare_mko_model(mko):
-  n_inputs = mko.dataspec['n_inputs']
-  n_outputs = mko.dataspec['n_outputs']
+  n_inputs = len(mko.dataspec['x_tags'])
+  if mko.dataspec["time_as_input"]: n_inputs += 1
+  n_outputs = len(mko.dataspec['y_tags'])
   model = parse_json_model_structure((n_inputs,), mko._model_name, mko.topology, n_outputs)
   mko._model = compile_model(model, mko.hypers)
   mko.set_compiled(True)

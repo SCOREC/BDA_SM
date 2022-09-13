@@ -62,6 +62,23 @@ def get_equipment_description(url, token, attrib_id):
     else:
       raise(err)
 
+def get_attribute_datatype(url, token, attrib_id):
+
+  query = queries.get_datatype.format(attrib_id=attrib_id)
+  
+  try:
+    smp_response = perform_graphql_request(query,
+      url,
+      headers={"Authorization": f"Bearer {token}"}
+    )
+    data = smp_response["data"]["attribute"]["dataType"]
+
+  except Exception as err:
+    if "forbidden" in str(err).lower() or "unauthorized" in str(err).lower():
+      raise(AuthenticationError(err))
+    else:
+      raise(err)
+
 def get_raw_attribute_data( url, token, attrib_id):
   query_template = queries.get_raw_attribute_data
   (start_time, end_time) = fm.max_time_range()
@@ -110,4 +127,29 @@ def get_timeseries_array(url, token, attrib_id_list,
     dataframes.append(get_timeseries(url, token, attrib_id, start_time, end_time, max_samples))
   
   df = fm.combine_dataframes(dataframes, period)
+  return df
+
+
+def get_lot_series(url, token, attrib_id):
+
+  (start_time, end_time) = fm.max_time_range()
+  query_template = queries.get_lot_series
+  query = query_template.format(index=1, attrib_id=attrib_id, start_time=start_time, end_time=end_time)
+  
+  try:
+    smp_response = perform_graphql_request(query, url,  headers={"Authorization": f"Bearer {token}"})
+  except Exception as err:
+    if "forbidden" in str(err).lower() or "unauthorized" in str(err).lower():
+      raise(AuthenticationError(err))
+    else:
+      raise(err)
+  
+  list_of_dicts = smp_response['data']['attribute']['getTimeSeries']
+  rows = []
+  for d in list_of_dicts:
+    json_string = d['objectvalue']
+    array_dict = json.loads(json_string)
+    rows.append(array_dict)
+  
+  df = pd.json_normalize(rows)
   return df

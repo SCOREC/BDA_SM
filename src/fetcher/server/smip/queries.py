@@ -67,6 +67,35 @@ get_timeseries = '''
 }}
 '''
 
+get_lotseries = '''
+  query getDatatype {{
+    attribute(id: "{attrib_id}") {{
+      dataType
+      getTimeSeries {{
+        objectvalue
+      }}
+    }}
+  }}
+'''
+
+update_lotseries = '''
+  mutation lot_series_update {{
+    replaceTimeSeriesRange(
+      input: {{
+        attributeOrTagId: "{attrib_id}", 
+          entries: [
+          {{
+          {entries}
+          }}
+        ]
+      }}
+    ) 
+    {{
+      json
+    }}
+  }}
+'''
+
 get_raw_attribute_data = '''
   query firstTime {{
     attribute(id: "{attrib_id}") {{
@@ -77,6 +106,25 @@ get_raw_attribute_data = '''
       ) {{
         ts
         floatvalue
+      }}
+    }}
+  }}
+  '''
+get_datatype = '''
+  query getDatatype {
+  attribute(id: "{attrib_id}") {
+    dataType
+  }
+}
+'''
+get_lot_series = '''
+  query get_lot_data_{index} {{
+    attribute(id: "{attrib_id}") {{
+      getTimeSeries(
+        startTime: "{start_time}"
+        endTime: "{end_time}"
+      ) {{
+        objectvalue
       }}
     }}
   }}

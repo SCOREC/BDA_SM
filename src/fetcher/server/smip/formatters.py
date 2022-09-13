@@ -1,12 +1,19 @@
 import json
 import pandas as pd
 import dateutil.parser
-from datetime import datetime
+from datetime import datetime, timedelta
 import numpy as np
 
 
-def standardize_timestamp(time_in):
-  return dateutil.parser.parse(time_in).strftime("%Y-%m-%dT%H:%M:%SZ")
+def standardize_timestamp(time_in, unix_timestamp=False):
+  timeformat = "%Y-%m-%dT%H:%M:%SZ"
+  if unix_timestamp:
+    time = datetime.fromtimestamp(time_in)
+  elif isinstance(time_in, datetime):
+    time = time_in
+  else:
+    time = dateutil.parser.parse(time_in)
+  return time.strftime(timeformat)
 
 def max_time_range():
   start_time = dateutil.parser.parse("1900-01-01").strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -33,6 +40,23 @@ def format_time_series_stamped(datafile, index, max_timerange=False):
     line = ' {{timestamp: "{}", value: "{}", status: "0" }}\n'.format(ts, row['data'])
     stamped_data = stamped_data + line
   return (start_time, end_time, stamped_data)
+
+def table_to_lotseries(timestamp_start, ts_increment, table, unix_timestamp=False):
+  entries = []
+  time = timestamp_start
+  for row in table:
+    entries.append(row_to_lot(time, row, unix_timestamp))
+    time = time + ts_increment
+  return "\n".join(entries)
+
+
+def row_to_lot(timestamp, row, unix_timestamp):
+  timestamp_str = standardize_timestamp(timestamp, unix_timestamp)
+  id = row[0]
+  array = ",".join([str(item) for item in row[1:]])
+  array_string = '"{{\\"id\\": \\"{}\\", \\"data\\": \\"[{}]\\"}}'.format(id, array)
+  return f'''timestamp: \"{timestamp_str}\", status: \"0\", value: {array_string} '''
+
 
 def json_timeseries_to_table(jd, attrib_id="floatvalue"):
   
@@ -112,13 +136,11 @@ def combine_dataframes(df_list, period):
   def to_float(d, epoch=nrange_starts[0]):
     return (d - epoch).total_seconds()
 
+  interpolation_ts_list = []
   for (start_time, end_time) in zip(range_starts, range_stops):
     n_points = int((end_time.timestamp() - start_time.timestamp()) / float(period))
     timegrid = list(pd.date_range(start_time, end_time, n_points))
-    if 'interpolation_ts_list' not in locals():
-      interpolation_ts_list = timegrid
-    else: 
-      interpolation_ts_list = interpolation_ts_list + timegrid
+    interpolation_ts_list = interpolation_ts_list + timegrid
   
   tab={'ts': interpolation_ts_list}
   for j, df in enumerate(df_list):

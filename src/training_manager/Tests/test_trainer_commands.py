@@ -53,7 +53,7 @@ class TrainerLinksTestCase(unittest.TestCase):
     #print("MKO KEYS", list(mko_json.keys()))
     self.assertIn("model_name", mko_json)
     self.assertEqual(mko_json['model_name'], td.good_modelname)
-    self.assertEqual(mko_json['data']['x_tags'], dataspec['x_tags'])
+    self.assertEqual(mko_json['data']['inputs'], dataspec['inputs'])
 
   def test_train_mko(self):
 

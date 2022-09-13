@@ -52,8 +52,8 @@ def cloudplot(mko_filename, data_filename, username, claim_check, rc_url, n_samp
   delete_file(data_filename)
 
   n_rows = data_rows.shape[0]
-  n_inputs = len(mko.dataspec['x_tags'])
-  n_outputs = len(mko.dataspec['y_tags'])
+  n_inputs = len(mko.dataspec['inputs'])
+  n_outputs = len(mko.dataspec['outputs'])
   if mko.dataspec["time_as_input"]: n_inputs += 1 
   inputs = data_rows[:,0:n_inputs]
   outputs = data_rows[:,n_inputs:]

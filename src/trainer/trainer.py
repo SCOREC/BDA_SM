@@ -26,7 +26,7 @@ def delete_file(file_loc: str):
     os.unlink(file_loc)
 
 def get_data_from_fetcher(mko : 'MKO', smip_token : str):
-    ids = mko.dataspec['x_tags'] + mko.dataspec['y_tags']
+    ids = mko.dataspec['inputs'] + mko.dataspec['outputs']
     query = mko.dataspec['query_json']
     query["attrib_id_list"] = ids
     smip_url = mko.dataspec['data_location']
@@ -39,16 +39,16 @@ def get_data_from_fetcher(mko : 'MKO', smip_token : str):
     fetcher_data = externals.query_fetcher(json.dumps(query), json.dumps(auth))
     df = pd.read_json(fetcher_data)
     if mko.dataspec['time_as_input']:
-      input_indices = ['ts'] + mko.dataspec['x_tags']
+      input_indices = ['ts'] + mko.dataspec['inputs']
     else:
-      input_indices = mko.dataspec['x_tags']
-    output_indices = mko.dataspec['y_tags']
+      input_indices = mko.dataspec['inputs']
+    output_indices = mko.dataspec['outputs']
     return df[input_indices].to_numpy(), df[output_indices].to_numpy()
   
 def prepare_mko_model(mko):
-  n_inputs = len(mko.dataspec['x_tags'])
+  n_inputs = len(mko.dataspec['inputs'])
   if mko.dataspec["time_as_input"]: n_inputs += 1
-  n_outputs = len(mko.dataspec['y_tags'])
+  n_outputs = len(mko.dataspec['outputs'])
   model = parse_json_model_structure((n_inputs,), mko._model_name, mko.topology, n_outputs)
   mko._model = compile_model(model, mko.hypers)
   mko.set_compiled(True)

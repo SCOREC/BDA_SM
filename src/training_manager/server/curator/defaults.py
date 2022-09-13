@@ -33,8 +33,8 @@ hypers = {
 
 dataspec = {
   "time_as_input" : False,
-  "x_tags": "REQUIRED",
-  "y_tags": "REQUIRED",
+  "inputs": "REQUIRED",
+  "outputs": "REQUIRED",
   "query_json" : {
     "start_time": "REQUIRED",
     "end_time": "REQUIRED",

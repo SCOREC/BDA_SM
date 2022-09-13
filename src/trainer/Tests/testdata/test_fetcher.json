@@ -37,8 +37,8 @@
             "role": "rpi_ro_group",
             "url": "https://rpi.cesmii.net/graphql"
         },
-        "x_tags": ["984"],
-        "y_tags": ["983", "985"],
+        "inputs": ["984"],
+        "outputs": ["983", "985"],
         "query_json" : {
             "start_time": "2020-01-23T20:51:40.071032+00:00",
             "end_time": "now",

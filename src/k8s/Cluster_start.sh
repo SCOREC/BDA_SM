@@ -30,7 +30,9 @@ done
 if [ "${mode}" = "delete" ]; then
   ${KUBECTL} delete -f fetcher.yaml
   ${KUBECTL} delete -f frontend.yaml
+  ${KUBECTL} delete -f inference_manager.yaml
   ${KUBECTL} delete -f training_manager.yaml
+  ${KUBECTL} delete -f sampler.yaml
   ${KUBECTL} delete -f results_cache.yaml
   ${KUBECTL} delete -f configMap.yaml
   ${KUBECTL} delete -f secrets.yaml
@@ -47,6 +49,8 @@ elif [ ${mode} = "add" ]; then
   ${KUBECTL} apply -f configMap.yaml
   ${KUBECTL} apply -f frontend.yaml
   ${KUBECTL} apply -f training_manager.yaml
+  ${KUBECTL} apply -f inference_manager.yaml
   ${KUBECTL} apply -f results_cache.yaml
+  ${KUBECTL} apply -f sampler.yaml
   ${KUBECTL} apply -f fetcher.yaml
 fi

@@ -1,6 +1,7 @@
 from common.mko  import MKO
 from server.externals.results_cache import get_new_claim_check, post_results_cache
 import server.curator.defaults as defaults
+import json
 
 def create_mko(model_name, username):
   mko = MKO(model_name)
@@ -29,4 +30,16 @@ def fill_mko(username, model_name, old_mko, dataspec, topology, hypers):
   claim_check = get_new_claim_check(username, offset=10)
   post_results_cache(username, claim_check, 1.0, str(mko))
   return claim_check
+
+
+def describe_mko(mkodata):
+
+  mko = MKO.from_base64(mkodata)
+  data = mko._to_dict()
+  if mko.has_weights:
+    data['WEIGHTS'] = "WEIGHTS NOT SHOW"
+  else:
+    data['WEIGHTS'] = "NO WEIGHTS"
+
+  return json.dumps(data)
 

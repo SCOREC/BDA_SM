@@ -25,3 +25,17 @@ def histogram():
   except Exception as err:
     return Response("Badly formed request: {}".format(err), 400)
   return ({"claim_check": claim_check}, 200)
+
+@AnalyzersResource.route('/cloudplot', methods=['POST'])
+def cloudplot():
+  try:
+    data = request.data
+    data = json.loads(data)['data']
+    username = data.get("username")
+    mko = data.get('mko')
+    data_table = data.get('data_table')
+    n_samples = data.get('n_samples', 0)
+    claim_check = server.analyzers.get_cloudplot(mko, data_table, username, n_samples=n_samples)
+  except Exception as err:
+    return Response("Badly formed request: {}".format(err), 400)
+  return ({"claim_check": claim_check}, 200)

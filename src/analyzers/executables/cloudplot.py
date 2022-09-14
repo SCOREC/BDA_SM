@@ -7,7 +7,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 from common.mko import MKO, encodings
-from externals import get_samples, post_error, post_results_cache, post_status
+from externals import get_samples_array, post_error, post_results_cache, post_status
 
 
 import time
@@ -15,7 +15,7 @@ import time
 def parse_args():
   parser = argparse.ArgumentParser(description='Train an MKO')
   parser.add_argument('--mko', nargs=1, dest='mko_filename', type=str, required=True, help='path to file for MKO')
-  parser.add_argument('-i', nargs=1, dest='inputs_filename', type=str, required=True, help='path to file containing inputs')
+  parser.add_argument('-i', nargs=1, dest='data_filename', type=str, required=True, help='path to file containing inputs')
   parser.add_argument('--n_bins', nargs=1, dest='n_bins', type=int, default=[0], required=False, help='number of bins in histogram')
   parser.add_argument('--n_samples', nargs=1, dest='n_samples', type=int, default=[0], required=False, help='number of samples to take')
   parser.add_argument('-u', nargs=1, dest='username', type=str, required=True, help='username for result_cache')
@@ -28,7 +28,7 @@ def delete_file(file_loc: str):
         return
     os.unlink(file_loc)
 
-def histogram(mko_filename, inputs_filename, username, claim_check, rc_url, n_samples=2000, n_bins=50):
+def cloudplot(mko_filename, data_filename, username, claim_check, rc_url, n_samples=100):
 
   def get_post_status_closure(rc_url, username, claim_check):
     def post_status_closure(status):
@@ -40,9 +40,7 @@ def histogram(mko_filename, inputs_filename, username, claim_check, rc_url, n_sa
   status_poster(0.0)
 
   if n_samples <= 0:
-    n_samples = 2000
-  if n_bins <= 0:
-    n_bins = 50
+    n_samples = 100
 
   with open(mko_filename, 'r') as fd:
     mko_data = fd.read()
@@ -50,20 +48,43 @@ def histogram(mko_filename, inputs_filename, username, claim_check, rc_url, n_sa
   delete_file(mko_filename)
   mko = MKO.from_base64(mko_data)
 
-  inputs = np.loadtxt(inputs_filename)
-  delete_file(inputs_filename)
+  data_rows = np.loadtxt(data_filename)
+  delete_file(data_filename)
 
-  samples = get_samples(username, mko_data, n_samples, inputs.tolist())
+  n_rows = data_rows.shape[0]
+  n_inputs = len(mko.dataspec['inputs'])
+  n_outputs = len(mko.dataspec['outputs'])
+  if mko.dataspec["time_as_input"]: n_inputs += 1 
+  inputs = data_rows[:,0:n_inputs]
+  outputs = data_rows[:,n_inputs:]
+
+  predict = np.empty((n_rows, n_outputs, n_samples))
+  predict[:,:,:] = get_samples_array(username, mko_data, n_samples, inputs)
 
   matplotlib.use('agg')
-  plt.figure(figsize=(5,5), dpi=100)
-  n, bins, patches = plt.hist(samples, n_bins, density=True)
+  images = []
+  for j in range(n_outputs):
+    output_name = mko.dataspec['outputs'][j]
+    fig = plt.figure(figsize=(5,5), dpi=100)
+    for i in range(n_rows):
+      known = outputs[i,j].repeat(n_samples)
+      plt.scatter(known, predict[i,j,:], alpha=0.2, marker='o', color='r')
+    ll = min(np.amin(known), np.amin(predict[:,j,:]))
+    ul = max(np.amax(known), np.amax(predict[:,j,:]))
+    plt.xlim((ll, ul))
+    plt.ylim((ll, ul))
+    plt.plot([ll, ul], [ll,ul], color='blue')
+    plt.title(output_name)
+    stream = BytesIO() 
+    plt.savefig(stream, format="png", bbox_inches='tight')
+    plt.close()
+    stream.seek(0)
+    image = encodings.encode_base64(stream.read())
+    images.append(image)
+    stream.close()
 
-  stream = BytesIO() 
-  plt.savefig(stream, format="png", bbox_inches='tight')
-  stream.seek(0)
+  data = encodings.b64encode_datatype(images)
 
-  data = encodings.encode_base64(stream.read())
   end_time = time.time()
   generation_time = max(1, int(end_time - start_time))
 
@@ -76,11 +97,10 @@ def histogram(mko_filename, inputs_filename, username, claim_check, rc_url, n_sa
 if __name__ == '__main__':
   args = vars(parse_args())
   mko_filename = args['mko_filename'][0]
-  inputs_filename = args['inputs_filename'][0]
+  data_filename = args['data_filename'][0]
   username = args['username'][0]
   claim_check = args['claim_check'][0]
   rc_url = args['rc_url'][0]
-  n_bins = args['n_bins'][0]
   n_samples = args['n_samples'][0]
 
-  histogram(mko_filename, inputs_filename, username, claim_check, rc_url, n_samples, n_bins)
+  cloudplot(mko_filename, data_filename, username, claim_check, rc_url, n_samples=100)

@@ -26,7 +26,8 @@ def delete_file(file_loc: str):
     os.unlink(file_loc)
 
 def get_data_from_fetcher(mko : 'MKO', smip_token : str):
-    ids = mko.dataspec['x_tags'] + mko.dataspec['y_tags']
+  if mko.series_type == 'time':
+    ids = mko.dataspec['inputs'] + mko.dataspec['outputs']
     query = mko.dataspec['query_json']
     query["attrib_id_list"] = ids
     smip_url = mko.dataspec['data_location']
@@ -36,13 +37,40 @@ def get_data_from_fetcher(mko : 'MKO', smip_token : str):
         'smip_url'   : smip_url
     }
 
-    fetcher_data = externals.query_fetcher(json.dumps(query), json.dumps(auth))
+    fetcher_data = externals.query_fetcher_ts(json.dumps(query), json.dumps(auth))
     df = pd.read_json(fetcher_data)
-    return df[mko.dataspec['x_tags']].to_numpy(), df[mko.dataspec['y_tags']].to_numpy()
+    if mko.dataspec['time_as_input']:
+      input_indices = ['ts'] + mko.dataspec['inputs']
+    else:
+      input_indices = mko.dataspec['inputs']
+    output_indices = mko.dataspec['outputs']
+    return df[input_indices].to_numpy(), df[output_indices].to_numpy()
+  elif mko.series_type == 'lot':
+    query = mko.dataspec['query_json']
+    query["attrib_id"] = mko.dataspec['attrib_id']
+    smip_url = mko.dataspec['data_location']
+    auth = {
+        'smip_token' : smip_token,
+        'smip_url'   : smip_url
+    }
+    fetcher_data = externals.query_fetcher_ls(json.dumps(query), json.dumps(auth))
+    df = pd.read_json(fetcher_data)
+    if not mko.dataspec['query_json']['all_lots']:
+      df.sort_index(inplace=True)
+      try:
+        start_lot = int(float(mko.dataspec['start_lot']))
+        end_lot = int(float(mko.dataspec['end_lot']))
+        df = df.loc[start_lot:end_lot]
+      except:
+        pass
+    return df[mko.dataspec['inputs']], df[mko.dataspec['outputs']]
+  else:
+    raise Exception("This can't happen")
   
 def prepare_mko_model(mko):
-  n_inputs = mko.dataspec['n_inputs']
-  n_outputs = mko.dataspec['n_outputs']
+  n_inputs = len(mko.dataspec['inputs'])
+  if mko.dataspec["time_as_input"]: n_inputs += 1
+  n_outputs = len(mko.dataspec['outputs'])
   model = parse_json_model_structure((n_inputs,), mko._model_name, mko.topology, n_outputs)
   mko._model = compile_model(model, mko.hypers)
   mko.set_compiled(True)
@@ -86,7 +114,7 @@ def trainer(mko_filename, username, claim_check, rc_url, smip_token):
 
   nx = inputs.shape[0]
   ny = outputs.shape[0]
-  inputs, outputs = same_shuffle(inputs, outputs, axis=0)
+  inputs, outputs = same_shuffle(inputs.to_numpy(), outputs.to_numpy(), axis=0)
   inputs = mko.normalize_training_inputs(inputs)
   outputs = mko.normalize_training_outputs(outputs)
 

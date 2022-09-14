@@ -40,8 +40,8 @@ dataspec = {
   "x_std": None,
   "y_mu": None,
   "y_std": None,
-  "x_tags": ["27084"],
-  "y_tags": ["27077"],
+  "inputs": ["27084"],
+  "outputs": ["27077"],
   "data_type": "fetcher",
   "data_location": "http://127.0.0.1:5004",
   "query_json": {

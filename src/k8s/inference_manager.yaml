@@ -1,25 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend-deployment
+  name: inference-manager-deployment
   labels:
-    app: frontend
+    app: inference-manager
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: frontend
+      app: inference-manager
   template:
     metadata:
       labels:
-        app: frontend
+        app: inference-manager
     spec:
       containers:
-      - name: frontend
-        image: mk/frontend
+      - name: inference-manager
+        image: mk/inference_manager
+        imagePullPolicy: Never
         ports:
          - containerPort: 5000
-        imagePullPolicy: Never
         env: 
           - name: FETCHER_BASE_URL
             valueFrom:
@@ -46,24 +46,19 @@ spec:
               configMapKeyRef:
                 name: bda-configmap
                 key: TRAINING_MANAGER_BASE_URL
-          - name: SERVER_SECRET
-            valueFrom:
-              secretKeyRef: 
-                name: bda-secrets
-                key: SERVER_SECRET
+          - name: ANALYZERS_WORKING_DIRECTORY
+            value: ./analyzers
       restartPolicy: Always
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: frontend-service
+  name: inference-manager-service
 spec:
   selector:
-    app: frontend
-  type: LoadBalancer
+    app: inference-manager
   ports:
     - protocol: TCP
       port: 5000
       targetPort: 5000
-      nodePort: 30000

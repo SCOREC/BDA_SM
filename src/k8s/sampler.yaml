@@ -1,25 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend-deployment
+  name: sampler-deployment
   labels:
-    app: frontend
+    app: sampler
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: frontend
+      app: sampler
   template:
     metadata:
       labels:
-        app: frontend
+        app: sampler
     spec:
       containers:
-      - name: frontend
-        image: mk/frontend
+      - name: sampler
+        image: mk/sampler
+        imagePullPolicy: Never
         ports:
          - containerPort: 5000
-        imagePullPolicy: Never
         env: 
           - name: FETCHER_BASE_URL
             valueFrom:
@@ -46,24 +46,17 @@ spec:
               configMapKeyRef:
                 name: bda-configmap
                 key: TRAINING_MANAGER_BASE_URL
-          - name: SERVER_SECRET
-            valueFrom:
-              secretKeyRef: 
-                name: bda-secrets
-                key: SERVER_SECRET
       restartPolicy: Always
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: frontend-service
+  name: sampler-service
 spec:
   selector:
-    app: frontend
-  type: LoadBalancer
+    app: sampler
   ports:
     - protocol: TCP
       port: 5000
       targetPort: 5000
-      nodePort: 30000

@@ -46,6 +46,21 @@ def fill_data():
 
   return ({"claim_check": claim_check}, 200)
 
+
+
+@bp.route("/describe_mko", methods=["POST"])
+def describe_mko():
+  try:
+    data = request.data
+    data = json.loads(data)['data']
+    mko = data.get('mkodata')
+    return server.curator.describe_mko(mko)
+  except Exception as err:
+    return Response("Badly formed request: {}".format(err), 400)
+
+  return ({"claim_check": claim_check}, 200)
+
+
 @bp.route("/train", methods=["POST"])
 def train():
   try:

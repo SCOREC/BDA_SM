@@ -2,7 +2,7 @@ import os
 from flask import Flask, Blueprint, request
 
 app = Flask(__name__)
-app_settings = os.getenv('APP_SETTINGS', 'server.config.DevelopmentConfig')
+app_settings = os.getenv('APP_SETTINGS', 'server.config.ProductionConfiguration')
 app.config.from_object(app_settings)
 
 import server.resources.api

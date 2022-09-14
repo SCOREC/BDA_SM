@@ -50,7 +50,7 @@ def fill_mko(username: str, model_name: str, mko: str, dataspec_r: dict, topolog
   if 'n_outputs' in dataspec:
     n_outputs = dataspec['n_outputs']
   else:
-    n_outputs = len(dataspec["y_tags"])
+    n_outputs = len(dataspec["outputs"])
 
   if len(topology_r) > 0:
     topology = topology_r

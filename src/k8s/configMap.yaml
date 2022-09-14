@@ -3,6 +3,8 @@ kind: ConfigMap
 metadata:
   name: bda-configmap
 data:
-  RESULTS_CACHE_BASE_URL: http://results-cache-service:5000/
   FETCHER_BASE_URL: http://fetcher-service:5000/
+  INFERENCE_MANAGER_BASE_URL: http://inference-manager-service:5000/
+  RESULTS_CACHE_BASE_URL: http://results-cache-service:5000/
+  SAMPLER_BASE_URL: http://sampler-service:5000/
   TRAINING_MANAGER_BASE_URL: http://training-manager-service:5000/

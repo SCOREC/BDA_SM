@@ -17,16 +17,35 @@ spec:
       containers:
       - name: training-manager
         image: mk/training_manager
-        command: [venv/bin/python]
-        args: ["training_manager.py"]
         imagePullPolicy: Never
         ports:
          - containerPort: 5000
         env: 
-          - name: RESULTS_CACHE_BASE_URL
-            value: http://results-cache-service:5000/
           - name: FETCHER_BASE_URL
-            value: http://fetcher-service:5000/
+            valueFrom:
+              configMapKeyRef:
+                name: bda-configmap
+                key: FETCHER_BASE_URL
+          - name: INFERENCE_MANAGER_BASE_URL
+            valueFrom:
+              configMapKeyRef:
+                name: bda-configmap
+                key: INFERENCE_MANAGER_BASE_URL
+          - name: RESULTS_CACHE_BASE_URL
+            valueFrom:
+              configMapKeyRef:
+                name: bda-configmap
+                key: RESULTS_CACHE_BASE_URL          
+          - name: SAMPLER_BASE_URL
+            valueFrom:
+              configMapKeyRef:
+                name: bda-configmap
+                key: SAMPLER_BASE_URL
+          - name: TRAINING_MANAGER_BASE_URL
+            valueFrom:
+              configMapKeyRef:
+                name: bda-configmap
+                key: TRAINING_MANAGER_BASE_URL
           - name: TRAINER_WORKING_DIRECTORY
             value: ./trainer
           - name: TRAINING_MANAGER_PORT

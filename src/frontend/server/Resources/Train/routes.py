@@ -28,3 +28,9 @@ def train_train():
     return forward_request(target_url=training_manager_host +
       "/api/train")
 
+@TrainResource.route('/describe_mko', methods=['POST'])
+@initialized(True)
+@require_access(['train'])
+def train_describe():
+    return forward_request(target_url=training_manager_host +
+      "/api/describe_mko")

@@ -7,7 +7,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 from common.mko import MKO, encodings
-from externals import get_samples, post_error, post_results_cache, post_status
+from externals import get_samples_array, post_error, post_results_cache, post_status
 
 
 import time
@@ -58,23 +58,23 @@ def cloudplot(mko_filename, data_filename, username, claim_check, rc_url, n_samp
   inputs = data_rows[:,0:n_inputs]
   outputs = data_rows[:,n_inputs:]
 
-  predict = np.empty((n_rows, n_samples, n_outputs))
-  for i in range(n_rows):
-    row = inputs[i,:]
-    predict[i,:,:] = get_samples(username, mko_data, n_samples, row.tolist())
+  predict = np.empty((n_rows, n_outputs, n_samples))
+  predict[:,:,:] = get_samples_array(username, mko_data, n_samples, inputs)
 
   matplotlib.use('agg')
   images = []
-  for k in range(n_outputs):
+  for j in range(n_outputs):
+    output_name = mko.dataspec['outputs'][j]
     fig = plt.figure(figsize=(5,5), dpi=100)
     for i in range(n_rows):
-      known = outputs[i,k].repeat(n_samples)
-      plt.scatter(known, predict[i,:,k], alpha=0.2, marker='o', color='r')
-    ll = min(np.amin(known), np.amin(predict[:,:,k]))
-    ul = max(np.amax(known), np.amax(predict[:,:,k]))
+      known = outputs[i,j].repeat(n_samples)
+      plt.scatter(known, predict[i,j,:], alpha=0.2, marker='o', color='r')
+    ll = min(np.amin(known), np.amin(predict[:,j,:]))
+    ul = max(np.amax(known), np.amax(predict[:,j,:]))
     plt.xlim((ll, ul))
     plt.ylim((ll, ul))
     plt.plot([ll, ul], [ll,ul], color='blue')
+    plt.title(output_name)
     stream = BytesIO() 
     plt.savefig(stream, format="png", bbox_inches='tight')
     plt.close()

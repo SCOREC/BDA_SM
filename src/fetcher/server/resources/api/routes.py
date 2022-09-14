@@ -45,7 +45,7 @@ def raw_data_by_id():
 def timeseries_by_id():
   try:
     auth_data = json.loads(request.args.get('auth')) # type: ignore
-    smip_url = auth_data.get('url')
+    smip_url = auth_data.get('smip_url')
     smip_token = auth_data.get('smip_token')
     request_data = json.loads(request.args.get('query'))  # type: ignore
     attrib_id = request_data.get('attrib_id')
@@ -73,6 +73,25 @@ def timeseries_array_by_id():
     as_csv = (request_data.get('as_csv', "False") == "True")
     df = smip.get_timeseries_array(smip_url, smip_token,
       attrib_id_list, start_time, end_time, period)
+    if as_csv:
+      return Response(df.to_csv(index=False), status=200)
+    else:
+      return Response(df.to_json(), status=200)
+  except smip.GraphQLAuthenticationError as err:
+    return Response("Authorization failed", 500)
+  except Exception as err:
+    return Response("SMIP returned {}".format(err), 400)
+
+@bp.route("/getLotSeries")
+def get_lot_series():
+  try:
+    auth_data = json.loads(request.args.get('auth')) # type: ignore
+    smip_url = auth_data.get('smip_url')
+    smip_token = auth_data.get('smip_token')
+    request_data = json.loads(request.args.get('query'))  # type: ignore
+    attrib_id = request_data.get('attrib_id')
+    df = smip.get_lot_series(smip_url, smip_token, attrib_id) 
+    as_csv = (request_data.get('as_csv', "False") == "True")
     if as_csv:
       return Response(df.to_csv(index=False), status=200)
     else:

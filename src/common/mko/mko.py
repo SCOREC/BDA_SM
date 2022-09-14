@@ -29,7 +29,7 @@ class MKO(object):
     data['hypers'] = self._hypers
     data['dataspec'] = self._dataspec
     
-    if self._has_weights:   
+    if self._has_weights and self._compiled:   
       np_weights = self._model.get_weights()
       b64_encoded_w = []
       for w in np_weights:
@@ -73,11 +73,17 @@ class MKO(object):
 
   @staticmethod
   def scale_array(array, interval):
-    return (array - interval[0]) / (interval[1] - interval[0])
+    means = interval.mean(axis=0)
+    for i in range(array.shape[1]):
+      array[:,i] = (array[:,i] - means[i]) / (interval[1,i] - interval[0,i])
+    return array
 
   @staticmethod
   def unscale_array(array, interval):
-    return array * (interval[1] - interval[0]) + interval[0]
+    means = interval.mean(axis=0)
+    for i in range(array.shape[1]):
+      array[:,i] = array[:,i] * (interval[1,i] - interval[0,i]) + means[i]
+    return  array
 
   @classmethod
   def normalize(cls, array):
@@ -86,8 +92,9 @@ class MKO(object):
     std = tmp.std(axis=0)
     ll = means - std
     ul = means + std
-    normalized_array = cls.scale_array(tmp, [ll, ul])
-    return normalized_array, np.array([ll, ul])
+    interval = np.array([ll, ul])
+    normalized_array = cls.scale_array(tmp, interval)
+    return normalized_array, interval
 
   @classmethod
   def denormalize(cls, array, interval):
@@ -181,6 +188,10 @@ class MKO(object):
   @property
   def compiled(self) -> bool:
     return self._compiled
+
+  @property
+  def series_type(self):
+    return self.dataspec["series_type"].lower()
 
   @property
   def b64(self) -> str:

@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM ubuntu:22.04
 RUN useradd -ms /bin/bash inference_manager
 
 WORKDIR /home/inference_manager

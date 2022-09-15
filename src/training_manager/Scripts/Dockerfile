@@ -1,13 +1,12 @@
-FROM ubuntu:latest
-#FROM python:3.9.13-alpine3.16
-#FROM tensorflow/build:2.11-python3.9
-RUN useradd -ms /bin/bash training_manager
+FROM python:3.8-slim 
 
+RUN apt update && \
+    apt install --no-install-recommends -y build-essential python3-venv
+
+RUN useradd -ms /bin/bash training_manager
 WORKDIR /home/training_manager
 
 COPY training_manager/requirements.txt requirements.txt
-#RUN apk add --no-cache python3 py3-numpy 
-RUN apt-get -y update && apt-get -y upgrade && apt-get -y install python3.10-venv
 RUN python3 -m venv venv && venv/bin/pip install --upgrade pip 
 RUN venv/bin/pip install --upgrade -r requirements.txt
 

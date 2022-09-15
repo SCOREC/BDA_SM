@@ -1,12 +1,13 @@
-FROM ubuntu:latest
-RUN useradd -ms /bin/bash sampler
+FROM python:3.8-slim 
+RUN apt update && \
+    apt install --no-install-recommends -y build-essential python3-venv
 
+RUN useradd -ms /bin/bash sampler
 WORKDIR /home/sampler
 
-COPY sampler/requirements.txt requirements.txt
-RUN apt-get -y update && apt-get -y upgrade && apt-get -y install python3.10-venv
 RUN python3 -m venv venv && venv/bin/pip install --upgrade pip 
-RUN venv/bin/pip install --upgrade -r requirements.txt
+COPY sampler/requirements.txt requirements.txt
+RUN venv/bin/pip install --no-cache-dir -r requirements.txt
 
 COPY --chown=sampler:sampler sampler/server server
 COPY --chown=sampler:sampler common common

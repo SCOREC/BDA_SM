@@ -10,13 +10,17 @@ fi
 KUBECTL=kubectl
 mode="add"
 secret_mode="file"
-while getopts "mds:" options; do
+registry_mode="cli"
+while getopts "mdrs:" options; do
   case "${options}" in
     m)
       eval $(minikube docker-env)  
       ;;
     d)
       mode="delete"
+      ;;
+    r)
+      registry_mode="file"
       ;;
     s)
       echo "Creating secrets from provided password"
@@ -36,6 +40,7 @@ if [ "${mode}" = "delete" ]; then
   ${KUBECTL} delete -f results_cache.yaml
   ${KUBECTL} delete -f configMap.yaml
   ${KUBECTL} delete -f secrets.yaml
+  ${KUBECTL} delete -f registrykey.yaml
 elif [ ${mode} = "add" ]; then
   if [ ${secret_mode} = "cli" ]; then
     ${KUBECTL} create secret generic bda-secrets \
@@ -45,6 +50,15 @@ elif [ ${mode} = "add" ]; then
   else
     echo "Creating secrets from yaml file"
     ${KUBECTL} apply -f secrets.yaml
+  fi
+  if [ ${registry_mode} = "cli" ]; then
+    echo "Creating registrykey from yaml file"
+    ${KUBECTL} create secret generic dockerregcred  \
+      --from-file=.dockerconfigjson=${HOME}/.docker/token.json \
+      --type=docker.io/dockerconfigjson
+  else
+    echo "Creating registrykey from docker token file"
+    ${KUBECTL} apply -f registrykey.yaml
   fi 
   ${KUBECTL} apply -f configMap.yaml
   ${KUBECTL} apply -f frontend.yaml

@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
       - name: sampler
-        image: mk/sampler
-        imagePullPolicy: Never
+        image: index.docker.io/maxrpi/sampler:v1.0
+        imagePullPolicy: IfNotPresent
         ports:
          - containerPort: 5000
         env: 
@@ -47,6 +47,8 @@ spec:
                 name: bda-configmap
                 key: TRAINING_MANAGER_BASE_URL
       restartPolicy: Always
+      imagePullSecrets:
+        - name: dockerregcred
 
 ---
 apiVersion: v1

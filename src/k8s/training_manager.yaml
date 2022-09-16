@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
       - name: training-manager
-        image: mk/training_manager
-        imagePullPolicy: Never
+        image: maxrpi/training_manager:v1.0
+        imagePullPolicy: IfNotPresent
         ports:
          - containerPort: 5000
         env: 
@@ -51,6 +51,8 @@ spec:
           - name: TRAINING_MANAGER_PORT
             value: "5000"
       restartPolicy: Always
+      imagePullSecrets:
+        - name: dockerregcred
 
 ---
 apiVersion: v1

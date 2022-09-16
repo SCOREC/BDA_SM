@@ -16,10 +16,10 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: mk/frontend
+        image: maxrpi/frontend:v1.0
         ports:
          - containerPort: 5000
-        imagePullPolicy: Never
+        imagePullPolicy: IfNotPresent
         env: 
           - name: FETCHER_BASE_URL
             valueFrom:
@@ -52,6 +52,8 @@ spec:
                 name: bda-secrets
                 key: SERVER_SECRET
       restartPolicy: Always
+      imagePullSecrets:
+        - name: dockerregcred
 
 ---
 apiVersion: v1

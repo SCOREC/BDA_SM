@@ -16,11 +16,13 @@ spec:
     spec:
       containers:
       - name: results-cache
-        image: mk/results_cache
+        image: maxrpi/results_cache:v1.0
         ports:
          - containerPort: 5000
-        imagePullPolicy: Never
+        imagePullPolicy: IfNotPresent
       restartPolicy: Always
+      imagePullSecrets:
+        - name: dockerregcred
 ---
 apiVersion: v1
 kind: Service

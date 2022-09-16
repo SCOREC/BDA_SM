@@ -34,7 +34,7 @@ def save_array(data):
 def get_histogram(mko, inputs, username, n_samples, n_bins) -> str:
   claim_check = get_new_claim_check(username)
   mko_file = save_file(mko)
-  inputs_file = save_file(inputs)
+  inputs_file = save_array(inputs)
   mod_env = dict(os.environ)
   mod_env.update({'PYTHONPATH' : "."})
   EXECUTABLE_STRING_LIST = [

@@ -16,11 +16,13 @@ spec:
     spec:
       containers:
       - name: fetcher
-        image: mk/fetcher
+        image: maxrpi/fetcher:v1.0
         ports:
          - containerPort: 5000
-        imagePullPolicy: Never
+        imagePullPolicy: IfNotPresent
       restartPolicy: Always
+      imagePullSecrets:
+        - name: dockerregcred
 ---
 apiVersion: v1
 kind: Service

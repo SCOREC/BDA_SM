@@ -6,7 +6,8 @@ from io import BytesIO
 import matplotlib
 import matplotlib.pyplot as plt
 
-from common.mko import MKO, encodings
+from common.mko import MKO
+from common.utilities import encodings
 from externals import get_samples_array, post_error, post_results_cache, post_status
 
 

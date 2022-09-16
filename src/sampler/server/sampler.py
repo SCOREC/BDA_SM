@@ -1,7 +1,8 @@
 import pickle
 import numpy as np
-from common.mko import MKO, encodings
+from common.mko import MKO
 from common.ml import parse_json_model_structure, compile_model
+from common.utilities import encodings
 
 def prepare_mko_model(mko):
   n_inputs = len(mko.dataspec['inputs'])

@@ -1,7 +1,8 @@
 import requests
 import json
+from common.utilities import encodings
 from externals.config import ExternalsConfig as cfg
-from common.mko import MKO, encodings
+from common.mko import MKO
 import numpy as np
 
 def get_samples(username, mko_data, n_samples : int, inputs : list, as_csv=False, precision=8):

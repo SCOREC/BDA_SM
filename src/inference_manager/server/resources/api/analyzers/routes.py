@@ -6,6 +6,7 @@ import json
 from subprocess import Popen, PIPE, STDOUT
 
 import server.analyzers
+import common.utilities.encodings as encodings
 from server.config import AnalyzersConfig as cfg
 
 AnalyzersResource = Blueprint('Analyzers', __name__)
@@ -18,7 +19,7 @@ def histogram():
     data = json.loads(data)['data']
     username = data.get("username")
     mko = data.get('mko')
-    inputs = data.get('inputs')
+    inputs = encodings.b64decode_datatype(data.get('inputs'))
     n_bins = data.get('n_bins', 0)
     n_samples = data.get('n_samples', 0)
     claim_check = server.analyzers.get_histogram(mko, inputs, username, n_samples=n_samples, n_bins=n_bins)
@@ -33,7 +34,7 @@ def cloudplot():
     data = json.loads(data)['data']
     username = data.get("username")
     mko = data.get('mko')
-    data_table = data.get('data_table')
+    data_table = encodings.b64decode_datatype(data.get('data_table'))
     n_samples = data.get('n_samples', 0)
     claim_check = server.analyzers.get_cloudplot(mko, data_table, username, n_samples=n_samples)
   except Exception as err:

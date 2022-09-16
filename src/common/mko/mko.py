@@ -1,6 +1,6 @@
 import json
 import numpy as np
-import common.mko.encodings as encodings
+import common.utilities.encodings as encodings
 
 version = 1.0
 

@@ -4,7 +4,7 @@ from server.sampler import sample_inputs, sample_inputs_array
 import json
 from flask import Blueprint
 
-import common.mko.encodings as encodings
+import common.utilities.encodings as encodings
 
 bp = Blueprint('api',__name__)
 

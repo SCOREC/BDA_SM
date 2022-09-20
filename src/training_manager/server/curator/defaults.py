@@ -11,13 +11,16 @@ topology = [
     "activation": "relu",
     "units": 50
   }, {
-    "type": "dropout",
-    "rate": 0.95
+    "type": "variational_dropout",
+    "rate": 0.90
   }, {
     "type": "dense",
     "activation": "relu",
     "units": "50"
-  }
+  }, {
+    "type": "variational_dropout",
+    "rate": 0.90
+  }, 
 ]
 
 hypers = {

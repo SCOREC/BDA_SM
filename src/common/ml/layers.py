@@ -8,6 +8,7 @@ class VariationalDropout(Dropout):
     def __init__(self, rate, always_drop=True, noise_shape=None, seed=None, **kwargs):
         super(VariationalDropout, self).__init__(rate, noise_shape=noise_shape, seed=seed, **kwargs)
         self.always_drop = always_drop
+        self.variational = True
 
     def call(self, inputs, always_drop=True):
         if 0.0 < self.rate < 1.0:

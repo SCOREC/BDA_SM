@@ -13,6 +13,7 @@ class MKO(object):
     self._has_hypers = False
     self._compiled = False
     self._has_weights = False
+    self._parameterized = False
 
     self._topology = { }
     self._hypers = {}
@@ -59,7 +60,7 @@ class MKO(object):
       self._model.set_weights(
         [ encodings.b64decode_datatype(w) for w in self._weights ]
       )
-    self._has_weights = True
+      self._parameterized = True
 
   @staticmethod
   def from_json(j_str: str) -> 'MKO':
@@ -83,7 +84,7 @@ class MKO(object):
     means = interval.mean(axis=0)
     for i in range(array.shape[1]):
       array[:,i] = array[:,i] * (interval[1,i] - interval[0,i]) + means[i]
-    return  array
+    return array
 
   @classmethod
   def normalize(cls, array):
@@ -176,6 +177,10 @@ class MKO(object):
   @property
   def has_weights(self):
     return self._has_weights
+
+  @property
+  def parameterized(self):
+    return self._parameterized
 
   @property
   def trainable(self) -> bool:

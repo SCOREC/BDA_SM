@@ -1,6 +1,6 @@
 from typing import Any
 from tensorflow.keras import Input, Model
-from tensorflow.keras.layers import Dense, Conv2D, Layer
+from tensorflow.keras.layers import Dense, Dropout, Conv2D, Layer
 from common.ml.layers import VariationalDropout
 from common.ml.exceptions import InputException, InvalidArgument
 
@@ -47,15 +47,18 @@ def get_value(field: str, default: Any, layer_params: dict) -> Any:
 
     return default
 
-
 def get_dense(layer_params: dict, name: str) -> Dense:
     units = enforce(LayerKeys.UNITS, layer_params)
     activation = get_value(LayerKeys.ACTIVATION, Defaults.activation, layer_params).lower()
     initializer = get_value(LayerKeys.INITIALIZER, Defaults.get_default_initializer(activation), layer_params)
     return Dense(units, activation=activation, kernel_initializer=initializer, name=name)
 
+def get_dropout(layer_params: dict, name: str) -> Dropout:
+    rate = get_value(LayerKeys.RATE, Defaults.rate, layer_params)
+    return Dropout(rate, name=name)
 
-def dropout(layer_params: dict, name: str) -> VariationalDropout:
+
+def get_variational_dropout(layer_params: dict, name: str) -> VariationalDropout:
     rate = get_value(LayerKeys.RATE, Defaults.rate, layer_params)
     return VariationalDropout(rate, name=name)
 
@@ -71,8 +74,8 @@ def get_convolutional(layer_params: dict, name: str) -> Conv2D:
 
 layers = {
     "dense": get_dense,
-    "dropout": dropout,
-    "variational_dropout": dropout,
+    "dropout": get_dropout,
+    "variational_dropout": get_variational_dropout,
     "convolutional": get_convolutional,
 }
 

@@ -76,3 +76,24 @@ def train():
     return Response("Badly formed request: {}".format(err), 400)
 
   return ({"claim_check": claim_check}, 200)
+
+
+@bp.route("/trainCalibrate", methods=["POST"])
+def train_calibrate():
+  try:
+    data = request.data
+    data = json.loads(data)['data']
+    username = data.get("username")
+    model_name = data.get("model_name")
+    mko = data.get('mkodata')
+    smip_token = data.get('smip_auth').get('token')
+    smip_url = data.get('smip_auth').get('url')
+    calibration_point = data.get('calibration_point',"")
+    desired_mu = data.get('desired_mu', 1.0)
+    index = int(data.get('index', 0))
+    claim_check = server.trainer.train_mko(username, model_name, mko, smip_token, smip_url,
+      autocalibrate=True, calibration_point=calibration_point, desired_mu=desired_mu, index=index)
+  except Exception as err:
+    return Response("Badly formed request: {}".format(err), 400)
+
+  return ({"claim_check": claim_check}, 200)

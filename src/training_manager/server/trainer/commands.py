@@ -25,86 +25,30 @@ def save_file(data):
   f.close()
   return f.name
 
-"""
-def create_mko(model_name: str, username: str) -> str:
-  claim_check = get_new_claim_check(username)
-  subprocess.Popen([
-    *cfg.EXECUTABLE_NAME,
-    username,
-    claim_check,
-    cfg.RESULTS_CACHE_BASE_URL,
-    "--create",
-    "--name", model_name,
-    "--delete",
-    ],
-    cwd=cfg.EXECUTABLE_WORKING_DIRECTORY)
-  return claim_check
 
-def fill_mko(username: str, model_name: str, mko: str, dataspec_r: dict, topology_r: list=[], hypers_r:dict={} ) -> str:
-
-  dataspec = defaults.dataspec
-  for key in dataspec_r.keys():
-    dataspec[key] = dataspec_r[key]
-  if "REQUIRED" in dataspec.values():
-    raise exceptions.InputException("Required value not in data specification")
-  if 'n_outputs' in dataspec:
-    n_outputs = dataspec['n_outputs']
-  else:
-    n_outputs = len(dataspec["outputs"])
-
-  if len(topology_r) > 0:
-    topology = topology_r
-  else:
-    topology = defaults.topology
-    topology[-1]['units'] = n_outputs
-
-  hypers = defaults.hypers
-  for key in hypers_r.keys():
-    hypers[key] = hypers_r[key]
-  if "REQUIRED" in hypers.values():
-    raise exceptions.InputException("Required value not in hyper parameter specification")
-
-  params = defaults.stub
-  params['data'] = dataspec  # type: ignore
-  params['topology'] = topology  # type: ignore
-  params['hyper_params'] = hypers  # type: ignore
-
-  params = json.dumps(params)
-  add_loc = save_file(params)
-  mko_loc = save_file(mko)
-
-  claim_check = get_new_claim_check(username, 10)
-  subprocess.Popen([
-    *cfg.EXECUTABLE_NAME,
-    username,
-    claim_check,
-    cfg.RESULTS_CACHE_BASE_URL,
-    "-f",
-    mko_loc,
-    "--add",
-    "ALL",
-    add_loc
-    ],
-    cwd=cfg.EXECUTABLE_WORKING_DIRECTORY
-  )
-  return claim_check
-"""
-
-def train_mko(username: str, model_name: str, mko: str, smip_token : str, smip_url : str) -> str:
+def train_mko(username: str, model_name: str, mko: str, smip_token : str, smip_url : str,
+              autocalibrate=False, calibration_point="", desired_mu=1.0, index=0,
+  ) -> str:
   claim_check = get_new_claim_check(username)
   mko_loc = save_file(mko)
   EXECUTABLE_STRING_LIST = [
     *cfg.EXECUTABLE_NAME,
-    "-u",
-    username,
-    "--cc",
-    claim_check,
-    "--rc",
-    cfg.RESULTS_CACHE_BASE_URL,
-    "--mko",
-    mko_loc,
-    "--token",
-    smip_token,
+    "-u", username,
+    "--cc", claim_check,
+    "--rc", cfg.RESULTS_CACHE_BASE_URL,
+    "--mko", mko_loc,
+    "--token", smip_token,
+    ]
+  if autocalibrate:
+    if len(calibration_point) > 0:
+      calibration_point_loc = save_file(calibration_point)
+    else:
+      calibration_point_loc = ""
+    EXECUTABLE_STRING_LIST = EXECUTABLE_STRING_LIST + [
+      "--ac",
+      "--point", str(calibration_point_loc),
+      "--mu", str(desired_mu),
+      "--ac_index", str(index),
     ]
   print(EXECUTABLE_STRING_LIST)
   subprocess.Popen(EXECUTABLE_STRING_LIST, cwd=cfg.EXECUTABLE_WORKING_DIRECTORY)

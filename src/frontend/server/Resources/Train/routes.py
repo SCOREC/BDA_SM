@@ -28,6 +28,13 @@ def train_train():
     return forward_request(target_url=training_manager_host +
       "/api/train")
 
+@TrainResource.route('/trainCalibrate', methods=['POST'])
+@initialized(True)
+@require_access(['train'])
+def train_calibrate():
+    return forward_request(target_url=training_manager_host +
+      "/api/trainCalibrate")
+
 @TrainResource.route('/describe_mko', methods=['POST'])
 @initialized(True)
 @require_access(['train'])

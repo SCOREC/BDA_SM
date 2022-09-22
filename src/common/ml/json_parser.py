@@ -101,4 +101,4 @@ def parse_json_model_structure(data_input_shape: tuple, name: str, model_topolog
     }
     x = get_layer(output_layer_params, len(model_topology))(x)
 
-    return Model(inputs=input_layer, outputs=x, name=name)
+    return Model(inputs=input_layer, outputs=x,)

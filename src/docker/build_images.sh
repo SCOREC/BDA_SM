@@ -13,10 +13,13 @@ FETver=":v1.0"
 BUILDER=docker
 roottag="maxrpi/"
 do_push="no"
-while getopts "DmMp" options; do
+while getopts "DmMpA" options; do
   case "${options}" in
     D)
       roottag=""
+      ;;
+    A)
+      roottag="maxrpicesmii.azurecr.io/bda/"
       ;;
     m)
       eval $(minikube docker-env)  
@@ -41,12 +44,12 @@ ${BUILDER} build -t ${roottag}sampler${Sver} -f sampler/Scripts/Dockerfile .
 if [ ${do_push} == "no " ]; then
   echo "Not pushing to docker"
 else
-  echo "pushing to docker"
-  docker push maxrpi/training_manager${TMver}
-  docker push maxrpi/inference_manager${IMver}
-  docker push maxrpi/sampler${Sver}
-  docker push maxrpi/frontend${FRver}
-  docker push maxrpi/results_cache${RCver}
-  docker push maxrpi/fetcher${FETver}
+  echo "pushing to ${roottag}"
+  docker push ${roottag}training_manager${TMver}
+  docker push ${roottag}inference_manager${IMver}
+  docker push ${roottag}sampler${Sver}
+  docker push ${roottag}frontend${FRver}
+  docker push ${roottag}results_cache${RCver}
+  docker push ${roottag}fetcher${FETver}
 fi
 

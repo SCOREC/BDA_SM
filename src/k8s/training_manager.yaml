@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: training-manager
-        image: maxrpi/training_manager:v1.0
+        image: {{REGISTRY}}training_manager:v1.0
         imagePullPolicy: IfNotPresent
         ports:
          - containerPort: 5000

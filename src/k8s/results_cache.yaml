@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: results-cache
-        image: maxrpi/results_cache:v1.0
+        image: {{REGISTRY}}results_cache:v1.0
         ports:
          - containerPort: 5000
         imagePullPolicy: IfNotPresent

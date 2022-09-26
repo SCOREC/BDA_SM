@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: maxrpi/frontend:v1.0
+        image: {{REGISTRY}}frontend:v1.0
         ports:
          - containerPort: 5000
         imagePullPolicy: IfNotPresent

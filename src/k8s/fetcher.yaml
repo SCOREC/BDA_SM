@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: fetcher
-        image: maxrpi/fetcher:v1.0
+        image: {{REGISTRY}}fetcher:v1.0
         ports:
          - containerPort: 5000
         imagePullPolicy: IfNotPresent

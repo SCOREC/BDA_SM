@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: sampler
-        image: index.docker.io/maxrpi/sampler:v1.0
+        image: {{REGISTRY}}sampler:v1.0
         imagePullPolicy: IfNotPresent
         ports:
          - containerPort: 5000

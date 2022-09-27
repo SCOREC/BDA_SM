@@ -49,7 +49,7 @@ def get_data_from_fetcher(mko : 'MKO', smip_token : str):
     else:
       input_indices = mko.dataspec['inputs']
     output_indices = mko.dataspec['outputs']
-    return df[input_indices].to_numpy(), df[output_indices].to_numpy()
+    return df[input_indices], df[output_indices]
   elif mko.series_type == 'lot':
     query = mko.dataspec['query_json']
     query["attrib_id"] = mko.dataspec['attrib_id']

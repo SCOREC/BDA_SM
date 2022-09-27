@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: inference-manager
-        image: maxrpi/inference_manager:v1.0
+        image: {{REGISTRY}}inference_manager:v1.0
         imagePullPolicy: IfNotPresent
         ports:
          - containerPort: 5000

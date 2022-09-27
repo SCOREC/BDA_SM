@@ -11,10 +11,15 @@ RCver=":v1.0"
 FETver=":v1.0"
 
 BUILDER=docker
-while getopts "DmM" options; do
+roottag="maxrpi/"
+do_push="no"
+while getopts "DmMpA" options; do
   case "${options}" in
     D)
-      roottag="maxrpi/"
+      roottag=""
+      ;;
+    A)
+      roottag="maxrpicesmii.azurecr.io/bda/"
       ;;
     m)
       eval $(minikube docker-env)  
@@ -22,6 +27,10 @@ while getopts "DmM" options; do
       ;;
     M)
       BUILDER='minikube image'
+      ;;
+    p)
+      do_push="yes"
+      ;;
   esac
 done
 
@@ -31,3 +40,16 @@ ${BUILDER} build -t ${roottag}sampler${Sver} -f sampler/Scripts/Dockerfile .
 (cd frontend; ${BUILDER} build -t ${roottag}frontend${FRver} -f Scripts/Dockerfile .)
 (cd results_cache; ${BUILDER} build -t ${roottag}results_cache${RCver} -f Scripts/Dockerfile .)
 (cd fetcher; ${BUILDER} build -t ${roottag}fetcher${FETver} -f Scripts/Dockerfile .)
+
+if [ ${do_push} == "no " ]; then
+  echo "Not pushing to docker"
+else
+  echo "pushing to ${roottag}"
+  docker push ${roottag}training_manager${TMver}
+  docker push ${roottag}inference_manager${IMver}
+  docker push ${roottag}sampler${Sver}
+  docker push ${roottag}frontend${FRver}
+  docker push ${roottag}results_cache${RCver}
+  docker push ${roottag}fetcher${FETver}
+fi
+

@@ -26,4 +26,4 @@ def Analyze_sample():
 @require_access(['analyze'])
 def Analyze_integrate():
     return forward_request(target_url=inference_manager_host +
-      "/integrate")
+      "/api/analyze/integrate")

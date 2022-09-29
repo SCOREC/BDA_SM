@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 from common.mko import MKO
 from common.utilities import encodings
-from externals import get_samples_array, post_error, post_results_cache, post_status
+from externals import get_samples, post_error, post_results_cache, post_status
 
 
 import time
@@ -98,7 +98,7 @@ def integrator(mko_filename, inputs_filename, username, claim_check, rc_url, fun
   gridlines = table_to_gridlines(table[:,:-1])
   data = table[:,-1]
   interp = RegularGridInterpolator(gridlines, data)
-  samples = get_samples_array(username, mko_data, n_samples, inputs)
+  samples = get_samples(username, mko_data, n_samples, inputs.tolist())
 
   integral = np.sum(interp(samples)) / float(n_samples)
 
@@ -119,7 +119,6 @@ if __name__ == '__main__':
   username = args['username'][0]
   claim_check = args['claim_check'][0]
   rc_url = args['rc_url'][0]
-  n_bins = args['n_bins'][0]
   n_samples = args['n_samples'][0]
 
   integrator(mko_filename, inputs_filename, username, claim_check, rc_url, function_filename, n_samples)

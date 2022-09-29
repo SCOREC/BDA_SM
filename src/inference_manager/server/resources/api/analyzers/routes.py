@@ -42,7 +42,7 @@ def cloudplot():
   return ({"claim_check": claim_check}, 200)
 
 @AnalyzersResource.route('/integrate', methods=['POST'])
-def histogram():
+def integrate():
   try:
     data = request.data
     data = json.loads(data)['data']

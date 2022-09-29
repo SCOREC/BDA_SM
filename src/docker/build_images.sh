@@ -16,7 +16,7 @@ do_push="no"
 while getopts "DmMpA" options; do
   case "${options}" in
     D)
-      roottag=""
+      roottag="maxrpi/"
       ;;
     A)
       roottag="maxrpicesmii.azurecr.io/bda/"

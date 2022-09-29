@@ -22,7 +22,7 @@ spec:
         imagePullPolicy: IfNotPresent
       restartPolicy: Always
       imagePullSecrets:
-        - name: dockerregcred
+        - name: regcred
 ---
 apiVersion: v1
 kind: Service

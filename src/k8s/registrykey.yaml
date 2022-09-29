@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: dockerregcred
+  name: regcred
   namespace: default
 data:
   .dockerconfigjson: ewogICAgICAgICJhdXRocyI6IHsKICAgICAgICAgICAgICAgICJodHRwczovL2luZGV4LmRvY2tlci5pby92MS8iOiB7CiAgICAgICAgICAgICAgICAgICAgICAgICJhdXRoIjogImJXRjRjbkJwT21SamEzSmZjR0YwWHpoeU5tWlhla2xQUldWeVZtbHpjbGs1WTNJelRtRldWMkZ6VlE9PSIKICAgICAgICAgICAgICAgIH0KICAgICAgICB9Cn0=

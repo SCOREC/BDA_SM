@@ -65,7 +65,7 @@ elif [ ${mode} = "add" ]; then
   fi
   if [ ${registry_mode} = "cli" ]; then
     echo "Creating registrykey from yaml file"
-    ${KUBECTL} create secret generic dockerregcred  \
+    ${KUBECTL} create secret generic regcred  \
       --from-file=.dockerconfigjson=${HOME}/.docker/token.json \
       --type=docker.io/dockerconfigjson
   else

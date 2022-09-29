@@ -48,7 +48,7 @@ spec:
                 key: TRAINING_MANAGER_BASE_URL
       restartPolicy: Always
       imagePullSecrets:
-        - name: dockerregcred
+        - name: regcred
 
 ---
 apiVersion: v1

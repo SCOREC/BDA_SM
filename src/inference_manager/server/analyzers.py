@@ -94,3 +94,38 @@ def get_cloudplot(mko, data, username, n_samples) -> str:
     )
   
   return claim_check
+
+
+def get_integration(mko, inputs, username, n_samples, function_table) -> str:
+  claim_check = get_new_claim_check(username)
+  mko_file = save_file(mko)
+  inputs_file = save_array(inputs)
+  table_file = save_array(function_table)
+  mod_env = dict(os.environ)
+  mod_env.update({'PYTHONPATH' : "."})
+  EXECUTABLE_STRING_LIST = [
+    cfg.PYTHON_EXECUTABLE,
+    "executables/integration.py",
+    "-u",
+    username,
+    "--cc",
+    claim_check,
+    "--rc",
+    cfg.RESULTS_CACHE_BASE_URL,
+    "--mko",
+    mko_file,
+    "-i",
+    inputs_file,
+    "--function",
+    table_file,
+    "--n_samples",
+    str(n_samples)
+    ]
+  print(EXECUTABLE_STRING_LIST)
+  subprocess.Popen(
+    EXECUTABLE_STRING_LIST,
+    cwd=cfg.EXECUTABLE_WORKING_DIRECTORY,
+    env=mod_env
+    )
+  
+  return claim_check

@@ -17,7 +17,7 @@ spec:
       containers:
       - name: inference-manager
         image: {{REGISTRY}}inference_manager:v1.0
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         ports:
          - containerPort: 5000
         env: 

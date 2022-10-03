@@ -17,7 +17,7 @@ spec:
       containers:
       - name: training-manager
         image: {{REGISTRY}}training_manager:v1.0
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         ports:
          - containerPort: 5000
         env: 

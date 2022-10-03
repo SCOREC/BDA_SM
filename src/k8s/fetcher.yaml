@@ -19,7 +19,7 @@ spec:
         image: {{REGISTRY}}fetcher:v1.0
         ports:
          - containerPort: 5000
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
       restartPolicy: Always
       imagePullSecrets:
         - name: regcred

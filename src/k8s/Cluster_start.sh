@@ -17,13 +17,11 @@ while getopts "mdrs:R:" options; do
     registry="${OPTARG}/"
     mkdir -p ${registry}
     escregistry=$(echo ${registry} | sed "s/\//\\\\\//g")
-    echo "escregistry=${escregistry}"
+    echo "Creating yaml files"
     for yaml in ./*.yaml
     do
-      echo "cat ${yaml} | sed "s/{{REGISTRY}}/${escregistry}/g" > ${registry}/${yaml}"
       cat ${yaml} | sed "s/{{REGISTRY}}/${escregistry}/g" > ${registry}/${yaml}
     done
-    exit
     ;;
     m)
       eval $(minikube docker-env)  

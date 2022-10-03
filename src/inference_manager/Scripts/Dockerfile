@@ -12,7 +12,7 @@ COPY --chown=inference_manager:inference_manager inference_manager/server server
 COPY --chown=inference_manager:inference_manager analyzers analyzers
 RUN rm -f analyzers/common
 COPY --chown=inference_manager:inference_manager common common
-RUN ln -s common analyzers/common
+RUN ln -sf ../common analyzers/common
 
 COPY --chown=inference_manager:inference_manager inference_manager/inference_manager.py inference_manager/Scripts/boot.sh ./
 RUN chmod +x boot.sh

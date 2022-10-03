@@ -1,5 +1,5 @@
 from typing import Any
-from tensorflow.keras import Input, Model
+from tensorflow.keras import Input, Model, regularizers
 from tensorflow.keras.layers import Dense, Dropout, Conv2D, Layer
 from common.ml.layers import VariationalDropout
 from common.ml.exceptions import InputException, InvalidArgument
@@ -9,6 +9,8 @@ class Defaults:
     activation = "relu"
     padding = "valid"
     stride = 1
+    regularizer_lambda = 0.1
+    regularizer = "L2"
 
     @staticmethod
     def get_default_initializer(activation: str) -> str:
@@ -16,12 +18,13 @@ class Defaults:
             return "he_uniform"
         return "glorot_uniform"
 
-
 class LayerKeys:
     TYPE = "type"
     UNITS = "units"
     ACTIVATION = "activation"
     INITIALIZER = "kernel_initializer"
+    REGULARIZER = "kernel_regularizer"
+    REGULARIZER_LAMBDA = "lambda"
     NAME = "name"
     RATE = "rate"
     FILTERS = "filters"
@@ -51,7 +54,10 @@ def get_dense(layer_params: dict, name: str) -> Dense:
     units = enforce(LayerKeys.UNITS, layer_params)
     activation = get_value(LayerKeys.ACTIVATION, Defaults.activation, layer_params).lower()
     initializer = get_value(LayerKeys.INITIALIZER, Defaults.get_default_initializer(activation), layer_params)
-    return Dense(units, activation=activation, kernel_initializer=initializer, name=name)
+    regularizer_str = get_value(LayerKeys.REGULARIZER, Defaults.regularizer, layer_params)
+    regularizer_lambda = get_value(LayerKeys.REGULARIZER_LAMBDA, Defaults.regularizer_lambda, layer_params)
+    regularizer = getattr(regularizers, regularizer_str)(regularizer_lambda)
+    return Dense(units, activation=activation, kernel_initializer=initializer, kernel_regularizer=regularizer, name=name)
 
 def get_dropout(layer_params: dict, name: str) -> Dropout:
     rate = get_value(LayerKeys.RATE, Defaults.rate, layer_params)

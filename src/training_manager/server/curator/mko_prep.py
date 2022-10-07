@@ -20,9 +20,20 @@ def fill_mko(username, model_name, old_mko, dataspec, topology, hypers):
   }
 
   data['model_name'] = model_name
-
   data['dataspec'].update(dataspec)
-  if len(topology) > 0: data['topology'] = topology
+
+  old_topology = mko.topology
+  if old_topology == topology:
+    data['topology'] = topology
+    if mko.has_weights:
+      data['WEIGHTS'] = mko._weights
+  elif len(topology) > 0:
+    data['topology'] = topology
+  elif len(old_topology) > 0:
+    data['topology'] = old_topology
+  else:
+    pass
+  
   data['hypers'].update(hypers)
 
   mko = MKO.from_dict(data)

@@ -1,7 +1,7 @@
 from typing import Any
 from tensorflow.keras import Input, Model, regularizers
 from tensorflow.keras.layers import Dense, Dropout, Conv2D, Layer
-from common.ml.layers import VariationalDropout
+from common.ml.layers import VariationalDropout, ConcreteDropout
 from common.ml.exceptions import InputException, InvalidArgument
 
 class Defaults:
@@ -68,6 +68,10 @@ def get_variational_dropout(layer_params: dict, name: str) -> VariationalDropout
     rate = get_value(LayerKeys.RATE, Defaults.rate, layer_params)
     return VariationalDropout(rate, name=name)
 
+def get_concrete(layer_params: dict, name: str) -> ConcreteDropout:
+    units = enforce(LayerKeys.UNITS, layer_params)
+    activation = get_value(LayerKeys.ACTIVATION, Defaults.activation, layer_params).lower()
+    return ConcreteDropout(Dense(units=units, activation=activation, name=name))
 
 def get_convolutional(layer_params: dict, name: str) -> Conv2D:
     filters = enforce(LayerKeys.FILTERS, layer_params)
@@ -83,6 +87,7 @@ layers = {
     "dropout": get_dropout,
     "variational_dropout": get_variational_dropout,
     "convolutional": get_convolutional,
+    "concrete": get_concrete,
 }
 
 
@@ -91,7 +96,7 @@ def get_layer(layer_params: dict, index: int) -> Layer:
     layer_type = enforce(LayerKeys.TYPE, layer_params).lower()
 
     if layer_type not in layers:
-        raise InvalidArgument(layer_type, layers)
+        raise InvalidArgument(layer_type, list(layers.keys()))
 
     return layers[layer_type](layer_params, name)
 

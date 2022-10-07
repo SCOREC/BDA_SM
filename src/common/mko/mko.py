@@ -75,15 +75,17 @@ class MKO(object):
   @staticmethod
   def scale_array(array, interval):
     means = interval.mean(axis=0)
+    tmp = np.empty_like(array)
     for i in range(array.shape[1]):
-      array[:,i] = (array[:,i] - means[i]) / (interval[1,i] - interval[0,i])
+      tmp[:,i] = (array[:,i] - means[i]) / (interval[1,i] - interval[0,i])
     return array
 
   @staticmethod
   def unscale_array(array, interval):
     means = interval.mean(axis=0)
+    tmp = np.empty_like(array)
     for i in range(array.shape[1]):
-      array[:,i] = array[:,i] * (interval[1,i] - interval[0,i]) + means[i]
+      tmp[:,i] = array[:,i] * (interval[1,i] - interval[0,i]) + means[i]
     return array
 
   @classmethod
@@ -114,6 +116,10 @@ class MKO(object):
   def normalize_inputs(self, array):
     interval = self.get_inputs_interval()
     return self.scale_array(array, interval)
+
+  def denormalize_inputs(self, array):
+    interval = self.get_inputs_interval()
+    return self.denormalize(array, interval)
 
   def denormalize_outputs(self, array):
     interval = self.get_outputs_interval()

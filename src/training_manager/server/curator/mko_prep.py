@@ -34,6 +34,7 @@ def fill_mko(username, model_name, old_mko, dataspec, topology, hypers):
   else:
     pass
   
+  data['hypers'].update(mko.hypers)
   data['hypers'].update(hypers)
 
   mko = MKO.from_dict(data)

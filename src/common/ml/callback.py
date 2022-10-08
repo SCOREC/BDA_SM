@@ -23,7 +23,7 @@ class DecayScheduler(LearningRateScheduler):
   def decay(self, epoch):
     new_lr = self.decay_schedule[0][1]
     for lim, lr in self.decay_schedule:
-      if epoch >= lr:
+      if epoch >= lim:
         new_lr = lr
     return new_lr
   

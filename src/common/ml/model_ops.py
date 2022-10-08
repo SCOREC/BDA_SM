@@ -1,6 +1,6 @@
 import numpy as np
 from tensorflow.keras import backend as K
-from common.ml.callback import StatusCallback
+from common.ml.callback import StatusCallback, DecayScheduler
 from math import log10
 
 def compile_model(model, hypers):
@@ -13,6 +13,10 @@ def compile_model(model, hypers):
 def fit_model(model, X_train, Y_train, X_test, Y_test, hypers, status_poster):
 
   callbacks = [StatusCallback(status_poster, hypers['epochs'])]
+
+  if "lr_schedule" in hypers:
+    scheduler = DecayScheduler(hypers["lr_schedule"])
+    callbacks.append(scheduler)
 
   model.fit(
     X_train,

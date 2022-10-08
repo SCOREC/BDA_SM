@@ -138,7 +138,8 @@ def trainer(mko_filename, username, claim_check, rc_url, smip_token,
       )
     mko.set_trained()
 
-    mko.add_loss_history(history.history["loss"])
+    mko.add_loss_history(history.history.get("loss", []))
+    mko.add_lr_history([float(x) for x in history.history.get("lr", []) ])
 
     if autocalibrate:
       if len(cp_loc) > 0:

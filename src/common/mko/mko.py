@@ -143,9 +143,16 @@ class MKO(object):
   def add_loss_history(self, history):
     if not self.has_hypers:
       return
-    if "history" not in self._hypers:
-      self._hypers["history"] = []
-    self._hypers["history"] = self._hypers["history"] + history
+    if "loss_history" not in self._hypers:
+      self._hypers["loss_history"] = []
+    self._hypers["loss_history"] = self._hypers["loss_history"] + history
+
+  def add_lr_history(self, history):
+    if not self.has_hypers:
+      return
+    if "lr_history" not in self._hypers:
+      self._hypers["lr_history"] = []
+    self._hypers["lr_history"] = self._hypers["lr_history"] + history
 
 
   ##### GETTERS #####

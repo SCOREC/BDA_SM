@@ -43,12 +43,18 @@ def history(mko_filename, username, claim_check, rc_url):
   delete_file(mko_filename)
   mko = MKO.from_base64(mko_data)
 
-  history = mko._hypers["history"]
-  epochs = [float(x + 1) for x in range(len(history))]
+  loss_history = mko._hypers["loss_history"]
+  lr_history = mko._hypers["lr_history"]
+  epochs = [float(x + 1) for x in range(len(loss_history))]
+
 
   matplotlib.use('agg')
-  plt.figure(figsize=(5,5), dpi=100)
-  plt.semilogy(epochs, history, lw=2.0)
+  fig, ax = plt.subplots(figsize=(5,5), dpi=100)
+  plt.semilogy(epochs, loss_history, label="loss", lw=2.0)
+  plt.semilogy(epochs, lr_history, label="learning rate", lw=2.0)
+  plt.xlabel("Epochs")
+  ax.legend()
+
 
   stream = BytesIO() 
   plt.savefig(stream, format="png", bbox_inches='tight')

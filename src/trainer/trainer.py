@@ -129,7 +129,7 @@ def trainer(mko_filename, username, claim_check, rc_url, smip_token,
   try:
     mko = prepare_mko_model(mko)
 
-    mko._model, mko._hypers['loss'] = fit_model(
+    mko._model, mko._hypers['loss'], history = fit_model(
       mko._model,
       X_train, Y_train,
       X_test, Y_test,
@@ -137,6 +137,8 @@ def trainer(mko_filename, username, claim_check, rc_url, smip_token,
       status_poster
       )
     mko.set_trained()
+
+    mko.add_loss_history(history.history["loss"])
 
     if autocalibrate:
       if len(cp_loc) > 0:

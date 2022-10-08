@@ -18,7 +18,7 @@ def fit_model(model, X_train, Y_train, X_test, Y_test, hypers, status_poster):
     scheduler = DecayScheduler(hypers["lr_schedule"])
     callbacks.append(scheduler)
 
-  model.fit(
+  history = model.fit(
     X_train,
     Y_train,
     epochs=hypers['epochs'],
@@ -34,7 +34,7 @@ def fit_model(model, X_train, Y_train, X_test, Y_test, hypers, status_poster):
 
   hypers['trained'] += hypers['epochs']
 
-  return model, loss
+  return model, loss, history
 
 
 def mu(rho, model, X_train, Y_train, hypers, test_set):

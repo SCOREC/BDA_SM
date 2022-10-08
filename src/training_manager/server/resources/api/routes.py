@@ -58,8 +58,6 @@ def describe_mko():
   except Exception as err:
     return Response("Badly formed request: {}".format(err), 400)
 
-  return ({"claim_check": claim_check}, 200)
-
 
 @bp.route("/train", methods=["POST"])
 def train():

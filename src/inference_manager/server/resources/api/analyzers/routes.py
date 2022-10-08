@@ -61,3 +61,15 @@ def integrate():
   except Exception as err:
     return Response("Badly formed request: {}".format(err), 400)
   return ({"claim_check": claim_check}, 200)
+
+@AnalyzersResource.route('/history', methods=['POST'])
+def history():
+  try:
+    data = request.data
+    data = json.loads(data)['data']
+    mko = data.get('mkodata')
+    username = data.get("username")
+    claim_check = server.analyzers.get_history(mko, username)
+  except Exception as err:
+    return Response("Badly formed request: {}".format(err), 400)
+  return ({"claim_check": claim_check}, 200)

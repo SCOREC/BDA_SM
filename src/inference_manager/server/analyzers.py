@@ -129,3 +129,29 @@ def get_integration(mko, inputs, username, n_samples, function_table) -> str:
     )
   
   return claim_check
+
+def get_history(mko, username) -> str:
+  claim_check = get_new_claim_check(username)
+  mko_file = save_file(mko)
+  mod_env = dict(os.environ)
+  mod_env.update({'PYTHONPATH' : "."})
+  EXECUTABLE_STRING_LIST = [
+    cfg.PYTHON_EXECUTABLE,
+    "executables/history.py",
+    "-u",
+    username,
+    "--cc",
+    claim_check,
+    "--rc",
+    cfg.RESULTS_CACHE_BASE_URL,
+    "--mko",
+    mko_file,
+    ]
+  print(EXECUTABLE_STRING_LIST)
+  subprocess.Popen(
+    EXECUTABLE_STRING_LIST,
+    cwd=cfg.EXECUTABLE_WORKING_DIRECTORY,
+    env=mod_env
+    )
+  
+  return claim_check

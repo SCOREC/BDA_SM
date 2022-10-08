@@ -17,9 +17,16 @@ def Analyze_cloudplot():
 @AnalyzeResource.route('/histogram', methods=['POST'])
 @initialized(True)
 @require_access(['analyze'])
-def Analyze_sample():
+def Analyze_histogram():
     return forward_request(target_url=inference_manager_host.rstrip("/ ") +
       "/api/analyze/histogram")
+
+@AnalyzeResource.route('/history', methods=['POST'])
+@initialized(True)
+@require_access(['analyze'])
+def Analyze_history():
+    return forward_request(target_url=inference_manager_host.rstrip("/ ") +
+      "/api/analyze/history")
 
 @AnalyzeResource.route('/integrate', methods=['POST'])
 @initialized(True)

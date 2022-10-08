@@ -22,6 +22,7 @@ class MKO(object):
     }
     self._model = None
     self._weights = None
+    self._history = None
 
   def _to_dict(self):
     data = {}
@@ -138,6 +139,14 @@ class MKO(object):
 
   def set_outputs_interval(self, interval):
     self._dataspec['outputs_interval'] = encodings.b64encode_datatype(interval)
+
+  def add_loss_history(self, history):
+    if not self.has_hypers:
+      return
+    if "history" not in self._hypers:
+      self._hypers["history"] = []
+    self._hypers["history"] = self._hypers["history"] + history
+
 
   ##### GETTERS #####
 

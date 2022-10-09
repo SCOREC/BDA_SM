@@ -31,6 +31,7 @@ def fit_model(model, X_train, Y_train, X_test, Y_test, hypers, status_poster):
     X_test,
     Y_test,
     batch_size=hypers['batch_size'],
+    verbose=2,
   )
 
   hypers['trained'] += hypers['epochs']

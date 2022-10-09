@@ -3,10 +3,16 @@ from tensorflow.keras import backend as K
 from common.ml.callback import StatusCallback, DecayScheduler
 from math import log10
 
-def compile_model(model, hypers):
+def compile_model(model, hypers, optimizer_state=None):
 
   model.compile(loss=hypers['loss_function'], optimizer=hypers['optimizer'])
-  K.set_value(model.optimizer.learning_rate, hypers['learning_rate'])
+  if optimizer_state is not None:
+    _ = model.optimizer.iterations
+    model.optimizer._create_hypers()
+    model.optimizer._create_slots(model.trainable_weights)
+    model.optimizer.set_weights(optimizer_state)
+  else:
+    K.set_value(model.optimizer.learning_rate, hypers['learning_rate'])
   return model
 
 
@@ -17,6 +23,7 @@ def fit_model(model, X_train, Y_train, X_test, Y_test, hypers, status_poster):
   if "lr_schedule" in hypers:
     scheduler = DecayScheduler(hypers["lr_schedule"])
     callbacks.append(scheduler)
+  
 
   history = model.fit(
     X_train,
@@ -36,8 +43,9 @@ def fit_model(model, X_train, Y_train, X_test, Y_test, hypers, status_poster):
   )
 
   hypers['trained'] += hypers['epochs']
+  optimizer_state = model.optimizer.get_weights()
 
-  return model, loss, history
+  return model, loss, history, optimizer_state
 
 
 def mu(rho, model, X_train, Y_train, hypers, test_set):

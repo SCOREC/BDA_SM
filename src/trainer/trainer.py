@@ -6,6 +6,7 @@ import json
 import time
 
 import externals
+from common.utilities import encodings
 from common.mko import MKO
 from common.ml import parse_json_model_structure, compile_model, fit_model, autocalibrate_model
 
@@ -91,7 +92,7 @@ def prepare_mko_model(mko : MKO):
   if mko.dataspec["time_as_input"]: n_inputs += 1
   n_outputs = len(mko.dataspec['outputs'])
   model = parse_json_model_structure((n_inputs,), mko._model_name, mko.topology, n_outputs)
-  mko._model = compile_model(model, mko.hypers)
+  mko._model = compile_model(model, mko.hypers, mko.get_optimizer_state())
   mko.set_compiled(True)
   mko.parameterize_model()
   return mko
@@ -129,7 +130,7 @@ def trainer(mko_filename, username, claim_check, rc_url, smip_token,
   try:
     mko = prepare_mko_model(mko)
 
-    mko._model, mko._hypers['loss'], history = fit_model(
+    mko._model, mko._hypers['loss'], history, optimizer_state = fit_model(
       mko._model,
       X_train, Y_train,
       X_test, Y_test,
@@ -138,6 +139,7 @@ def trainer(mko_filename, username, claim_check, rc_url, smip_token,
       )
     mko.set_trained()
 
+    mko.add_optimizer_state(optimizer_state)
     mko.add_loss_history(history.history.get("loss", []))
     mko.add_lr_history([float(x) for x in history.history.get("lr", []) ])
 

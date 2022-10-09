@@ -153,6 +153,11 @@ class MKO(object):
     if "lr_history" not in self._hypers:
       self._hypers["lr_history"] = []
     self._hypers["lr_history"] = self._hypers["lr_history"] + history
+  
+  def add_optimizer_state(self, optimizer_state):
+    if not self.has_hypers:
+      return
+    self._hypers["optimizer_state"] = encodings.b64encode_datatype(optimizer_state)
 
 
   ##### GETTERS #####
@@ -170,6 +175,10 @@ class MKO(object):
 
   def get_outputs_interval(self):
     return encodings.b64decode_datatype(self._dataspec['outputs_interval'])
+  
+  def get_optimizer_state(self):
+    if "optimizer_state" not in self.hypers: return None
+    return encodings.b64decode_datatype(self.hypers["optimizer_state"])
 
   ##### PROPERTIES #####
   @property

@@ -1,1 +1,0 @@
-python -m src.trainer -f test_fetcher.json --train the_rest is_not being_tested

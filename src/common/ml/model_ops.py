@@ -23,7 +23,8 @@ def fit_model(model, X_train, Y_train, X_test, Y_test, hypers, status_poster):
     Y_train,
     epochs=hypers['epochs'],
     batch_size=hypers['batch_size'],
-    callbacks=callbacks
+    callbacks=callbacks,
+    verbose=2,
   )
 
   loss = model.evaluate(

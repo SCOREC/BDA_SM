@@ -134,7 +134,7 @@ def trainer(mko_filename, username, claim_check, rc_url, smip_token,
       X_train, Y_train,
       X_test, Y_test,
       mko.hypers,
-      status_poster
+      status_poster,
       )
     mko.set_trained()
 

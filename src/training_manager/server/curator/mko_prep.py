@@ -14,9 +14,9 @@ def fill_mko(username, model_name, old_mko, dataspec, topology, hypers):
 
   mko = MKO.from_base64(old_mko)
   data = {
-    'dataspec': defaults.dataspec,
-    'hypers': defaults.hypers,
-    'topology': defaults.topology
+    'dataspec': dict(defaults.dataspec),
+    'hypers': dict(defaults.hypers),
+    'topology': list(defaults.topology)
   }
 
   data['model_name'] = model_name

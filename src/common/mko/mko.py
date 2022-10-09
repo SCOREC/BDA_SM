@@ -32,11 +32,11 @@ class MKO(object):
     data['dataspec'] = self._dataspec
     
     if self._has_weights and self._compiled:   
-      np_weights = self._model.get_weights()
-      b64_encoded_w = []
-      for w in np_weights:
-        b64_encoded_w.append(encodings.b64encode_datatype(w))
-      data['WEIGHTS'] = b64_encoded_w
+      weights = [ layer.get_weights() for layer in self._model.layers ]
+      data['WEIGHTS'] = encodings.b64encode_datatype(weights)
+    elif self._has_weights:
+      data['WEIGHTS'] = self._weights
+
     return data
   
   @staticmethod
@@ -58,9 +58,9 @@ class MKO(object):
 
   def parameterize_model(self):
     if self._compiled and self._has_weights:
-      self._model.set_weights(
-        [ encodings.b64decode_datatype(w) for w in self._weights ]
-      )
+      weights = encodings.b64decode_datatype(self._weights)
+      for i, layer in enumerate(self._model.layers):
+        layer.set_weights(weights[i])
       self._parameterized = True
 
   @staticmethod

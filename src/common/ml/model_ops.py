@@ -21,6 +21,7 @@ def fit_model(model, X_train, Y_train, X_test, Y_test, hypers, status_poster):
   history = model.fit(
     X_train,
     Y_train,
+    initial_epoch=hypers["trained"],
     epochs=hypers['epochs'],
     batch_size=hypers['batch_size'],
     callbacks=callbacks,

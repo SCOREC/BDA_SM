@@ -49,11 +49,18 @@ def history(mko_filename, username, claim_check, rc_url):
 
 
   matplotlib.use('agg')
-  fig, ax = plt.subplots(figsize=(5,5), dpi=100)
-  plt.semilogy(epochs, loss_history, label="loss", lw=2.0)
-  plt.semilogy(epochs, lr_history, label="learning rate", lw=2.0)
-  plt.xlabel("Epochs")
-  ax.legend()
+  fig, ax1 = plt.subplots(figsize=(5,5), dpi=100)
+  color = "tab:red"
+  ax1.semilogy(epochs, loss_history, label="loss", lw=2.0, color=color)
+  ax1.set_xlabel("Epochs")
+  ax1.set_ylabel("Loss", color=color)
+  ax1.tick_params(axis='y', labelcolor=color)
+  ax2 = ax1.twinx()
+  color = "tab:blue"
+  ax2.semilogy(epochs, lr_history, label="learning rate", lw=2.0, color=color)
+  ax2.set_ylabel("Learning rate", color=color)
+  ax2.tick_params(axis='y', labelcolor=color)
+  plt.legend()
 
 
   stream = BytesIO() 

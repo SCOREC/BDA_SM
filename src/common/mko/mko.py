@@ -59,9 +59,11 @@ class MKO(object):
   def parameterize_model(self):
     if self._compiled and self._has_weights:
       weights = encodings.b64decode_datatype(self._weights)
-      for i, layer in enumerate(self._model.layers):
-        layer.set_weights(weights[i])
-      self._parameterized = True
+      n_layers = len(self._model.layers)
+      if len(weights) == n_layers:
+        for i, layer in enumerate(self._model.layers):
+          layer.set_weights(weights[i])
+        self._parameterized = True
 
   @staticmethod
   def from_json(j_str: str) -> 'MKO':

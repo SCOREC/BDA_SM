@@ -10,7 +10,9 @@ def compile_model(model, hypers, optimizer_state=None):
     _ = model.optimizer.iterations
     model.optimizer._create_hypers()
     model.optimizer._create_slots(model.trainable_weights)
-    model.optimizer.set_weights(optimizer_state)
+    n_weights = len(model.optimizer.get_weights())
+    if n_weights == len(optimizer_state):
+      model.optimizer.set_weights(optimizer_state)
   else:
     K.set_value(model.optimizer.learning_rate, hypers['learning_rate'])
   return model

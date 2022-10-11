@@ -71,8 +71,10 @@ def cloudplot(mko_filename, data_filename, username, claim_check, rc_url, n_samp
     if error_bars:
       means = predict[:,j,:].mean(axis=1)
       stds = predict[:,j,:].std(axis=1)
-      plt.errorbar(inputs, means, stds, uplimes=False, lolimes=False, capsize=3, fmt="none")
-      plt.scatter(inputs, means)
+      plt.errorbar(outputs[:,j], means, stds, uplims=False, lolims=False, capsize=3, fmt="none")
+      plt.scatter(outputs[:,j], means)
+      ll = np.amin(means - stds)
+      ul = np.amax(means + stds)
     else:
       for i in range(n_rows):
         known = outputs[i,j].repeat(n_samples)

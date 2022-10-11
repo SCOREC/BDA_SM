@@ -55,16 +55,25 @@ def histogram(mko_filename, inputs_filename, username, claim_check, rc_url, n_sa
   delete_file(inputs_filename)
 
   samples = get_samples(username, mko_data, n_samples, inputs.tolist())
+  n_outputs = len(mko.dataspec['outputs'])
 
   matplotlib.use('agg')
-  plt.figure(figsize=(5,5), dpi=100)
-  n, bins, patches = plt.hist(samples, n_bins, density=True)
+  images = []
+  for j in range(n_outputs):
+    output_name = mko.dataspec['outputs'][j]
+    fig = plt.figure(figsize=(5,5), dpi=100)
+    n, bins, patches = plt.hist(samples[:][j], n_bins, density=True)
+    plt.xlabel(output_name)
+    plt.ylabel("Probability density")
+    stream = BytesIO() 
+    plt.savefig(stream, format="png", bbox_inches='tight')
+    plt.close()
+    stream.seek(0)
+    image = encodings.encode_base64(stream.read())
+    images.append(image)
+    stream.close()
 
-  stream = BytesIO() 
-  plt.savefig(stream, format="png", bbox_inches='tight')
-  stream.seek(0)
-
-  data = encodings.encode_base64(stream.read())
+  data = encodings.b64encode_datatype(images)
   end_time = time.time()
   generation_time = max(1, int(end_time - start_time))
 

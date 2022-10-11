@@ -19,6 +19,7 @@ def parse_args():
   parser.add_argument('-i', nargs=1, dest='data_filename', type=str, required=True, help='path to file containing inputs')
   parser.add_argument('--n_bins', nargs=1, dest='n_bins', type=int, default=[0], required=False, help='number of bins in histogram')
   parser.add_argument('--n_samples', nargs=1, dest='n_samples', type=int, default=[0], required=False, help='number of samples to take')
+  parser.add_argument('--error_bars', nargs=1, dest='error_bars', type=str, default="False", required=False, help='Collapse cloud to errorbars')
   parser.add_argument('-u', nargs=1, dest='username', type=str, required=True, help='username for result_cache')
   parser.add_argument('--cc', nargs=1, dest='claim_check', type=str, required=True, help='claim_check for result_cache')
   parser.add_argument('--rc', nargs=1, dest="rc_url", type=str, required=True, help='url to result_cache server')
@@ -29,7 +30,7 @@ def delete_file(file_loc: str):
         return
     os.unlink(file_loc)
 
-def cloudplot(mko_filename, data_filename, username, claim_check, rc_url, n_samples=100):
+def cloudplot(mko_filename, data_filename, username, claim_check, rc_url, n_samples=100, error_bars=False):
 
   def get_post_status_closure(rc_url, username, claim_check):
     def post_status_closure(status):
@@ -67,11 +68,17 @@ def cloudplot(mko_filename, data_filename, username, claim_check, rc_url, n_samp
   for j in range(n_outputs):
     output_name = mko.dataspec['outputs'][j]
     fig = plt.figure(figsize=(5,5), dpi=100)
-    for i in range(n_rows):
-      known = outputs[i,j].repeat(n_samples)
-      plt.scatter(known, predict[i,j,:], alpha=0.2, marker='o', color='r')
-    ll = min(np.amin(known), np.amin(predict[:,j,:]))
-    ul = max(np.amax(known), np.amax(predict[:,j,:]))
+    if error_bars:
+      means = predict[:,j,:].mean(axis=1)
+      stds = predict[:,j,:].std(axis=1)
+      plt.errorbar(inputs, means, stds, uplimes=False, lolimes=False, capsize=3, fmt="none")
+      plt.scatter(inputs, means)
+    else:
+      for i in range(n_rows):
+        known = outputs[i,j].repeat(n_samples)
+        plt.scatter(known, predict[i,j,:], alpha=0.2, marker='o', color='r')
+      ll = min(np.amin(known), np.amin(predict[:,j,:]))
+      ul = max(np.amax(known), np.amax(predict[:,j,:]))
     plt.xlim((ll, ul))
     plt.ylim((ll, ul))
     plt.plot([ll, ul], [ll,ul], color='blue')
@@ -103,5 +110,6 @@ if __name__ == '__main__':
   claim_check = args['claim_check'][0]
   rc_url = args['rc_url'][0]
   n_samples = args['n_samples'][0]
+  error_bars = ( args['error_bars'][0] == "True" )
 
-  cloudplot(mko_filename, data_filename, username, claim_check, rc_url, n_samples=100)
+  cloudplot(mko_filename, data_filename, username, claim_check, rc_url, n_samples, error_bars)

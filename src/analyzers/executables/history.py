@@ -60,7 +60,7 @@ def history(mko_filename, username, claim_check, rc_url):
   ax2.semilogy(epochs, lr_history, label="learning rate", lw=2.0, color=color)
   ax2.set_ylabel("Learning rate", color=color)
   ax2.tick_params(axis='y', labelcolor=color)
-  plt.legend()
+  #plt.legend()
 
 
   stream = BytesIO() 

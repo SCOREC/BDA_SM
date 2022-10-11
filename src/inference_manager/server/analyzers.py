@@ -64,7 +64,7 @@ def get_histogram(mko, inputs, username, n_samples, n_bins) -> str:
   
   return claim_check
 
-def get_cloudplot(mko, data, username, n_samples) -> str:
+def get_cloudplot(mko, data, username, n_samples, error_bars=False) -> str:
   claim_check = get_new_claim_check(username)
   mko_file = save_file(mko)
   data_file = save_array(data)
@@ -84,7 +84,9 @@ def get_cloudplot(mko, data, username, n_samples) -> str:
     "-i",
     data_file,
     "--n_samples",
-    str(n_samples)
+    str(n_samples),
+    "--error_bars",
+    str(error_bars)
     ]
   print(EXECUTABLE_STRING_LIST)
   subprocess.Popen(

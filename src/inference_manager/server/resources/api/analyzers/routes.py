@@ -36,7 +36,13 @@ def cloudplot():
     mko = data.get('mko')
     data_table = encodings.b64decode_datatype(data.get('data_table'))
     n_samples = data.get('n_samples', 0)
-    claim_check = server.analyzers.get_cloudplot(mko, data_table, username, n_samples=n_samples)
+    error_bars = ( data.get('error_bars', "False") == "True" )
+    claim_check = server.analyzers.get_cloudplot(
+      mko,
+      data_table,
+      username,
+      n_samples=n_samples,
+      error_bars=error_bars)
   except Exception as err:
     return Response("Badly formed request: {}".format(err), 400)
   return ({"claim_check": claim_check}, 200)

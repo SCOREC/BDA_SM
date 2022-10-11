@@ -62,7 +62,7 @@ def histogram(mko_filename, inputs_filename, username, claim_check, rc_url, n_sa
   for j in range(n_outputs):
     output_name = mko.dataspec['outputs'][j]
     fig = plt.figure(figsize=(5,5), dpi=100)
-    n, bins, patches = plt.hist(samples[:][j], n_bins, density=True)
+    n, bins, patches = plt.hist(samples[:,j], n_bins, density=True)
     plt.xlabel(output_name)
     plt.ylabel("Probability density")
     stream = BytesIO() 

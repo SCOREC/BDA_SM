@@ -10,7 +10,7 @@ from server.models import User, AuthToken, RefreshToken
 
 AdminResource = Blueprint('Admin', __name__, url_prefix='/Admin')
 
-@AdminResource.route('/Init', methods=['GET','POST'])
+@AdminResource.route('/Init', methods=['GET'])
 @initialized(False)
 def admin_server_init():
   server_secret = request.values.get('server_secret')

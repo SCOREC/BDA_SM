@@ -254,4 +254,4 @@ def get_eta():
 
     time = time[-1][1]
 
-    return Response(str(rate * time), 200)
+    return Response(str(rate * (1.0 - time)), 200)

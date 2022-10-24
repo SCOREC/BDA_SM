@@ -3,6 +3,8 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd ${SCRIPT_DIR}/..
 
+roottag="maxrpicesmii.azurecr.io/bda/"
+
 TMver=":v1.0"
 IMver=":v1.0"
 Sver=":v1.0"
@@ -21,15 +23,11 @@ bold() {
 }
 
 BUILDER=docker
-roottag="maxrpi/"
 do_push="no"
-while getopts "DmMpA" options; do
+while getopts "DmMpAR:" options; do
   case "${options}" in
     D)
       roottag="maxrpi/"
-      ;;
-    A)
-      roottag="maxrpicesmii.azurecr.io/bda/"
       ;;
     m)
       eval $(minikube docker-env)  
@@ -40,6 +38,9 @@ while getopts "DmMpA" options; do
       ;;
     p)
       do_push="yes"
+      ;;
+    R)
+      roottag=${OPTARG}
       ;;
   esac
 done

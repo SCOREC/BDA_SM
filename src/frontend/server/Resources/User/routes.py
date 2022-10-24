@@ -36,7 +36,7 @@ def set_password():
   try:
     (r_username, access_list) = AuthToken.jwt_to_access_list(token)
   except AuthenticationError:
-    return Response("Authorization failed", 500)
+    return Response("Authorization failed", 401)
 
   username = request.values.get('username')
   oldpass = request.values.get('oldpass')
@@ -44,15 +44,15 @@ def set_password():
 
   if r_username != username:
     Event("SEC", "User {} cannot change password for user {}.".format(r_username, username)).logit()
-    return Response("User {} cannot change password for user {}.".format(r_username, username), 502)
+    return Response("User {} cannot change password for user {}.".format(r_username, username), 403)
   
   user = User.query.filter_by(username=r_username).first()
   if user is None:
     Event("DATA", "User {} not in Users, but has token.".format(r_username) ).logit()
-    return Response("Authorization failed", 500)
+    return Response("Authorization failed", 401)
 
   if not user.check_password(oldpass):
-    return Response("Old password does not match", 501)
+    return Response("Old password does not match", 401)
 
   user.set_password(newpass)
   Event("USER", "User {} changed own password.".format(user.username)).logit()

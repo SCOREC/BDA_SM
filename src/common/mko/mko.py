@@ -161,6 +161,14 @@ class MKO(object):
       return
     self._hypers["optimizer_state"] = encodings.b64encode_datatype(optimizer_state)
 
+  def add_weights(self, weights):
+    self._weights = encodings.b64encode_datatype(weights)
+
+  def save_weights(self):
+    if self.compiled:
+      self.add_weights(self._model.get_weights())
+
+
 
   ##### GETTERS #####
 
@@ -181,6 +189,10 @@ class MKO(object):
   def get_optimizer_state(self):
     if "optimizer_state" not in self.hypers: return None
     return encodings.b64decode_datatype(self.hypers["optimizer_state"])
+
+  def get_weights(self):
+    if not self._has_weights or self._weights == None: return None
+    return encodings.b64decode_datatype(self._weights)
 
   ##### PROPERTIES #####
   @property

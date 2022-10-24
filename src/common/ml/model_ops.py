@@ -1,20 +1,31 @@
 import numpy as np
 from tensorflow.keras import backend as K
+from tensorflow.keras import optimizers
 from common.ml.callback import StatusCallback, DecayScheduler
 from math import log10
 
-def compile_model(model, hypers, optimizer_state=None):
+def compile_model(model, hypers, weights=None, optimizer_state=None):
 
-  model.compile(loss=hypers['loss_function'], optimizer=hypers['optimizer'])
+  if (
+    weights is not None and
+    len(weights) == len(model.layers)
+  ):
+    for layer, weight in zip(model.layers, weights):
+      model.layers.set_weights(weight)
+
+  optimizer = getattr(optimizers, hypers["optimizer"])
   if optimizer_state is not None:
-    _ = model.optimizer.iterations
-    model.optimizer._create_hypers()
-    model.optimizer._create_slots(model.trainable_weights)
-    n_weights = len(model.optimizer.get_weights())
-    if n_weights == len(optimizer_state):
+    _ = optimizer.iterations
+    optimizer._create_hypers()
+    optimizer._create_slots(model.trainable_weights)
+    optimizer._create_all_weights(model.trainable_variables)
+    if len(optimizer.get_weights()) == len(optimizer_state):
       model.optimizer.set_weights(optimizer_state)
-  else:
-    K.set_value(model.optimizer.learning_rate, hypers['learning_rate'])
+  
+  if "lr_schedule" not in hypers and "learning_rate" in hypers:
+    K.set_value(optimizer.learning_rate, hypers['learning_rate'])
+
+  model.compile(loss=hypers['loss_function'], optimizer=optimizer)
   return model
 
 

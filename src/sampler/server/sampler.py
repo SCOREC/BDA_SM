@@ -9,8 +9,6 @@ def prepare_mko_model(mko):
   if mko.dataspec["time_as_input"]: n_inputs += 1
   n_outputs = len(mko.dataspec['outputs'])
   model = parse_json_model_structure((n_inputs,), mko._model_name, mko.topology, n_outputs)
-  mko._model = compile_model(model, mko.hypers)
-  mko._compiled = True
   mko.parameterize_model()
   return mko
 

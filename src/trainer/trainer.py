@@ -92,9 +92,8 @@ def prepare_mko_model(mko : MKO):
   if mko.dataspec["time_as_input"]: n_inputs += 1
   n_outputs = len(mko.dataspec['outputs'])
   model = parse_json_model_structure((n_inputs,), mko._model_name, mko.topology, n_outputs)
-  mko._model = compile_model(model, mko.hypers, mko.get_optimizer_state())
+  mko._model = compile_model(model, mko.hypers, mko.get_weights(), mko.get_optimizer_state())
   mko.set_compiled(True)
-  mko.parameterize_model()
   return mko
 
 def same_shuffle(a, b, axis=0):

@@ -1,0 +1,527 @@
+\documentclass[12pt, etter]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{babel}
+\usepackage{rest-api}
+\usepackage{titlesec}
+\newcommand{\sectionbreak}{\clearpage}
+\makeindex
+
+\title{API for BDA Service}
+\author{Max Bloomfield}
+\date{October 2022}
+
+\begin{document}
+
+\maketitle
+
+\section{/Admin}
+All routes require 'admin' permission in access control list of user.
+
+\begin{apiRoute}{GET}{/Admin/Init}{initializes service}
+    \begin{routeParameter}
+        \routeParamItem{username}{admin username}
+        \routeParamItem{password}{admin password}
+        \routeParamItem{server\_secret}{One time code for initialization of server, set at launch}
+    \end{routeParameter}
+    \begin{routeResponse}{application/json}
+        \begin{routeResponseItem}{200}{ok}
+            \begin{routeResponseItemBody}
+                Initialized
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+        \begin{routeResponseItem}{500}{Failed to Initialize}
+            \begin{routeResponseItemBody}
+                Internal Server Error
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+    \end{routeResponse}
+\end{apiRoute}
+
+\begin{apiRoute}{POST}{/Admin/create\_user}{creates user}
+    \begin{routeParameter}
+        \routeParamItem{username}{new username}
+        \routeParamItem{password}{new password}
+        \routeParamItem{access\_list}{list of permissions for new user}
+    \end{routeParameter}
+    \begin{routeResponse}{application/json}
+        \begin{routeResponseItem}{200}{ok}
+            \begin{routeResponseItemBody}
+                User {username} created.
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+        \begin{routeResponseItem}{500}{Internal Server Error}
+            \begin{routeResponseItemBody}
+                Username already taken
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+        \begin{routeResponseItem}{500}{Internal Server Error}
+            \begin{routeResponseItemBody}
+                {access_list} not a valid access level
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+    \end{routeResponse}
+\end{apiRoute}
+
+\begin{apiRoute}{POST}{/Admin/delete\_user}{deletes user}
+    \begin{routeParameter}
+        \routeParamItem{username}{new username}
+    \end{routeParameter}
+    \begin{routeResponse}{application/json}
+        \begin{routeResponseItem}{200}{ok}
+            \begin{routeResponseItemBody}
+                Deleted user {username}.
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+        \begin{routeResponseItem}{500}{Internal Server Error}
+            \begin{routeResponseItemBody}
+                No such user
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+    \end{routeResponse}
+\end{apiRoute}
+
+\begin{apiRoute}{POST}{/Admin/set\_password}{sets password for user}
+    \begin{routeParameter}
+        \routeParamItem{username}{username to operate on}
+        \routeParamItem{password}{new password}
+    \end{routeParameter}
+    \begin{routeResponse}{application/json}
+        \begin{routeResponseItem}{200}{ok}
+            \begin{routeResponseItemBody}
+                Updated password for {username}.
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+        \begin{routeResponseItem}{500}{Internal Server Error}
+            \begin{routeResponseItemBody}
+                No such user
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+    \end{routeResponse}
+\end{apiRoute}
+
+\begin{apiRoute}{POST}{/Admin/set\_access\_list}{sets access control list for user}
+    \begin{routeParameter}
+        \routeParamItem{username}{username to operate on}
+        \routeParamItem{access\_list}{new access control list}
+    \end{routeParameter}
+    \begin{routeResponse}{application/json}
+        \begin{routeResponseItem}{200}{ok}
+            \begin{routeResponseItemBody}
+                Updated access_list for {username} to {access_list}.
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+        \begin{routeResponseItem}{500}{Internal Server Error}
+            \begin{routeResponseItemBody}
+                No such user as {username}
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+    \end{routeResponse}
+\end{apiRoute}
+
+
+
+\section{/User}
+All requests except "/User/get\_token" require bearer token.
+All GET/POST method routes require 'user' permission in access control list of user.
+
+\begin{apiRoute}{}{/User/login}{redirects to login form}
+    \begin{routeParameter}
+        \noRouteParameter{no parameter}
+    \end{routeParameter}
+    \begin{routeResponse}{application/json}
+        \noRouteResponse{no response}
+    \end{routeResponse}
+\end{apiRoute}
+
+\begin{apiRoute}{}{/User/logout}{logs out current user, voids token}
+    \begin{routeParameter}
+        \noRouteParameter{no parameter}
+    \end{routeParameter}
+    \begin{routeResponse}{application/json}
+        \noRouteResponse{no response}
+    \end{routeResponse}
+\end{apiRoute}
+
+\begin{apiRoute}{POST}{/user/set\_password}{sets password of current user}
+    \begin{routeParameter}
+        \routeParamItem{username}{new username}
+        \routeParamItem{oldpass}{old password}
+        \routeParamItem{newpass}{new password}
+    \end{routeParameter}
+    \begin{routeResponse}{application/json}
+        \begin{routeResponseItem}{200}{ok}
+            \begin{routeResponseItemBody}
+                Password updated.
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+        \begin{routeResponseItem}{401}{Unauthorized}
+            \begin{routeResponseItemBody}
+                Authorization failed.
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+        \begin{routeResponseItem}{401}{Unauthorized}
+            \begin{routeResponseItemBody}
+                Old password does not match.
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+        \begin{routeResponseItem}{403}{Forbidden}
+            \begin{routeResponseItemBody}
+                User {user} cannot change password for user {username}.
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+    \end{routeResponse}
+\end{apiRoute}
+
+\begin{apiRoute}{POST}{/User/get\_token}{Get authorization token}
+    \begin{routeParameter}
+        \routeParamItem{username}{username to validate}
+        \routeParamItem{password}{user password}
+    \end{routeParameter}
+    \begin{routeResponse}{application/json}
+        \begin{routeResponseItem}{200}{ok}
+            \begin{routeResponseItemBody}
+                token : bearer token
+                expiration_date: expiration time of token
+                message: Success!
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+        \begin{routeResponseItem}{200}{ok}
+            \begin{routeResponseItemBody}
+                cookie set: 'refresh_token'
+            \end{routeResponseItemBody}   
+        \end{routeResponseItem}
+        \begin{routeResponseItem}{403}{Forbidden}
+            \begin{routeResponseItemBody}
+                Access denied
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+    \end{routeResponse}
+\end{apiRoute}
+
+\begin{apiRoute}{POST, GET}{/User/refresh\_token}{get new auth\_token with refresh\_token}
+    \begin{routeParameter}
+        \routeParamItem{cookie}{'refresh\_token'}
+    \end{routeParameter}
+    \begin{routeResponse}{application/json}
+        \begin{routeResponseItem}{200}{ok}
+            \begin{routeResponseItemBody}
+                token : bearer token
+                expiration_date: expiration time of token
+                message: Success!
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+        \begin{routeResponseItem}{200}{ok}
+            \begin{routeResponseItemBody}
+                cookie set: 'refresh_token'
+            \end{routeResponseItemBody}   
+        \end{routeResponseItem}
+        \begin{routeResponseItem}{403}{Unauthorized}
+            \begin{routeResponseItemBody}
+                Unavailable
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+    \end{routeResponse}
+\end{apiRoute}
+
+
+\section{/Train}
+All requests require bearer token authenticating current user.
+All requests require 'train' permission in access control list of current user.
+
+\begin{apiRoute}{POST}{/Train/create\_MKO}{Create initial MKO}
+    \begin{routeParameter}
+        \routeParamItem{username}{username for result caching}
+        \routeParamItem{model\_name}{name for model}
+    \end{routeParameter}
+    \begin{routeResponse}{application/json}
+        \begin{routeResponseItem}{200}{ok}
+            \begin{routeResponseItemBody}
+                claim_check : claim check to retrieve MKO
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+        \begin{routeResponseItem}{400}{Bad Request}
+            \begin{routeResponseItemBody}
+                Badly formed request: {error message}
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+    \end{routeResponse}
+\end{apiRoute}
+
+\begin{apiRoute}{POST}{/Train/fill\_mko}{attach data to mko}
+    \begin{routeParameter}
+        \routeParamItem{username}{username for result caching}
+        \routeParamItem{model\_name}{name for model}
+        \routeParamItem{dataspec}{specification for data location (JSON)}
+        \routeParamItem{topology}{neural network topology}
+        \routeParamItem{hyper\_parameters}{neural network hyperparameters}
+        \routeParamItem{mkodata}{mko, as initialized with create\_MKO}
+    \end{routeParameter}
+    \begin{routeResponse}{application/json}
+        \begin{routeResponseItem}{200}{ok}
+            \begin{routeResponseItemBody}
+                claim_check : claim check to retrieve MKO
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+        \begin{routeResponseItem}{400}{Bad Request}
+            \begin{routeResponseItemBody}
+                Badly formed request: {error message}
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+    \end{routeResponse}
+\end{apiRoute}
+
+\begin{apiRoute}{POST}{/Train/train}{schedule training of MKO}
+    \begin{routeParameter}
+        \routeParamItem{username}{username for result caching}
+        \routeParamItem{model\_name}{name for model}
+        \routeParamItem{mkodata}{mko, as processed with fill\_mko}
+        \routeParamItem{smip\_auth}{JSON object with 'token' and 'url' providing access to SMIP}
+    \end{routeParameter}
+    \begin{routeResponse}{application/json}
+        \begin{routeResponseItem}{200}{ok}
+            \begin{routeResponseItemBody}
+                claim_check : claim check to retrieve MKO
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+        \begin{routeResponseItem}{400}{Bad Request}
+            \begin{routeResponseItemBody}
+                Badly formed request: {error message}
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+    \end{routeResponse}
+\end{apiRoute}
+
+\begin{apiRoute}{GET}{/Train/describe\_mko}{describe contents of MKO}
+    \begin{routeParameter}
+        \routeParamItem{mkodata}{mko, as processed with fill\_mko}
+    \end{routeParameter}
+    \begin{routeResponse}{application/json}
+        \begin{routeResponseItem}{200}{ok}
+            \begin{routeResponseItemBody}
+                JSON object describing contents of MKO
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+        \begin{routeResponseItem}{400}{Bad Request}
+            \begin{routeResponseItemBody}
+                Badly formed request: {error message}
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+    \end{routeResponse}
+\end{apiRoute}
+
+
+\section{/Results}
+All requests require bearer token authenticating current user.
+All requests require 'train' or 'infer' permission in access control list of current user.
+
+\begin{apiRoute}{GET}{/Results/get\_result}{retrieve result of training or analysis}
+    \begin{routeParameter}
+        \routeParamItem{username}{username associated with cached result}
+        \routeParamItem{claim\_check}{claim check previously returned by train or analysis}
+    \end{routeParameter}
+    \begin{routeResponse}{application/json}
+        \begin{routeResponseItem}{200}{ok}
+            \begin{routeResponseItemBody}
+                base64, utf-8 encoded binary result or array of results
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+        \begin{routeResponseItem}{204}{No content}
+            \begin{routeResponseItemBody}
+                /{username}/{claim_check} not found.
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+        \begin{routeResponseItem}{401}{Unauthorized}
+            \begin{routeResponseItemBody}
+                Not valid claim check for user {username}
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+    \end{routeResponse}
+\end{apiRoute}
+
+\begin{apiRoute}{GET}{/Results/get\_status}{check status of result}
+    \begin{routeParameter}
+        \routeParamItem{username}{username associated with cached result}
+        \routeParamItem{claim\_check}{claim check previously returned by train or analysis}
+    \end{routeParameter}
+    \begin{routeResponse}{application/json}
+        \begin{routeResponseItem}{200}{ok}
+            \begin{routeResponseItemBody}
+                String representation of floating point number in [0,1] indicating fraction complete
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+        \begin{routeResponseItem}{204}{No content}
+            \begin{routeResponseItemBody}
+                /{username}/{claim_check} not found.
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+        \begin{routeResponseItem}{401}{Unauthorized}
+            \begin{routeResponseItemBody}
+                Not valid claim check for user {username}
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+    \end{routeResponse}
+\end{apiRoute}
+
+\begin{apiRoute}{GET}{/Results/get\_eta}{check projected time to completion}
+    \begin{routeParameter}
+        \routeParamItem{username}{username associated with cached result}
+        \routeParamItem{claim\_check}{claim check previously returned by train or analysis}
+    \end{routeParameter}
+    \begin{routeResponse}{application/json}
+        \begin{routeResponseItem}{200}{ok}
+            \begin{routeResponseItemBody}
+                String representation of floating point number indicating number of seconds to completion
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+        \begin{routeResponseItem}{204}{No content}
+            \begin{routeResponseItemBody}
+                /{username}/{claim_check} not found.
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+        \begin{routeResponseItem}{401}{Unauthorized}
+            \begin{routeResponseItemBody}
+                Not valid claim check for user {username}
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+    \end{routeResponse}
+\end{apiRoute}
+
+\section{/Infer}
+All requests require bearer token authenticating current user.
+All requests require 'infer' permission in access control list of current user.
+
+\begin{apiRoute}{POST}{/Infer/sample}{directly sample using MKO}
+    \begin{routeParameter}
+        \routeParamItem{mko}{MKO, as return by Service}
+        \routeParamItem{inputs}{base64 encoded numpy array containing input point at which to sample}
+        \routeParamItem{n_samples}{Number of samples to return}
+        \routeParamItem{as\_csv}{(defaults to True) [True/False] whether to return results as comma-separated values in string form}
+        \routeParamItem{precision}{number of digits of precision (default: 8) to return if CSV}
+    \end{routeParameter}
+    \begin{routeResponse}{application/json}
+        \begin{routeResponseItem}{200}{ok}
+            \begin{routeResponseItemBody}
+                outputs: base64, utf-8 encoded array of {n_samples} samples at {input}
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+        \begin{routeResponseItem}{409}{Conflict}
+            \begin{routeResponseItemBody}
+                Sampler error
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+    \end{routeResponse}
+\end{apiRoute}
+
+
+\section{/Analyze}
+All requests require bearer token authenticating current user.
+All requests require 'analyze' permission in access control list of current user.
+
+\begin{apiRoute}{POST}{/Analyze/cloudplot}{create cloudplot using provided MKO}
+    \begin{routeParameter}
+        \routeParamItem{username}{username for result retrieval}
+        \routeParamItem{mko}{trained MKO}
+        \routeParamItem{data_table}{base64 encoded numpy array containing data which to plot against predictions}
+        \routeParamItem{n_samples}{Number of samples to return}
+        \routeParamItem{error\_bars}{(defaults to False) [True/False] whether to plot all samples or means and error bars}
+    \end{routeParameter}
+    \begin{routeResponse}{application/json}
+        \begin{routeResponseItem}{200}{ok}
+            \begin{routeResponseItemBody}
+                claim_check: claim_check to retrieve plots
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+        \begin{routeResponseItem}{400}{Bad request}
+            \begin{routeResponseItemBody}
+                Sampler error
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+    \end{routeResponse}
+\end{apiRoute}
+
+\begin{apiRoute}{POST}{/Analyze/histogram}{create histograms using provided MKO}
+    \begin{routeParameter}
+        \routeParamItem{username}{username for result retrieval}
+        \routeParamItem{mko}{trained MKO}
+        \routeParamItem{data_table}{base64 encoded numpy array containing inputs at which to construct histograms}
+        \routeParamItem{n_samples}{Number of samples to use}
+        \routeParamItem{n_bins}{Number of bins in histograms}
+    \end{routeParameter}
+    \begin{routeResponse}{application/json}
+        \begin{routeResponseItem}{200}{ok}
+            \begin{routeResponseItemBody}
+                claim_check: claim_check to retrieve plots
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+        \begin{routeResponseItem}{400}{Bad request}
+            \begin{routeResponseItemBody}
+                Sampler error
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+    \end{routeResponse}
+\end{apiRoute}
+
+\begin{apiRoute}{POST}{/Analyze/history}{create plot of training history}
+    \begin{routeParameter}
+        \routeParamItem{username}{username for result retrieval}
+        \routeParamItem{mko}{trained MKO}
+    \end{routeParameter}
+    \begin{routeResponse}{application/json}
+        \begin{routeResponseItem}{200}{ok}
+            \begin{routeResponseItemBody}
+                claim_check: claim_check to retrieve plot
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+        \begin{routeResponseItem}{400}{Bad request}
+            \begin{routeResponseItemBody}
+                Sampler error
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+    \end{routeResponse}
+\end{apiRoute}
+
+\begin{apiRoute}{POST}{/Analyze/integrate}{integrate table of quantity of interest against PDF to obtain expectation value of QoI}
+    \begin{routeParameter}
+        \routeParamItem{username}{username for result retrieval}
+        \routeParamItem{mko}{trained MKO}
+        \routeParamItem{data_table}{base64 encoded numpy array containing inputs at which to construct PDF}
+        \routeParamItem{function_table}{base64 encoded numpy array representing function to integrate}
+        \routeParamItem{n_samples}{Number of samples to use}
+    \end{routeParameter}
+    \begin{routeResponse}{application/json}
+        \begin{routeResponseItem}{200}{ok}
+            \begin{routeResponseItemBody}
+                claim_check: claim_check to retrieve plots
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+        \begin{routeResponseItem}{400}{Bad request}
+            \begin{routeResponseItemBody}
+                Sampler error
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+    \end{routeResponse}
+\end{apiRoute}
+
+
+\section{/Logging}
+All requests require bearer token authenticating current user.
+All requests require 'logs' permission in access control list of current user.
+
+\begin{apiRoute}{POST}{/Logging/viewall}{Display all logs from server}
+    \begin{routeParameter}
+        \noRouteParamItem{no parameters}
+    \end{routeParameter}
+    \begin{routeResponse}{application/json}
+        \begin{routeResponseItem}{200}{ok}
+            \begin{routeResponseItemBody}
+                Time stamped list of server events
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+        \begin{routeResponseItem}{403}{Forbidden}
+            \begin{routeResponseItemBody}
+                User not authorized to view resource
+            \end{routeResponseItemBody}
+        \end{routeResponseItem}
+    \end{routeResponse}
+\end{apiRoute}
+\end{document}

@@ -14,9 +14,10 @@ registry_mode="cli"
 while getopts "mdrs:R:" options; do
   case "${options}" in
     R)
-    registry="${OPTARG}/"
+    registry="${OPTARG}"
+    registry=$(echo $registry | sed 's:/*$::')
     mkdir -p ${registry}
-    escregistry=$(echo ${registry} | sed "s/\//\\\\\//g")
+    escregistry=$(echo ${registry}/ | sed "s/\//\\\\\//g")
     echo "Creating yaml files"
     for yaml in ./*.yaml
     do

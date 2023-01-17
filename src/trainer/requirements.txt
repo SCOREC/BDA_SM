@@ -7,7 +7,7 @@ backcall @ file:///home/conda/feedstock_root/build_artifacts/backcall_1592338393
 backports.functools-lru-cache @ file:///home/conda/feedstock_root/build_artifacts/backports.functools_lru_cache_1618230623929/work
 cached-property @ file:///tmp/build/80754af9/cached-property_1600785575025/work
 cachetools==4.2.4
-certifi==2021.10.8
+certifi==2022.12.7
 cffi @ file:///opt/concourse/worker/volumes/live/4a8f7628-1917-402a-5a6a-cdafcc3ec547/volume/cffi_1625814707380/work
 chardet @ file:///Users/runner/miniforge3/conda-bld/chardet_1635814956906/work
 charset-normalizer==2.0.7

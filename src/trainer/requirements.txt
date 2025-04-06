@@ -34,7 +34,7 @@ ipython-genutils==0.2.0
 jedi @ file:///Users/runner/miniforge3/conda-bld/jedi_1610146990595/work
 jupyter-client @ file:///home/conda/feedstock_root/build_artifacts/jupyter_client_1633454794268/work
 jupyter-core @ file:///Users/runner/miniforge3/conda-bld/jupyter_core_1635407239950/work
-keras==2.6.0
+keras==3.9.0
 Keras-Applications @ file:///tmp/build/80754af9/keras-applications_1594366238411/work
 Keras-Preprocessing @ file:///tmp/build/80754af9/keras-preprocessing_1612283640596/work
 kiwisolver==1.3.2
